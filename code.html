@@ -1,0 +1,757 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Permata AI Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface-variant": "#584141",
+              "on-secondary-fixed": "#221b00",
+              "on-tertiary": "#ffffff",
+              "primary-fixed-dim": "#ffb3b5",
+              "inverse-primary": "#ffb3b5",
+              "tertiary-fixed": "#e5e2e1",
+              "surface-container": "#edeeef",
+              "secondary-fixed": "#ffe16d",
+              "surface-container-highest": "#e1e3e4",
+              "primary-container": "#800020",
+              tertiary: "#282727",
+              "inverse-surface": "#2e3132",
+              outline: "#8c7071",
+              "on-secondary-container": "#6e5c00",
+              "on-background": "#191c1d",
+              "on-primary-container": "#ff828a",
+              "surface-tint": "#af2b3e",
+              "on-secondary": "#ffffff",
+              "error-container": "#ffdad6",
+              "inverse-on-surface": "#f0f1f2",
+              "on-primary-fixed": "#40000b",
+              "on-primary-fixed-variant": "#8e0f28",
+              "primary-fixed": "#ffdada",
+              "on-tertiary-fixed": "#1c1b1b",
+              error: "#ba1a1a",
+              "surface-bright": "#f8f9fa",
+              surface: "#f8f9fa",
+              "secondary-container": "#fcd400",
+              "on-tertiary-fixed-variant": "#474746",
+              "on-secondary-fixed-variant": "#544600",
+              "surface-variant": "#e1e3e4",
+              "on-surface": "#191c1d",
+              secondary: "#705d00",
+              background: "#f8f9fa",
+              "surface-container-low": "#f3f4f5",
+              "surface-dim": "#d9dadb",
+              "on-primary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "tertiary-fixed-dim": "#c8c6c5",
+              "tertiary-container": "#3e3d3d",
+              "on-error-container": "#93000a",
+              "surface-container-high": "#e7e8e9",
+              "on-error": "#ffffff",
+              primary: "#570013",
+              "secondary-fixed-dim": "#e9c400",
+              "on-tertiary-container": "#aaa8a7",
+              "outline-variant": "#e0bfbf",
+            },
+            borderRadius: {
+              DEFAULT: "1rem",
+              lg: "2rem",
+              xl: "3rem",
+              full: "9999px",
+            },
+            spacing: {
+              "container-padding": "32px",
+              "stack-md": "24px",
+              "stack-sm": "12px",
+              gutter: "24px",
+              "stack-lg": "48px",
+              base: "8px",
+            },
+            fontFamily: {
+              "headline-md": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "label-sm": ["Inter"],
+              "label-md": ["Inter"],
+              "display-lg": ["Inter"],
+              "headline-lg": ["Inter"],
+              "body-lg": ["Inter"],
+              "body-md": ["Inter"],
+            },
+            fontSize: {
+              "headline-md": [
+                "24px",
+                { lineHeight: "32px", fontWeight: "600" },
+              ],
+              "headline-lg-mobile": [
+                "28px",
+                { lineHeight: "36px", fontWeight: "600" },
+              ],
+              "label-sm": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.02em",
+                  fontWeight: "500",
+                },
+              ],
+              "label-md": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+              "display-lg": [
+                "48px",
+                {
+                  lineHeight: "56px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+              "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .bg-gradient-pro {
+        background: linear-gradient(135deg, #800020 0%, #ffd700 100%);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-surface-container-low text-on-surface h-screen w-screen overflow-hidden flex font-body-md"
+  >
+    <!-- 1. Far Left Sidebar -->
+    <nav
+      class="w-[80px] h-full border-r border-black/10 flex flex-col items-center py-6 bg-white/70 backdrop-blur-3xl dark:bg-tertiary/70 z-40 justify-between shrink-0"
+    >
+      <div class="flex flex-col items-center gap-stack-md w-full">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-pro flex items-center justify-center text-white mb-4 shadow-md"
+        >
+          <span
+            class="material-symbols-outlined"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >diamond</span
+          >
+        </div>
+        <button
+          class="w-12 h-12 rounded-2xl bg-primary text-on-primary shadow-md flex items-center justify-center scale-95 active:scale-90 transition-transform"
+        >
+          <span
+            class="material-symbols-outlined"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >chat</span
+          >
+        </button>
+        <button
+          class="w-12 h-12 rounded-2xl text-on-surface-variant hover:text-primary dark:text-on-tertiary-container hover:bg-primary-container/20 transition-all duration-300 flex items-center justify-center group relative"
+        >
+          <span class="material-symbols-outlined">library_books</span>
+          <div
+            class="absolute left-full ml-4 px-2 py-1 bg-tertiary text-on-tertiary text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap"
+          >
+            Library
+          </div>
+        </button>
+        <button
+          class="w-12 h-12 rounded-2xl text-on-surface-variant hover:text-primary dark:text-on-tertiary-container hover:bg-primary-container/20 transition-all duration-300 flex items-center justify-center group relative"
+        >
+          <span class="material-symbols-outlined">explore</span>
+          <div
+            class="absolute left-full ml-4 px-2 py-1 bg-tertiary text-on-tertiary text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap"
+          >
+            Explore
+          </div>
+        </button>
+        <button
+          class="w-12 h-12 rounded-2xl text-on-surface-variant hover:text-primary dark:text-on-tertiary-container hover:bg-primary-container/20 transition-all duration-300 flex items-center justify-center group relative"
+        >
+          <span class="material-symbols-outlined">extension</span>
+          <div
+            class="absolute left-full ml-4 px-2 py-1 bg-tertiary text-on-tertiary text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap"
+          >
+            Integrations
+          </div>
+        </button>
+      </div>
+      <div class="flex flex-col items-center gap-4 w-full">
+        <button
+          class="w-12 h-12 rounded-2xl text-on-surface-variant hover:text-primary hover:bg-primary-container/20 transition-all duration-300 flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+        <button
+          class="w-12 h-12 rounded-2xl text-on-surface-variant hover:text-primary hover:bg-primary-container/20 transition-all duration-300 flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined">help</span>
+        </button>
+        <div
+          class="w-12 h-12 rounded-full border-2 border-secondary-fixed flex items-center justify-center text-xs font-bold text-primary relative group cursor-pointer bg-white"
+        >
+          80
+          <div
+            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-2 py-1 bg-tertiary text-on-tertiary text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity"
+          >
+            80 credits left
+          </div>
+        </div>
+      </div>
+    </nav>
+    <!-- 2. Inner Left (Chats/Models/History) -->
+    <div
+      class="w-72 h-full bg-white border-r border-on-surface/5 flex flex-col shrink-0"
+    >
+      <div
+        class="p-4 flex items-center justify-between border-b border-on-surface/5"
+      >
+        <span class="font-headline-md text-[18px] text-on-surface font-semibold"
+          >Chats</span
+        >
+        <div class="flex gap-2">
+          <button
+            class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]"
+              >view_sidebar</span
+            >
+          </button>
+          <button
+            class="w-8 h-8 rounded-full hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">more_vert</span>
+          </button>
+        </div>
+      </div>
+      <div class="p-4 pb-2">
+        <button
+          class="w-full bg-primary text-on-primary py-2.5 px-4 rounded-xl font-label-md flex items-center justify-center gap-2 hover:bg-surface-tint transition-colors mb-4 shadow-sm"
+        >
+          <span class="material-symbols-outlined text-[18px]">add</span>
+          New Chat
+        </button>
+        <div class="relative">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant"
+            >search</span
+          >
+          <input
+            class="w-full bg-surface-container-low border-none rounded-xl pl-9 pr-8 py-2 text-sm text-on-surface focus:ring-1 focus:ring-primary placeholder:text-on-surface-variant/70"
+            placeholder="Search chats..."
+            type="text"
+          />
+          <span
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-on-surface-variant bg-white px-1.5 py-0.5 rounded border border-on-surface/10 shadow-sm"
+            >⌘F</span
+          >
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto px-4 py-2 custom-scrollbar">
+        <div class="mb-6">
+          <div
+            class="flex items-center justify-between mb-3 text-xs font-semibold text-on-surface-variant uppercase tracking-wider"
+          >
+            <span>Pinned Models</span>
+            <span
+              class="material-symbols-outlined text-[16px] cursor-pointer hover:text-on-surface"
+              >add</span
+            >
+          </div>
+          <button
+            class="w-full bg-gradient-pro p-3 rounded-xl text-white text-left font-label-md flex items-center justify-between mb-2 shadow-sm transition-transform hover:scale-[1.02]"
+          >
+            <div class="flex items-center gap-2">
+              <span
+                class="material-symbols-outlined text-[18px]"
+                style="font-variation-settings: &quot;FILL&quot; 1"
+                >psychology</span
+              >
+              Permata Pro
+            </div>
+            <span class="material-symbols-outlined text-[16px]"
+              >more_horiz</span
+            >
+          </button>
+          <button
+            class="w-full p-2.5 rounded-lg text-on-surface hover:bg-surface-container-low text-left font-label-md flex items-center gap-3 transition-colors"
+          >
+            <span
+              class="material-symbols-outlined text-[18px] text-on-surface-variant"
+              >image</span
+            >
+            Create Image
+          </button>
+          <button
+            class="w-full p-2.5 rounded-lg text-on-surface hover:bg-surface-container-low text-left font-label-md flex items-center gap-3 transition-colors"
+          >
+            <span
+              class="material-symbols-outlined text-[18px] text-on-surface-variant"
+              >draw</span
+            >
+            Canvas
+          </button>
+        </div>
+        <div
+          class="flex items-center justify-between mb-2 text-xs font-semibold text-on-surface-variant"
+        >
+          <div class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">star</span>
+            Saved topic
+          </div>
+          <button class="text-on-surface-variant hover:text-on-surface">
+            <span class="material-symbols-outlined text-[16px]">more_vert</span>
+          </button>
+        </div>
+        <div class="flex flex-col gap-1 mb-4">
+          <div
+            class="p-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer flex justify-between items-start group transition-colors"
+          >
+            <div class="overflow-hidden">
+              <p class="font-label-md text-on-surface text-sm truncate pr-2">
+                Give me unique name logo for...
+              </p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">
+                Edited 2m ago
+              </p>
+            </div>
+            <span
+              class="material-symbols-outlined text-secondary-fixed text-[18px] shrink-0"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >star</span
+            >
+          </div>
+          <div
+            class="p-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer flex justify-between items-start group transition-colors"
+          >
+            <div class="overflow-hidden">
+              <p class="font-label-md text-on-surface text-sm truncate pr-2">
+                Create a logo for a tech startup
+              </p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">
+                Edited Oct 2, 2:05 PM
+              </p>
+            </div>
+            <span
+              class="material-symbols-outlined text-secondary-fixed text-[18px] shrink-0"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >star</span
+            >
+          </div>
+        </div>
+        <div
+          class="flex items-center justify-between mb-2 text-xs font-semibold text-on-surface-variant mt-6"
+        >
+          <div class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">history</span>
+            Recent Chats
+          </div>
+          <button class="text-on-surface-variant hover:text-on-surface">
+            <span class="material-symbols-outlined text-[16px]">more_vert</span>
+          </button>
+        </div>
+        <div class="flex flex-col gap-1 pb-4">
+          <div
+            class="p-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer flex justify-between items-start group transition-colors"
+          >
+            <div class="overflow-hidden">
+              <p class="font-label-md text-on-surface text-sm truncate pr-2">
+                New Chat
+              </p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">
+                Edited 1m ago
+              </p>
+            </div>
+            <span
+              class="material-symbols-outlined text-on-surface-variant/30 text-[18px] shrink-0 group-hover:text-on-surface-variant transition-colors"
+              >radio_button_unchecked</span
+            >
+          </div>
+          <div
+            class="p-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer flex justify-between items-start group transition-colors"
+          >
+            <div class="overflow-hidden">
+              <p class="font-label-md text-on-surface text-sm truncate pr-2">
+                Give me unique name logo for...
+              </p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">
+                Edited 2m ago
+              </p>
+            </div>
+            <span
+              class="material-symbols-outlined text-on-surface-variant/30 text-[18px] shrink-0 group-hover:text-on-surface-variant transition-colors"
+              >radio_button_unchecked</span
+            >
+          </div>
+          <div
+            class="p-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer flex justify-between items-start group transition-colors"
+          >
+            <div class="overflow-hidden">
+              <p class="font-label-md text-on-surface text-sm truncate pr-2">
+                Create a logo for a tech startup
+              </p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">
+                Edited 5m ago
+              </p>
+            </div>
+            <span
+              class="material-symbols-outlined text-on-surface-variant/30 text-[18px] shrink-0 group-hover:text-on-surface-variant transition-colors"
+              >radio_button_unchecked</span
+            >
+          </div>
+          <div
+            class="p-2.5 rounded-lg hover:bg-surface-container-low cursor-pointer flex justify-between items-start group transition-colors"
+          >
+            <div class="overflow-hidden">
+              <p class="font-label-md text-on-surface text-sm truncate pr-2">
+                Design a logo for a sustainable...
+              </p>
+              <p class="text-[10px] text-on-surface-variant mt-0.5">
+                Edited Oct 3, 1:44 PM
+              </p>
+            </div>
+            <span
+              class="material-symbols-outlined text-on-surface-variant/30 text-[18px] shrink-0 group-hover:text-on-surface-variant transition-colors"
+              >radio_button_unchecked</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 3. Main Center -->
+    <div
+      class="flex-1 h-full bg-background flex flex-col relative overflow-hidden"
+    >
+      <!-- Top Bar -->
+      <div
+        class="h-16 w-full flex justify-between items-center px-6 absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-background via-background/90 to-transparent"
+      >
+        <button
+          class="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-on-surface/10 text-sm font-medium hover:bg-white transition-colors shadow-sm"
+        >
+          <span class="material-symbols-outlined text-[18px] text-primary"
+            >diamond</span
+          >
+          Permata Flash 2.5
+          <span
+            class="material-symbols-outlined text-[18px] text-on-surface-variant"
+            >keyboard_arrow_down</span
+          >
+        </button>
+        <div class="flex items-center gap-3">
+          <button
+            class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors"
+          >
+            <span class="material-symbols-outlined text-[20px]">link</span>
+          </button>
+          <button
+            class="flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-on-surface/10 text-sm font-medium shadow-sm hover:bg-surface-container-low transition-colors"
+          >
+            Share
+            <span class="material-symbols-outlined text-[18px]">ios_share</span>
+          </button>
+          <button
+            class="w-9 h-9 rounded-full border border-on-surface/10 flex items-center justify-center hover:bg-white transition-colors shadow-sm"
+          >
+            <span class="material-symbols-outlined text-[20px]"
+              >more_horiz</span
+            >
+          </button>
+        </div>
+      </div>
+      <!-- Main Content Scroll Area -->
+      <div
+        class="flex-1 overflow-y-auto px-8 pt-24 pb-48 flex flex-col items-center custom-scrollbar"
+      >
+        <!-- Hero Section -->
+        <div
+          class="max-w-2xl w-full flex flex-col items-center text-center mb-12 mt-8"
+        >
+          <div
+            class="w-20 h-20 rounded-3xl bg-gradient-pro flex items-center justify-center text-white mb-8 shadow-xl shadow-primary/20 ring-4 ring-white"
+          >
+            <span
+              class="material-symbols-outlined text-4xl"
+              style="font-variation-settings: &quot;FILL&quot; 1"
+              >diamond</span
+            >
+          </div>
+          <h1
+            class="font-display-lg text-headline-lg text-on-surface mb-6 leading-tight"
+          >
+            Think bigger with
+            <span
+              class="text-primary font-bold bg-clip-text text-transparent bg-gradient-pro"
+              >Permata AI</span
+            >
+            for insights and innovation at your command
+          </h1>
+          <p
+            class="font-body-lg text-on-surface-variant max-w-xl leading-relaxed"
+          >
+            Turn imagination into impact with Permata AI built to unlock endless
+            possibilities and shape your ideas into intelligent results.
+          </p>
+        </div>
+        <!-- Pinned Chats Grid -->
+        <div class="w-full max-w-3xl mb-12">
+          <div class="flex items-center justify-between mb-6">
+            <div
+              class="flex items-center gap-2 text-sm font-semibold text-on-surface"
+            >
+              <span class="material-symbols-outlined text-[20px] text-primary"
+                >push_pin</span
+              >
+              Pinned Chats
+              <span
+                class="material-symbols-outlined text-[18px] text-on-surface-variant"
+                >expand_more</span
+              >
+            </div>
+            <button
+              class="text-sm font-medium text-primary hover:text-primary-fixed-variant transition-colors"
+            >
+              See all
+            </button>
+          </div>
+          <div class="grid grid-cols-3 gap-5">
+            <div
+              class="bg-white p-5 rounded-2xl border border-on-surface/10 shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer group"
+            >
+              <div
+                class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+              >
+                <span class="material-symbols-outlined text-[20px]"
+                  >description</span
+                >
+              </div>
+              <h3
+                class="font-label-md text-on-surface font-semibold mb-1.5 truncate group-hover:text-primary transition-colors"
+              >
+                Project Brief.gsheet
+              </h3>
+              <p class="text-xs text-on-surface-variant truncate">
+                Creative services don't just make thi...
+              </p>
+              <p
+                class="text-[10px] text-on-surface-variant/70 mt-3 font-medium"
+              >
+                Just now
+              </p>
+            </div>
+            <div
+              class="bg-white p-5 rounded-2xl border border-on-surface/10 shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer group"
+            >
+              <div
+                class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+              >
+                <span class="material-symbols-outlined text-[20px]"
+                  >article</span
+                >
+              </div>
+              <h3
+                class="font-label-md text-on-surface font-semibold mb-1.5 truncate group-hover:text-primary transition-colors"
+              >
+                Design Notes.gdoc
+              </h3>
+              <p class="text-xs text-on-surface-variant truncate">
+                Creative services don't just make thi...
+              </p>
+              <p
+                class="text-[10px] text-on-surface-variant/70 mt-3 font-medium"
+              >
+                11 September
+              </p>
+            </div>
+            <div
+              class="bg-white p-5 rounded-2xl border border-on-surface/10 shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer group"
+            >
+              <div
+                class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+              >
+                <span class="material-symbols-outlined text-[20px]"
+                  >assignment</span
+                >
+              </div>
+              <h3
+                class="font-label-md text-on-surface font-semibold mb-1.5 truncate group-hover:text-primary transition-colors"
+              >
+                User Feedback.gform
+              </h3>
+              <p class="text-xs text-on-surface-variant truncate">
+                Creative services don't just make thi...
+              </p>
+              <p
+                class="text-[10px] text-on-surface-variant/70 mt-3 font-medium"
+              >
+                12 September
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Input Area (Fixed Bottom) -->
+      <div
+        class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background to-transparent pt-16 flex flex-col items-center"
+      >
+        <!-- Quick Actions -->
+        <div
+          class="flex gap-3 mb-5 overflow-x-auto w-full max-w-3xl pb-2 hide-scrollbar"
+        >
+          <button
+            class="whitespace-nowrap px-4 py-2.5 rounded-xl bg-white border border-on-surface/10 text-xs font-medium text-on-surface hover:bg-surface-container-low hover:border-primary/30 transition-all flex items-center gap-2 shadow-sm"
+          >
+            <span class="material-symbols-outlined text-[16px] text-primary"
+              >edit</span
+            >
+            Help me write
+          </button>
+          <button
+            class="whitespace-nowrap px-4 py-2.5 rounded-xl bg-white border border-on-surface/10 text-xs font-medium text-on-surface hover:bg-surface-container-low hover:border-primary/30 transition-all flex items-center gap-2 shadow-sm"
+          >
+            <span class="material-symbols-outlined text-[16px] text-primary"
+              >brush</span
+            >
+            Design Smart
+          </button>
+          <button
+            class="whitespace-nowrap px-4 py-2.5 rounded-xl bg-white border border-on-surface/10 text-xs font-medium text-on-surface hover:bg-surface-container-low hover:border-primary/30 transition-all flex items-center gap-2 shadow-sm"
+          >
+            <span class="material-symbols-outlined text-[16px] text-primary"
+              >lightbulb</span
+            >
+            Learn about
+          </button>
+          <button
+            class="whitespace-nowrap px-4 py-2.5 rounded-xl bg-white border border-on-surface/10 text-xs font-medium text-on-surface hover:bg-surface-container-low hover:border-primary/30 transition-all flex items-center gap-2 shadow-sm"
+          >
+            <span class="material-symbols-outlined text-[16px] text-primary"
+              >image_search</span
+            >
+            Analyze Image
+          </button>
+        </div>
+        <!-- Input Box -->
+        <div
+          class="w-full max-w-3xl bg-white rounded-3xl border border-on-surface/10 shadow-lg shadow-on-surface/5 overflow-hidden flex flex-col focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all"
+        >
+          <div
+            class="bg-primary/5 px-5 py-2.5 flex items-center justify-between border-b border-on-surface/5"
+          >
+            <div
+              class="flex items-center gap-2 text-xs font-medium text-on-surface"
+            >
+              <span
+                class="material-symbols-outlined text-[16px] text-primary animate-pulse"
+                >timer</span
+              >
+              Free Trial ending soon continue your workflow
+            </div>
+            <button
+              class="text-xs font-semibold text-primary hover:text-primary-fixed-variant transition-colors"
+            >
+              Upgrade Now
+            </button>
+          </div>
+          <div class="p-5 flex flex-col gap-4">
+            <textarea
+              class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-body-md placeholder:text-on-surface-variant/50 p-0 resize-none max-h-32"
+              placeholder="Ask Permata anything..."
+              rows="1"
+            ></textarea>
+            <div
+              class="flex items-center justify-between pt-2 border-t border-on-surface/5"
+            >
+              <div class="flex gap-2">
+                <button
+                  class="flex items-center gap-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container-low transition-colors"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >attach_file</span
+                  >
+                  Attach
+                </button>
+                <button
+                  class="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-fixed-variant px-3 py-1.5 rounded-lg hover:bg-primary/5 transition-colors"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >psychology</span
+                  >
+                  Deep Think
+                </button>
+              </div>
+              <div class="flex items-center gap-3">
+                <button
+                  class="flex items-center gap-1.5 text-sm font-medium text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container-low transition-colors"
+                >
+                  <span class="material-symbols-outlined text-[18px]">mic</span>
+                  Voice
+                </button>
+                <button
+                  class="bg-gradient-pro text-white px-6 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-md"
+                >
+                  <span class="material-symbols-outlined text-[18px]"
+                    >send</span
+                  >
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p
+          class="text-[10px] text-on-surface-variant mt-4 text-center max-w-xl mx-auto"
+        >
+          Permata AI generates AI-based answers. Review key details for
+          accuracy.
+          <a class="underline hover:text-on-surface transition-colors" href="#"
+            >Cookie Preferences</a
+          >.
+        </p>
+      </div>
+    </div>
+    <style>
+      /* Custom scrollbar for inner areas to maintain clean look */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+      }
+      .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </body>
+</html>
