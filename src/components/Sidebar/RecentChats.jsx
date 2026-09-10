@@ -18,13 +18,11 @@ export default function RecentChats() {
       </div>
       <div className="space-y-0.5">
         {/* Active Chat Item */}
-        <div className="p-2 rounded-xl bg-surface-container-low/70 border border-primary/10 cursor-pointer flex justify-between items-center group transition-all">
+        <div className="p-2 rounded-xl bg-surface-container-low/70 border border-primary/10 cursor-pointer flex items-center gap-2 group transition-all">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
           <div className="overflow-hidden pr-2 flex-1">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
-              <p className="font-medium text-on-surface text-xs truncate font-semibold">New Chat</p>
-            </div>
-            <p className="text-[10px] text-on-surface-variant/60 mt-0.5 pl-3">Active • 1m ago</p>
+            <p className="font-medium text-on-surface text-xs truncate font-semibold">New Chat</p>
+            <p className="text-[10px] text-on-surface-variant/60 mt-0.5">Active • 1m ago</p>
           </div>
           <span className="material-symbols-outlined text-primary text-[15px] shrink-0">check</span>
         </div>
@@ -32,7 +30,7 @@ export default function RecentChats() {
         {recentChats.map((chat) => (
           <div
             key={chat.title}
-            className="p-2 rounded-xl hover:bg-surface-container-low cursor-pointer flex justify-between items-center group transition-all"
+            className="p-2 rounded-xl hover:bg-surface-container-low cursor-pointer flex items-center gap-2 group transition-all"
           >
             <div className="overflow-hidden pr-2 flex-1">
               <p className="font-medium text-on-surface text-xs truncate group-hover:text-primary transition-colors">
@@ -40,9 +38,6 @@ export default function RecentChats() {
               </p>
               <p className="text-[10px] text-on-surface-variant/60 mt-0.5">{chat.edited}</p>
             </div>
-            <span className="material-symbols-outlined text-on-surface-variant/20 text-[16px] shrink-0 group-hover:text-on-surface-variant/60 transition-colors">
-              radio_button_unchecked
-            </span>
           </div>
         ))}
       </div>

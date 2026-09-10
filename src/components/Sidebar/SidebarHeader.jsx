@@ -1,18 +1,10 @@
 import logo from './../../assets/permata.png';
 
-export default function SidebarHeader() {
+export default function SidebarHeader({ onToggle }) {
   return (
     <div className="p-4 pb-3 flex items-center justify-between border-b border-on-surface/5">
       <div className="flex items-center gap-2.5 cursor-pointer">
         <img src={logo} alt="Permata AI" className="w-8 h-8" />
-        {/* <div className="w-8 h-8 rounded-xl bg-gradient-pro flex items-center justify-center text-white shadow-md shadow-primary/20">
-          <span
-            className="material-symbols-outlined text-[18px]"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            diamond
-          </span>
-        </div> */}
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
             <span className="font-headline-md text-[15px] font-bold tracking-tight text-on-surface leading-none">
@@ -29,6 +21,7 @@ export default function SidebarHeader() {
       </div>
       <div className="flex items-center gap-1">
         <button
+          onClick={onToggle}
           className="w-8 h-8 rounded-lg hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors"
           title="Collapse sidebar"
         >

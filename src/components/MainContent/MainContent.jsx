@@ -1,20 +1,21 @@
 import TopBar from './TopBar'
 import HeroSection from './HeroSection'
-import PinnedChats from './PinnedChats'
 import ChatInput from './ChatInput'
 
-export default function MainContent() {
+export default function MainContent({ onToggleSidebar }) {
   return (
-    <div className="flex-1 h-full bg-background flex flex-col relative overflow-hidden">
-      <TopBar />
+    <div className="flex-1 min-w-0 h-full flex flex-col relative overflow-hidden">
+      <TopBar onToggleSidebar={onToggleSidebar} />
 
-      {/* Main Content Scroll Area */}
-      <div className="flex-1 overflow-y-auto px-8 pt-24 pb-48 flex flex-col items-center custom-scrollbar">
-        <HeroSection />
-        <PinnedChats />
+      {/* Centered Content - vertically centered in viewport */}
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 pt-16">
+        <div className="w-full max-w-3xl flex flex-col items-center">
+          <HeroSection />
+          <div className="w-full mt-8 md:mt-12 flex justify-center">
+            <ChatInput />
+          </div>
+        </div>
       </div>
-
-      <ChatInput />
     </div>
   )
 }
