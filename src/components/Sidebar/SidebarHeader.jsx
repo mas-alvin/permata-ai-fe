@@ -19,15 +19,6 @@ export default function SidebarHeader({ onToggle }) {
           </span>
         </div>
       </div>
-      <div className="flex items-center gap-1">
-        <button
-          onClick={onToggle}
-          className="w-8 h-8 rounded-lg hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors"
-          title="Collapse sidebar"
-        >
-          <span className="material-symbols-outlined text-[18px]">view_sidebar</span>
-        </button>
-      </div>
     </div>
   )
 }
