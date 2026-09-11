@@ -1,4 +1,3 @@
-<?jsx
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -20,6 +19,6 @@ export default function MessageBubble({ message }) {
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
         )}
       </div>
-    </div>>
+    </div>
   );
 }

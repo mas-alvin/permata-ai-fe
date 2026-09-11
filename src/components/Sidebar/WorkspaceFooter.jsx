@@ -1,4 +1,23 @@
+import { useAppDispatch } from '../../store/hooks';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../../store/slices/authSlice';
+import { authService } from '../../services/authService';
+
 export default function WorkspaceFooter() {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      dispatch(logout());
+      navigate('/login', { replace: true });
+    }
+  };
+
   return (
     <div className="p-3 border-t border-on-surface/10 bg-surface-container-lowest/90 backdrop-blur-md space-y-2">
       {/* Credits Progress Badge */}
@@ -40,6 +59,13 @@ export default function WorkspaceFooter() {
             title="Help"
           >
             <span className="material-symbols-outlined text-[16px]">help</span>
+          </button>
+          <button
+            onClick={handleLogout}
+            className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors text-red-500 hover:text-red-600"
+            title="Logout"
+          >
+            <span className="material-symbols-outlined text-[16px]">logout</span>
           </button>
         </div>
       </div>
