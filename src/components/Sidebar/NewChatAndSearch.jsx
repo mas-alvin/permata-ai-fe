@@ -1,7 +1,13 @@
+import { useNavigate } from 'react-router-dom';
+
 export default function NewChatAndSearch() {
+  const navigate = useNavigate();
   return (
     <div className="p-4 pb-2 space-y-3">
-      <button className="w-full group relative overflow-hidden bg-gradient-to-r from-primary via-primary-container to-primary text-on-primary py-2.5 px-4 rounded-xl font-label-md flex items-center justify-between shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:opacity-95 active:scale-[0.99] transition-all">
+      <button 
+        onClick={() => navigate('/chat/new')}
+        className="w-full group relative overflow-hidden bg-gradient-to-r from-primary via-primary-container to-primary text-on-primary py-2.5 px-4 rounded-xl font-label-md flex items-center justify-between shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:opacity-95 active:scale-[0.99] transition-all cursor-pointer"
+      >
         <div className="flex items-center gap-2 font-semibold text-sm">
           <span className="material-symbols-outlined text-[20px] transition-transform group-hover:rotate-90">
             add
@@ -26,5 +32,5 @@ export default function NewChatAndSearch() {
         </span>
       </div>
     </div>
-  )
+  );
 }

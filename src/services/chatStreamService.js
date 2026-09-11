@@ -1,4 +1,4 @@
-export async function sendMessageStream(conversationId, content, onChunk, onDone, onError) {
+export async function sendMessageStream(conversationId, content, modelId, onChunk, onDone, onError) {
   try {
     const token = localStorage.getItem('token');
     const response = await fetch(`http://localhost:8011/api/conversations/${conversationId}/messages`, {
@@ -8,7 +8,7 @@ export async function sendMessageStream(conversationId, content, onChunk, onDone
         'Authorization': `Bearer ${token}`,
         'Accept': 'text/event-stream',
       },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, model_id: modelId }),
     });
 
     if (!response.ok) {

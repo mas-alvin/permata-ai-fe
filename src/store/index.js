@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import conversationReducer from './slices/conversationSlice';
 import chatStreamReducer from './slices/chatStreamSlice';
 import apiKeyReducer from './slices/apiKeySlice';
+import modelsReducer from './slices/modelsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
     conversation: conversationReducer,
     chatStream: chatStreamReducer,
     apiKey: apiKeyReducer,
+    models: modelsReducer,
   },
 });

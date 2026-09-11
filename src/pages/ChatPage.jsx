@@ -6,11 +6,13 @@ import {
   setMessages,
   appendMessage,
   commitStreamedMessage,
+  selectMessagesByConversationId,
 } from '../store/slices/conversationSlice';
 import {
   startStream,
   appendStreamChunk,
   endStream,
+  selectSelectedModelId,
 } from '../store/slices/chatStreamSlice';
 import { conversationService } from '../services/conversationService';
 import { sendMessageStream } from '../services/chatStreamService';
@@ -19,6 +21,7 @@ import ChatInputActive from '../components/Chat/ChatInputActive';
 import HeroSection from '../components/MainContent/HeroSection';
 import QuickActions from '../components/MainContent/QuickActions';
 import TypingIndicator from '../components/Typing/TypingIndicator';
+import ModelSwitcher from '../components/Chat/ModelSwitcher';
 
 export default function ChatPage() {
   const { id } = useParams();
@@ -27,10 +30,11 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const conversation = useAppSelector((state) => state.conversation.messages[id] || []);
+  const conversation = useAppSelector((state) => selectMessagesByConversationId(state, id));
   const isStreaming = useAppSelector((state) => state.chatStream.isStreaming);
   const partialContent = useAppSelector((state) => state.chatStream.partialContent);
   const conversationsList = useAppSelector((state) => state.conversation.conversations);
+  const selectedModelId = useAppSelector((state) => state.chatStream.selectedModelId);
 
   const isNewChat = !id || id === 'new';
   const hasMessages = conversation.length > 0;
@@ -39,6 +43,8 @@ export default function ChatPage() {
   useEffect(() => {
     partialContentRef.current = partialContent;
   }, [partialContent]);
+
+  const hasOptimisticRef = useRef(false);
 
   useEffect(() => {
     if (!id || id === 'new') {
@@ -50,7 +56,11 @@ export default function ChatPage() {
     conversationService
       .get(id)
       .then((res) => {
-        dispatch(setMessages({ conversationId: id, messages: res.data.messages || [] }));
+        const apiMessages = res.data.messages || [];
+        // Don't overwrite if we have optimistic messages
+        if (!hasOptimisticRef.current && apiMessages.length > 0) {
+          dispatch(setMessages({ conversationId: id, messages: apiMessages }));
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -65,7 +75,7 @@ export default function ChatPage() {
 
     try {
       if (!conversationId || conversationId === 'new') {
-        const res = await conversationService.create({ title: content.substring(0, 30) });
+        const res = await conversationService.create(content.substring(0, 30));
         conversationId = String(res.data.id);
         dispatch(setConversations([res.data, ...conversationsList]));
         navigate(`/chat/${conversationId}`, { replace: true });
@@ -77,12 +87,14 @@ export default function ChatPage() {
         content,
         created_at: new Date().toISOString(),
       };
+      hasOptimisticRef.current = true;
       dispatch(appendMessage({ conversationId, message: userMsg }));
       dispatch(startStream());
 
       sendMessageStream(
         conversationId,
         content,
+        selectedModelId,
         (chunk) => dispatch(appendStreamChunk(chunk)),
         () => {
           const fullContent = partialContentRef.current;
@@ -130,11 +142,24 @@ export default function ChatPage() {
   // Active conversation — show messages + input
   return (
     <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex justify-end p-2">
+        <ModelSwitcher />
+      </div>
       <MessageList messages={conversation} />
       {isStreaming && (
         <div className="px-4 pb-2">
-          <div className="max-w-3xl mx-auto bg-surface-variant/60 rounded-2xl p-4">
-            {partialContent || <TypingIndicator />}
+          <div className="flex justify-start">
+            <div className="rounded-md p-4 max-w-md bg-surface-variant text-on-surface-variant">
+              {partialContent ? (
+                <div style={{ whiteSpace: 'pre-wrap' }}>{partialContent}</div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-300 rounded animate-pulse w-48"></div>
+                  <div className="h-3 bg-gray-300 rounded animate-pulse w-36"></div>
+                  <div className="h-3 bg-gray-300 rounded animate-pulse w-40"></div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
