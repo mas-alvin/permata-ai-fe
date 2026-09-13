@@ -72,8 +72,8 @@ export default function MessageBubble({ message, onEdit }) {
   // AI message: no bubble, plain text + copy icon on hover
   return (
     <div className="flex flex-col items-start py-1 group">
-      <div className="max-w-4xl px-1">
-        <div className="text-sm leading-relaxed text-on-surface">
+        <div className="max-w-4xl px-1">
+        <div className="prose prose-sm max-w-none text-on-surface">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
         </div>
       </div>

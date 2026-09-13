@@ -1,6 +1,7 @@
 import SidebarHeader from './SidebarHeader'
 import NewChatAndSearch from './NewChatAndSearch'
 import PinnedModels from './PinnedModels'
+import PinnedChats from './PinnedChats'
 import SavedTopics from './SavedTopics'
 import RecentChats from './RecentChats'
 import WorkspaceFooter from './WorkspaceFooter'
@@ -35,6 +36,7 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
             {/* Scrollable Items Area */}
             <div className="flex-1 overflow-y-auto px-3.5 py-2 custom-scrollbar space-y-5">
               <PinnedModels />
+              <PinnedChats />
               <SavedTopics />
               <RecentChats />
             </div>
@@ -45,5 +47,5 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
         </div>
       </aside>
     </>
-  )
+  );
 }

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { setConversations, updateConversationTitle, toggleConversationPin, removeConversation } from '../../store/slices/conversationSlice';
+import { updateConversationTitle, toggleConversationPin, removeConversation } from '../../store/slices/conversationSlice';
 import { conversationService } from '../../services/conversationService';
 import ConversationMenu from './ConversationMenu';
 
-export default function RecentChats() {
+export default function PinnedChats() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const conversations = useAppSelector((state) => state.conversation.conversations);
@@ -13,12 +13,7 @@ export default function RecentChats() {
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
 
-  useEffect(() => {
-    conversationService.list(1, '').then((res) => {
-      const items = res.data.data || res.data;
-      dispatch(setConversations(items));
-    }).catch(() => {});
-  }, [dispatch]);
+  const pinnedConversations = conversations.filter((c) => c.is_pinned);
 
   const formatTime = (dateStr) => {
     if (!dateStr) return '';
@@ -83,19 +78,18 @@ export default function RecentChats() {
     }
   };
 
+  if (pinnedConversations.length === 0) return null;
+
   return (
     <div>
       <div className="flex items-center justify-between px-2 mb-1.5 text-[11px] font-semibold text-on-surface-variant/80 uppercase tracking-wider">
         <div className="flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[14px]">history</span>
-          <span>Recent Chats</span>
+          <span className="material-symbols-outlined text-[14px] text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>push_pin</span>
+          <span>Pinned Chats</span>
         </div>
       </div>
       <div className="space-y-0.5">
-        {conversations.length === 0 && (
-          <p className="px-2 py-3 text-xs text-on-surface-variant/40 italic">Belum ada percakapan</p>
-        )}
-        {conversations.map((chat) => {
+        {pinnedConversations.map((chat) => {
           const isActive = activeId === String(chat.id);
           const isEditing = editingId === chat.id;
 
@@ -105,8 +99,8 @@ export default function RecentChats() {
               onClick={() => !isEditing && navigate(`/chat/${chat.id}`)}
               className={`p-2 rounded-md cursor-pointer flex items-center gap-2 group transition-all ${
                 isActive
-                  ? 'bg-primary/[0.08] border border-primary/10'
-                  : 'hover:bg-surface-container-low border-l-[3px] border-l-transparent'
+                  ? 'bg-primary/[0.08]  border border-primary/10'
+                  : 'hover:bg-surface-container-low'
               }`}
             >
               <div className="overflow-hidden pr-1 flex-1 min-w-0">

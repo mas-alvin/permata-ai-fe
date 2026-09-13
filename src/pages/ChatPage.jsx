@@ -7,6 +7,7 @@ import {
   appendMessage,
   commitStreamedMessage,
   selectMessagesByConversationId,
+  setActiveConversation,
 } from '../store/slices/conversationSlice';
 import {
   startStream,
@@ -68,6 +69,7 @@ export default function ChatPage() {
           dispatch(setMessages({ conversationId: id, messages: apiMessages }));
         }
         setLoading(false);
+        dispatch(setActiveConversation(id));
       })
       .catch(() => {
         setError('Gagal memuat percakapan.');
@@ -81,7 +83,7 @@ export default function ChatPage() {
 
     try {
       if (!conversationId || conversationId === 'new') {
-        const res = await conversationService.create(content.substring(0, 30));
+        const res = await conversationService.create(content.substring(0, 30), selectedModelId);
         conversationId = String(res.data.id);
         dispatch(setConversations([res.data, ...conversationsList]));
         navigate(`/chat/${conversationId}`, { replace: true });

@@ -4,8 +4,8 @@ export const conversationService = {
   list: (page = 1, search = '') => 
     api.get('/conversations', { params: { page, search } }),
   
-  create: (title = null) => 
-    api.post('/conversations', { title }),
+  create: (title = null, modelId = null) => 
+    api.post('/conversations', { title, model_id: modelId }),
   
   get: (id) => 
     api.get(`/conversations/${id}`),

@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import MessageBubble from './MessageBubble';
 
 export default function MessageList({ messages, onEdit, isStreaming, partialContent }) {
@@ -18,12 +20,12 @@ export default function MessageList({ messages, onEdit, isStreaming, partialCont
           <MessageBubble key={idx} message={msg} onEdit={onEdit} />
         ))}
 
-        {/* Streaming AI response — no bubble, plain text */}
+        {/* Streaming AI response — same styling as final messages */}
         {isStreaming && partialContent && (
           <div className="flex flex-col items-start py-1">
             <div className="max-w-4xl px-1">
-              <div className="text-sm leading-relaxed text-on-surface whitespace-pre-wrap">
-                {partialContent}
+              <div className="prose prose-sm max-w-none text-on-surface">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{partialContent}</ReactMarkdown>
               </div>
             </div>
           </div>
