@@ -148,6 +148,7 @@ export default function ShaderBackground() {
       canvas.width = canvas.clientWidth * dpr
       canvas.height = canvas.clientHeight * dpr
       gl.viewport(0, 0, canvas.width, canvas.height)
+      gl.useProgram(program)
       gl.uniform2f(resolutionLocation, canvas.width, canvas.height)
     }
 
@@ -198,7 +199,7 @@ export default function ShaderBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 0 }}
+      style={{ zIndex: -1 }}
     />
   )
 }

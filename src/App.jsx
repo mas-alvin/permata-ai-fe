@@ -20,7 +20,6 @@ function ChatLayout() {
 
   return (
     <div className="text-on-surface h-screen w-screen overflow-hidden flex font-body-md relative">
-      <ShaderBackground />
       <Sidebar isOpen={isSidebarOpen} onToggle={toggleSidebar} onClose={closeSidebar} />
       <div className="flex-1 min-w-0 h-full flex flex-col relative overflow-hidden">
         <TopBar onToggleSidebar={toggleSidebar} />

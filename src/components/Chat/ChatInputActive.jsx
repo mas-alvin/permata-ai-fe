@@ -4,11 +4,17 @@ const models = [
   { id: 'permata-pro', label: 'Permata Pro', icon: 'psychology' },
 ];
 
-export default function ChatInputActive({ onSend, disabled = false }) {
-  const [input, setInput] = useState('');
+export default function ChatInputActive({ onSend, disabled = false, prefill = '', onPrefillClear }) {
+  const [input, setInput] = useState(prefill);
   const [textareaHeight, setTextareaHeight] = useState(48);
   const [selectedModel, setSelectedModel] = useState(models[0]);
   const textareaRef = useRef(null);
+
+  // Update input when prefill changes (edit feature)
+  useEffect(() => {
+    setInput(prefill);
+    adjustHeight();
+  }, [prefill]);
 
   const adjustHeight = () => {
     const textarea = textareaRef.current;
@@ -34,6 +40,8 @@ export default function ChatInputActive({ onSend, disabled = false }) {
       textareaRef.current.style.height = 'auto';
       setTextareaHeight(48);
     }
+    // Clear edit mode
+    if (onPrefillClear) onPrefillClear();
   };
 
   const handleKeyDown = (e) => {
@@ -44,8 +52,8 @@ export default function ChatInputActive({ onSend, disabled = false }) {
   };
 
   return (
-    <div className="p-4 border-t border-on-surface/10">
-      <div className="max-w-3xl mx-auto">
+    <div className="p-4">
+      <div className="max-w-4xl mx-auto">
         {/* Input Box — same style as MainContent/ChatInput.jsx */}
         <div className="w-full bg-white rounded-3xl border border-on-surface/10 shadow-lg shadow-on-surface/5 overflow-hidden flex flex-col focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all">
           <div className="p-4 flex flex-col gap-3">

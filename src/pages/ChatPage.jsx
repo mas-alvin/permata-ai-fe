@@ -22,6 +22,7 @@ import HeroSection from '../components/MainContent/HeroSection';
 import QuickActions from '../components/MainContent/QuickActions';
 import TypingIndicator from '../components/Typing/TypingIndicator';
 import ModelSwitcher from '../components/Chat/ModelSwitcher';
+import ShaderBackground from '../components/MainContent/ShaderBackground';
 
 export default function ChatPage() {
   const { id } = useParams();
@@ -35,6 +36,7 @@ export default function ChatPage() {
   const partialContent = useAppSelector((state) => state.chatStream.partialContent);
   const conversationsList = useAppSelector((state) => state.conversation.conversations);
   const selectedModelId = useAppSelector((state) => state.chatStream.selectedModelId);
+  const [editContent, setEditContent] = useState('');
 
   const isNewChat = !id || id === 'new';
   const hasMessages = conversation.length > 0;
@@ -45,6 +47,10 @@ export default function ChatPage() {
   }, [partialContent]);
 
   const hasOptimisticRef = useRef(false);
+
+  const handleEditMessage = (content) => {
+    setEditContent(content);
+  };
 
   useEffect(() => {
     if (!id || id === 'new') {
@@ -126,12 +132,13 @@ export default function ChatPage() {
   if (isNewChat && !hasMessages) {
     return (
       <div className="flex-1 flex flex-col min-h-0">
+        <ShaderBackground />
         {/* Centered Hero + Input */}
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 pt-16">
-          <div className="w-full max-w-3xl flex flex-col items-center">
+          <div className="w-full max-w-4xl flex flex-col">
             <HeroSection />
-            <div className="w-full mt-8 md:mt-12 flex justify-center">
-              <ChatInputActive onSend={handleNewMessage} disabled={isStreaming} />
+            <div className="w-full mt-8 md:mt-12">
+              <ChatInputActive onSend={handleNewMessage} disabled={isStreaming} prefill={editContent} onPrefillClear={() => setEditContent('')} />
             </div>
           </div>
         </div>
@@ -145,26 +152,10 @@ export default function ChatPage() {
       <div className="flex justify-end p-2">
         <ModelSwitcher />
       </div>
-      <MessageList messages={conversation} />
-      {isStreaming && (
-        <div className="px-4 pb-2">
-          <div className="flex justify-start">
-            <div className="rounded-md p-4 max-w-md bg-surface-variant text-on-surface-variant">
-              {partialContent ? (
-                <div style={{ whiteSpace: 'pre-wrap' }}>{partialContent}</div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="h-3 bg-gray-300 rounded animate-pulse w-48"></div>
-                  <div className="h-3 bg-gray-300 rounded animate-pulse w-36"></div>
-                  <div className="h-3 bg-gray-300 rounded animate-pulse w-40"></div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <MessageList messages={conversation} onEdit={handleEditMessage} isStreaming={isStreaming} partialContent={partialContent} />
+
       {error && <div className="text-red-400 p-4 text-center text-sm">{error}</div>}
-      <ChatInputActive onSend={handleNewMessage} disabled={isStreaming} />
+      <ChatInputActive onSend={handleNewMessage} disabled={isStreaming} prefill={editContent} onPrefillClear={() => setEditContent('')} />
     </div>
   );
 }
