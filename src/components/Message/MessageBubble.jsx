@@ -34,7 +34,7 @@ export default function MessageBubble({ message, onEdit }) {
   if (isUser) {
     return (
       <div className="flex flex-col items-end py-1 group">
-        <div className="bg-primary text-on-primary rounded-2xl rounded-br-sm px-4 py-2.5 max-w-4xl">
+        <div className="bg-primary text-on-primary rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xl">
           <span className="text-sm leading-relaxed">{content}</span>
         </div>
         <div className="flex items-center gap-1 mt-1 mr-1 opacity-0 group-hover:opacity-100 transition-opacity">
