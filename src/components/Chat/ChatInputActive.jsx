@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppSelector } from '../../store/hooks';
 import { BoltIcon } from '@heroicons/react/24/solid';
 import { PaperClipIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { attachmentService } from '../../services/attachmentService';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 
 const models = [
   { id: 'permata-pro', label: 'Permata Pro', icon: 'psychology' },
@@ -34,6 +35,29 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
   const conversationId = useAppSelector((state) => state.conversation.activeConversationId);
   const outOfCredits = credits <= 0;
   const sendDisabled = disabled || outOfCredits;
+
+  // Voice input — Web Speech API. Fallback gracefully on unsupported browsers.
+  const handleTranscript = useCallback((transcript, isFinal) => {
+    setInput((prev) => {
+      // Replace any interim text at the end, keep confirmed text
+      const base = prev.replace(/\s*$/, '');
+      if (isFinal) {
+        return base ? `${base} ${transcript}` : transcript;
+      }
+      return base ? `${base} ${transcript}` : transcript;
+    });
+  }, []);
+
+  const { listening, error: voiceError, supported: voiceSupported, start: startListening, stop: stopListening } =
+    useSpeechRecognition({ lang: 'id-ID', onTranscript: handleTranscript });
+
+  const handleMicClick = () => {
+    if (listening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   const handleAttachClick = () => {
     fileInputRef.current?.click();
@@ -158,6 +182,24 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
               </div>
             )}
 
+            {listening && (
+              <div className="flex items-center gap-2 text-xs font-medium text-red-600">
+                <span className="flex items-end gap-0.5 h-3.5">
+                  <span className="w-1 bg-red-500 rounded-full animate-pulse" style={{ height: '40%' }} />
+                  <span className="w-1 bg-red-500 rounded-full animate-pulse" style={{ height: '75%', animationDelay: '120ms' }} />
+                  <span className="w-1 bg-red-500 rounded-full animate-pulse" style={{ height: '55%', animationDelay: '240ms' }} />
+                </span>
+                <span>Mendengarkan... klik mic untuk berhenti</span>
+              </div>
+            )}
+
+            {voiceError && (
+              <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
+                <span className="material-symbols-outlined text-[14px]">error</span>
+                <span>{voiceError}</span>
+              </div>
+            )}
+
             <div style={{ minHeight: `${textareaHeight}px` }} className="relative">
               <textarea
                 ref={textareaRef}
@@ -197,10 +239,25 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-xl transition-colors"
-                  aria-label="Voice"
+                  onClick={handleMicClick}
+                  disabled={sendDisabled || !voiceSupported}
+                  title={
+                    !voiceSupported
+                      ? 'Browser tidak mendukung voice input'
+                      : listening
+                        ? 'Berhikan merekam'
+                        : 'Input suara'
+                  }
+                  className={`p-2 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                    listening
+                      ? 'text-red-600 bg-red-50 animate-pulse'
+                      : 'text-on-surface-variant hover:text-primary hover:bg-primary-container/10'
+                  }`}
+                  aria-label={listening ? 'Stop voice input' : 'Voice input'}
                 >
-                  <span className="material-symbols-outlined text-[22px]">mic</span>
+                  <span className="material-symbols-outlined text-[22px]">
+                    {listening ? 'mic_off' : 'mic'}
+                  </span>
                 </button>
                 <button
                   type="button"

@@ -24,12 +24,12 @@ export default function SettingsPage() {
         </header>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 p-1 mb-8 rounded-2xl bg-surface-container-low/70 border border-on-surface/8 overflow-x-auto hide-scrollbar">
+        <div className="flex items-center gap-1 p-1 mb-8 rounded-md bg-surface-container-low/70 border border-on-surface/8 overflow-x-auto hide-scrollbar">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap transition-all ${
+              className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-all ${
                 activeTab === tab.id
                   ? 'bg-white text-on-surface shadow-sm font-semibold'
                   : 'text-on-surface-variant/70 hover:text-on-surface'

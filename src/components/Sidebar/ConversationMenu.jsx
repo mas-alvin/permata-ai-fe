@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useConfirmModal } from '../../hooks/useConfirmModal';
 
 /**
  * Dropdown menu (titik 3) untuk aksi percakapan: Rename, Pin/Unpin, Delete.
@@ -13,6 +14,7 @@ import React, { useState, useRef, useEffect } from 'react';
 export default function ConversationMenu({ chat, onStartRename, onPin, onDelete }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
+  const { confirm } = useConfirmModal();
 
   // Tutup menu saat klik di luar
   useEffect(() => {
@@ -44,10 +46,17 @@ export default function ConversationMenu({ chat, onStartRename, onPin, onDelete 
     setIsOpen(false);
   };
 
-  const handleDelete = (e) => {
+  const handleDelete = async (e) => {
     e.stopPropagation();
     setIsOpen(false);
-    if (window.confirm('Hapus percakapan ini?')) {
+    const ok = await confirm({
+      title: 'Hapus percakapan?',
+      message: `Percakapan "${chat.title || 'Tanpa judul'}" dan semua pesannya akan dihapus permanen.`,
+      confirmLabel: 'Hapus',
+      cancelLabel: 'Batal',
+      danger: true,
+    });
+    if (ok) {
       onDelete(chat.id);
     }
   };

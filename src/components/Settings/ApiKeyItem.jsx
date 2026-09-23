@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAppDispatch } from '../../store/hooks';
 import { updateKey, removeKey } from '../../store/slices/apiKeySlice';
 import { apiKeyService } from '../../services/apiKeyService';
+import { useConfirmModal } from '../../hooks/useConfirmModal';
 import {
   CheckCircleIcon,
   XCircleIcon,
@@ -22,6 +23,7 @@ function formatDate(value) {
  */
 export default function ApiKeyItem({ apiKey }) {
   const dispatch = useAppDispatch();
+  const { confirm } = useConfirmModal();
   const [menuOpen, setMenuOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [draftName, setDraftName] = useState(apiKey.name);
@@ -80,7 +82,14 @@ export default function ApiKeyItem({ apiKey }) {
 
   const handleRevoke = async () => {
     setMenuOpen(false);
-    if (!window.confirm(`Cabut API key "${apiKey.name}" secara permanen?`)) return;
+    const ok = await confirm({
+      title: 'Cabut API key?',
+      message: `API key "${apiKey.name}" akan dicabut permanen. Aplikasi yang memakai key ini langsung kehilangan akses.`,
+      confirmLabel: 'Cabut permanen',
+      cancelLabel: 'Batal',
+      danger: true,
+    });
+    if (!ok) return;
     try {
       await apiKeyService.delete(apiKey.id);
       dispatch(removeKey(apiKey.id));

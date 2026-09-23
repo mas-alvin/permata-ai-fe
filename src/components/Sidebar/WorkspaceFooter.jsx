@@ -104,6 +104,15 @@ export default function WorkspaceFooter() {
           >
             <span className="material-symbols-outlined text-[16px]">help</span>
           </button>
+          {user.role === 'admin' && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="w-7 h-7 rounded-lg hover:bg-primary-container/20 flex items-center justify-center hover:text-primary transition-colors"
+              title="Admin Panel"
+            >
+              <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+            </button>
+          )}
           <button
             onClick={handleLogout}
             className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors text-red-500 hover:text-red-600"

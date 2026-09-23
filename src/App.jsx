@@ -8,10 +8,20 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChatPage from './pages/ChatPage';
 import SettingsPage from './pages/SettingsPage';
+import AdminPage from './pages/AdminPage';
+import { ConfirmModalProvider } from './context/ConfirmModalProvider';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+
+function AdminRoute({ children }) {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const role = useSelector((state) => state.auth.user?.role);
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (role !== 'admin') return <Navigate to="/chat/new" replace />;
+  return children;
 }
 
 function ChatLayout() {
@@ -32,20 +42,27 @@ function ChatLayout() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Auth pages — standalone, tanpa sidebar */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+    <ConfirmModalProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Auth pages — standalone, tanpa sidebar */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-        {/* Chat pages — dilindungi, dengan sidebar */}
-        <Route element={<ProtectedRoute><ChatLayout /></ProtectedRoute>}>
-          <Route path="/chat/:id" element={<ChatPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Route>
+          {/* Chat pages — dilindungi, dengan sidebar */}
+          <Route element={<ProtectedRoute><ChatLayout /></ProtectedRoute>}>
+            <Route path="/chat/:id" element={<ChatPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
 
-        <Route path="/" element={<Navigate to="/chat/new" replace />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Admin panel — khusus role:admin, dengan sidebar */}
+          <Route element={<AdminRoute><ChatLayout /></AdminRoute>}>
+            <Route path="/admin" element={<AdminPage />} />
+          </Route>
+
+          <Route path="/" element={<Navigate to="/chat/new" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ConfirmModalProvider>
   );
 }
