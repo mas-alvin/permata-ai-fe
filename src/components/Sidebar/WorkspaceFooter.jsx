@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
 import { authService } from '../../services/authService';
+import CreditBadge from './CreditBadge';
 
 export default function WorkspaceFooter() {
   const dispatch = useAppDispatch();
@@ -23,21 +24,8 @@ export default function WorkspaceFooter() {
   if (!user) {
     return (
       <div className="p-3 border-t border-on-surface/10 bg-surface-container-lowest/90 backdrop-blur-md space-y-2">
-        {/* Credits Progress Badge */}
-        <div className="px-3 py-2 rounded-xl bg-surface-container-low/70 border border-on-surface/5 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-secondary-fixed/50 flex items-center justify-center text-[10px] font-bold text-primary border border-secondary-fixed">
-              80
-            </div>
-            <div className="flex flex-col">
-              <span className="font-medium text-[11px] text-on-surface leading-none">80 credits left</span>
-              <span className="text-[9px] text-on-surface-variant/60 mt-0.5">Renews in 14 days</span>
-            </div>
-          </div>
-          <a className="text-[10px] font-semibold text-primary hover:underline" href="#">
-            Top up
-          </a>
-        </div>
+        {/* Credits Progress Badge — live from auth slice */}
+        <CreditBadge />
 
         {/* User Account row */}
         <div className="flex items-center justify-between px-1">
@@ -87,21 +75,8 @@ export default function WorkspaceFooter() {
 
   return (
     <div className="p-3 border-t border-on-surface/10 bg-surface-container-lowest/90 backdrop-blur-md space-y-2">
-      {/* Credits Progress Badge */}
-      <div className="px-3 py-2 rounded-xl bg-surface-container-low/70 border border-on-surface/5 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-secondary-fixed/50 flex items-center justify-center text-[10px] font-bold text-primary border border-secondary-fixed">
-            80
-          </div>
-          <div className="flex flex-col">
-            <span className="font-medium text-[11px] text-on-surface leading-none">80 credits left</span>
-            <span className="text-[9px] text-on-surface-variant/60 mt-0.5">Renews in 14 days</span>
-          </div>
-        </div>
-        <a className="text-[10px] font-semibold text-primary hover:underline" href="#">
-          Top up
-        </a>
-      </div>
+      {/* Credits Progress Badge — live from auth slice */}
+      <CreditBadge />
 
       {/* User Account row */}
       <div className="flex items-center justify-between px-1">

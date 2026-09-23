@@ -6,6 +6,9 @@ import {
   setMessages,
   appendMessage,
   commitStreamedMessage,
+  updateMessage,
+  removeMessage,
+  removeMessagesAfter,
   selectMessagesByConversationId,
   setActiveConversation,
 } from '../store/slices/conversationSlice';
@@ -15,8 +18,11 @@ import {
   endStream,
   selectSelectedModelId,
 } from '../store/slices/chatStreamSlice';
+import { setUser, setCredits, decrementCredits } from '../store/slices/authSlice';
 import { conversationService } from '../services/conversationService';
-import { sendMessageStream } from '../services/chatStreamService';
+import { messageService } from '../services/messageService';
+import { authService } from '../services/authService';
+import { sendMessageStream, regenerateMessageStream } from '../services/chatStreamService';
 import MessageList from '../components/Message/MessageList';
 import ChatInputActive from '../components/Chat/ChatInputActive';
 import HeroSection from '../components/MainContent/HeroSection';
@@ -37,6 +43,7 @@ export default function ChatPage() {
   const partialContent = useAppSelector((state) => state.chatStream.partialContent);
   const conversationsList = useAppSelector((state) => state.conversation.conversations);
   const selectedModelId = useAppSelector((state) => state.chatStream.selectedModelId);
+  const user = useAppSelector((state) => state.auth.user);
   const [editContent, setEditContent] = useState('');
 
   const isNewChat = !id || id === 'new';
@@ -49,8 +56,81 @@ export default function ChatPage() {
 
   const hasOptimisticRef = useRef(false);
 
-  const handleEditMessage = (content) => {
-    setEditContent(content);
+  // Sync user profile (incl. credits) on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    authService
+      .me()
+      .then((res) => dispatch(setUser(res.data)))
+      .catch(() => {});
+  }, [dispatch]);
+
+  const handleEditMessage = (message, newContent) => {
+    if (!id || id === 'new') return;
+    setError(null);
+    messageService
+      .update(message.id, newContent)
+      .then(() => {
+        dispatch(updateMessage({ conversationId: id, messageId: message.id, content: newContent }));
+      })
+      .catch(() => {
+        setError('Gagal menyimpan perubahan pesan.');
+      });
+  };
+
+  const handleDeleteMessage = async (message) => {
+    if (!id || id === 'new') return;
+    setError(null);
+    // Optimistic: drop the message (and anything after it) from the UI first
+    dispatch(removeMessage({ conversationId: id, messageId: message.id }));
+    try {
+      await messageService.delete(message.id);
+    } catch (err) {
+      setError('Gagal menghapus pesan.');
+      // Best-effort reload to restore consistent state
+      conversationService.get(id).then((res) => {
+        dispatch(setMessages({ conversationId: id, messages: res.data.messages || [] }));
+      });
+    }
+  };
+
+  const handleRegenerate = async (message) => {
+    if (!id || id === 'new' || isStreaming) return;
+    setError(null);
+
+    // Optimistically remove the assistant message (and anything after it)
+    dispatch(removeMessagesAfter({ conversationId: id, messageId: message.id, inclusive: true }));
+    dispatch(startStream());
+
+    regenerateMessageStream(
+      message.id,
+      (chunk) => dispatch(appendStreamChunk(chunk)),
+      ({ creditsRemaining, creditsDeducted }) => {
+        const fullContent = partialContentRef.current;
+        dispatch(endStream());
+        dispatch(
+          commitStreamedMessage({
+            conversationId: id,
+            message: {
+              id: Date.now() + 1,
+              role: 'assistant',
+              content: fullContent,
+              created_at: new Date().toISOString(),
+            },
+          })
+        );
+        if (typeof creditsRemaining === 'number') {
+          dispatch(setCredits(creditsRemaining));
+        } else if (typeof creditsDeducted === 'number' && creditsDeducted > 0) {
+          dispatch(decrementCredits(creditsDeducted));
+        }
+      },
+      (err) => {
+        dispatch(endStream());
+        setError(err?.message || 'Terjadi kesalahan saat regenerasi.');
+      }
+    );
   };
 
   useEffect(() => {
@@ -77,7 +157,7 @@ export default function ChatPage() {
       });
   }, [id, dispatch]);
 
-  const handleNewMessage = async (content) => {
+  const handleNewMessage = async (content, attachments = []) => {
     setError(null);
     let conversationId = id;
 
@@ -89,10 +169,19 @@ export default function ChatPage() {
         navigate(`/chat/${conversationId}`, { replace: true });
       }
 
+      const attachmentPayload = (attachments || []).map((att) => ({
+        id: att.id,
+        filename: att.filename,
+        url: att.url,
+        mime_type: att.mime_type,
+        size: att.size,
+      }));
+
       const userMsg = {
         id: Date.now(),
         role: 'user',
         content,
+        attachments: attachmentPayload,
         created_at: new Date().toISOString(),
       };
       hasOptimisticRef.current = true;
@@ -104,23 +193,29 @@ export default function ChatPage() {
         content,
         selectedModelId,
         (chunk) => dispatch(appendStreamChunk(chunk)),
-        () => {
+        ({ creditsRemaining, creditsDeducted }) => {
           const fullContent = partialContentRef.current;
           dispatch(endStream());
-          dispatch(commitStreamedMessage({
-            conversationId,
-            message: {
-              id: Date.now() + 1,
-              role: 'assistant',
-              content: fullContent,
-              created_at: new Date().toISOString(),
-            }
-          }));
+          dispatch(
+            commitStreamedMessage({
+              conversationId,
+              message: {
+                id: Date.now() + 1,
+                role: 'assistant',
+                content: fullContent,
+                created_at: new Date().toISOString(),
+              },
+            })
+          );
+          if (typeof creditsRemaining === 'number') {
+            dispatch(setCredits(creditsRemaining));
+          } else if (typeof creditsDeducted === 'number' && creditsDeducted > 0) {
+            dispatch(decrementCredits(creditsDeducted));
+          }
         },
         (err) => {
           dispatch(endStream());
-          setError('Terjadi kesalahan saat streaming.');
-          console.error(err);
+          setError(err?.message || 'Terjadi kesalahan saat streaming.');
         }
       );
     } catch (err) {
@@ -154,7 +249,14 @@ export default function ChatPage() {
       <div className="flex justify-end p-2">
         <ModelSwitcher />
       </div>
-      <MessageList messages={conversation} onEdit={handleEditMessage} isStreaming={isStreaming} partialContent={partialContent} />
+      <MessageList
+        messages={conversation}
+        onEdit={handleEditMessage}
+        onRegenerate={handleRegenerate}
+        onDelete={handleDeleteMessage}
+        isStreaming={isStreaming}
+        partialContent={partialContent}
+      />
 
       {error && <div className="text-red-400 p-4 text-center text-sm">{error}</div>}
       <ChatInputActive onSend={handleNewMessage} disabled={isStreaming} prefill={editContent} onPrefillClear={() => setEditContent('')} />

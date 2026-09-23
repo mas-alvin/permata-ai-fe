@@ -23,8 +23,17 @@ const authSlice = createSlice({
     setUser(state, action) {
       state.user = action.payload;
     },
+    setCredits(state, action) {
+      if (!state.user) return;
+      state.user = { ...state.user, credits: action.payload };
+    },
+    decrementCredits(state, action) {
+      if (!state.user) return;
+      const current = state.user.credits ?? 0;
+      state.user = { ...state.user, credits: Math.max(0, current - action.payload) };
+    },
   },
 });
 
-export const { setCredentials, logout, setUser } = authSlice.actions;
+export const { setCredentials, logout, setUser, setCredits, decrementCredits } = authSlice.actions;
 export default authSlice.reducer;

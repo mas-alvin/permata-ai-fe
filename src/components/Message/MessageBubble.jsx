@@ -1,20 +1,40 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import MessageActions from './MessageActions';
+import AttachmentPreview from './AttachmentPreview';
 
-export default function MessageBubble({ message, onEdit }) {
+export default function MessageBubble({
+  message,
+  isLast,
+  onEdit,
+  onRegenerate,
+  onDelete,
+}) {
   const isUser = message.role === 'user';
   const content = message.content || '';
-  const [copied, setCopied] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(content);
+  const attachments = message.attachments || [];
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(content);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Copy failed:', err);
+  const startEdit = () => {
+    setDraft(content);
+    setEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setDraft(content);
+    setEditing(false);
+  };
+
+  const saveEdit = () => {
+    const trimmed = draft.trim();
+    if (!trimmed || trimmed === content) {
+      cancelEdit();
+      return;
     }
+    onEdit?.(message, trimmed);
+    setEditing(false);
   };
 
   // Empty assistant message = loading dots
@@ -30,70 +50,79 @@ export default function MessageBubble({ message, onEdit }) {
     );
   }
 
-  // User message: bubble + action icons below
-  if (isUser) {
+  // Inline edit mode for user messages
+  if (isUser && editing) {
     return (
-      <div className="flex flex-col items-end py-1 group">
-        <div className="bg-primary text-on-primary rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xl">
-          <span className="text-sm leading-relaxed">{content}</span>
-        </div>
-        <div className="flex items-center gap-1 mt-1 mr-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={handleCopy}
-            className="p-1 rounded-md hover:bg-gray-200 transition-colors text-on-surface-variant/50 hover:text-on-surface-variant"
-            title="Salin pesan"
-          >
-            {copied ? (
-              <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            )}
-          </button>
-          {onEdit && (
+      <div className="flex flex-col items-end py-1">
+        <div className="w-full max-w-xl bg-primary/[0.04] border border-primary/20 rounded-2xl rounded-br-sm p-3 space-y-2">
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            autoFocus
+            rows={Math.min(8, Math.max(1, draft.split('\n').length))}
+            className="w-full bg-white text-sm text-on-surface rounded-xl border border-on-surface/10 p-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+          <div className="flex justify-end gap-2">
             <button
-              onClick={() => onEdit(content)}
-              className="p-1 rounded-md hover:bg-gray-200 transition-colors text-on-surface-variant/50 hover:text-on-surface-variant"
-              title="Edit pesan"
+              type="button"
+              onClick={cancelEdit}
+              className="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container-low transition-colors"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
+              Batal
             </button>
-          )}
+            <button
+              type="button"
+              onClick={saveEdit}
+              className="px-3 py-1.5 text-xs font-semibold text-white bg-gradient-pro rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Simpan &amp; kirim
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // AI message: no bubble, plain text + copy icon on hover
+  // User message: bubble + action icons below
+  if (isUser) {
+    return (
+      <div className="flex flex-col items-end py-1 group">
+        {attachments.length > 0 && (
+          <div className="flex flex-wrap justify-end gap-2 mb-1">
+            {attachments.map((att, idx) => (
+              <AttachmentPreview key={att.id ?? idx} attachment={att} />
+            ))}
+          </div>
+        )}
+        <div className="bg-primary text-on-primary rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xl">
+          <span className="text-sm leading-relaxed whitespace-pre-wrap">{content}</span>
+        </div>
+        <MessageActions
+          content={content}
+          role="user"
+          isLast={isLast}
+          onEdit={onEdit ? startEdit : undefined}
+          onDelete={onDelete ? () => onDelete(message) : undefined}
+        />
+      </div>
+    );
+  }
+
+  // AI message: no bubble, plain text + actions on hover
   return (
     <div className="flex flex-col items-start py-1 group">
-        <div className="max-w-4xl px-1">
+      <div className="max-w-4xl px-1">
         <div className="prose prose-sm max-w-none text-on-surface">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
         </div>
       </div>
-      <div className="flex items-center gap-1 mt-1 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={handleCopy}
-          className="p-1 rounded-md hover:bg-gray-200 transition-colors text-on-surface-variant/50 hover:text-on-surface-variant"
-          title="Salin jawaban"
-        >
-          {copied ? (
-            <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          )}
-        </button>
-      </div>
+      <MessageActions
+        content={content}
+        role="assistant"
+        isLast={isLast}
+        onRegenerate={onRegenerate ? () => onRegenerate(message) : undefined}
+        onDelete={onDelete ? () => onDelete(message) : undefined}
+      />
     </div>
   );
 }
