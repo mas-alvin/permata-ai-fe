@@ -40,6 +40,7 @@ export default function WorkspaceFooter() {
           </div>
           <div className="flex items-center gap-0.5 shrink-0 text-on-surface-variant">
             <button
+              onClick={() => navigate('/settings')}
               className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors"
               title="Settings"
             >
@@ -91,6 +92,7 @@ export default function WorkspaceFooter() {
         </div>
         <div className="flex items-center gap-0.5 shrink-0 text-on-surface-variant">
           <button
+            onClick={() => navigate('/settings')}
             className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors"
             title="Settings"
           >

@@ -7,6 +7,7 @@ import TopBar from './components/MainContent/TopBar';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChatPage from './pages/ChatPage';
+import SettingsPage from './pages/SettingsPage';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -40,6 +41,7 @@ export default function App() {
         {/* Chat pages — dilindungi, dengan sidebar */}
         <Route element={<ProtectedRoute><ChatLayout /></ProtectedRoute>}>
           <Route path="/chat/:id" element={<ChatPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/chat/new" replace />} />
