@@ -46,11 +46,11 @@ export default function ApiKeyItem({ apiKey }) {
   const isActive = apiKey.is_active && !isRevoked && !isExpired;
 
   const statusMeta = isRevoked
-    ? { label: 'Revoked', className: 'bg-red-50 text-red-600 border-red-200' }
+    ? { label: 'Revoked', className: 'bg-red-500/10 text-red-500 dark:text-red-400 border-red-500/20' }
     : isExpired
-    ? { label: 'Expired', className: 'bg-amber-50 text-amber-600 border-amber-200' }
+    ? { label: 'Expired', className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' }
     : isActive
-    ? { label: 'Active', className: 'bg-emerald-50 text-emerald-600 border-emerald-200' }
+    ? { label: 'Active', className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' }
     : { label: 'Inactive', className: 'bg-surface-container-low text-on-surface-variant border-on-surface/10' };
 
   const handleSaveName = async () => {
@@ -102,7 +102,7 @@ export default function ApiKeyItem({ apiKey }) {
   const expiresAt = formatDate(apiKey.expires_at);
 
   return (
-    <div className="group relative flex items-center gap-3 px-3.5 py-3 rounded-2xl border border-on-surface/8 hover:border-on-surface/15 hover:bg-surface-container-low/40 transition-all">
+    <div className="group relative flex items-center gap-3 px-3.5 py-3 rounded-md border border-on-surface/8 hover:border-on-surface/15 hover:bg-surface-container-low/40 transition-all">
       {/* Key icon + prefix */}
       <div className="w-9 h-9 rounded-xl bg-surface-container-low border border-on-surface/10 flex items-center justify-center shrink-0">
         <KeyIcon className="w-4 h-4 text-on-surface-variant" />
@@ -125,7 +125,7 @@ export default function ApiKeyItem({ apiKey }) {
                 }
               }}
               onBlur={handleSaveName}
-              className="flex-1 px-2 py-1 text-sm font-medium text-on-surface bg-white border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="flex-1 px-2 py-1 text-sm font-medium text-on-surface bg-surface-container-low border border-primary/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
         ) : (
@@ -181,7 +181,7 @@ export default function ApiKeyItem({ apiKey }) {
         </button>
 
         {menuOpen && (
-          <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-white rounded-md border border-on-surface/8 shadow-lg shadow-on-surface/5 py-1">
+          <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-surface-container-highest rounded-md border border-on-surface/8 shadow-lg shadow-on-surface/5 py-1">
             <button
               onClick={() => {
                 setMenuOpen(false);
@@ -206,7 +206,7 @@ export default function ApiKeyItem({ apiKey }) {
             <button
               onClick={handleRevoke}
               disabled={isRevoked}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-500 hover:bg-red-50/60 transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-500 dark:text-red-400 hover:bg-red-500/10 transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-[16px]">block</span>
               <span>{isRevoked ? 'Telah dicabut' : 'Cabut permanen'}</span>

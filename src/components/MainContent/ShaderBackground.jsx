@@ -4,6 +4,29 @@ export default function ShaderBackground() {
   const canvasRef = useRef(null)
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 })
 
+  // Warna shader dibaca dari token desain (index.css) supaya ikut tema
+  // secara otomatis. Shader butuh nilai 0-1, jadi konversi hex CSS ke
+  // vec3 ternormalisasi di sini, lalu lempar ke shader sebagai uniform.
+  const [themeColors, setThemeColors] = useState(null)
+
+  useEffect(() => {
+    const toRgb = (varName) => {
+      const hex = getComputedStyle(document.documentElement).getPropertyValue(varName).trim()
+      if (!hex) return null
+      const cleaned = hex.replace('#', '')
+      if (cleaned.length !== 6) return null
+      const r = parseInt(cleaned.substring(0, 2), 16) / 255
+      const g = parseInt(cleaned.substring(2, 4), 16) / 255
+      const b = parseInt(cleaned.substring(4, 6), 16) / 255
+      return [r, g, b]
+    }
+
+    setThemeColors({
+      color1: toRgb('--color-primary') || [0.5, 0.0, 0.07],
+      color2: toRgb('--color-secondary-fixed') || [0.99, 0.84, 0.0],
+    })
+  }, [])
+
   useEffect(() => {
     const canvas = canvasRef.current
     const gl = canvas.getContext('webgl', { alpha: true, antialias: true })
@@ -26,6 +49,8 @@ export default function ShaderBackground() {
       uniform float u_time;
       uniform vec2 u_mouse;
       uniform vec2 u_resolution;
+      uniform vec3 u_color1;
+      uniform vec3 u_color2;
 
       // Hash function
       float hash(vec2 p) {
@@ -77,9 +102,9 @@ export default function ShaderBackground() {
         // Combine effects
         float intensity = (n * 0.3 + radial * 0.4 + mouseInfluence * 0.6) * 0.5;
         
-        // Color palette - Burgundy to Gold theme
-        vec3 color1 = vec3(0.5, 0.0, 0.07);  // #800020 - Burgundy
-        vec3 color2 = vec3(0.99, 0.84, 0.0); // #FFD700 - Gold
+        // Color palette - diambil dari uniform (mengikuti tema aktif)
+        vec3 color1 = u_color1;   // primary (burgundy saat terang)
+        vec3 color2 = u_color2;   // secondary-fixed (gold saat terang)
         vec3 color3 = vec3(0.08, 0.04, 0.08); // Dark purple
         
         vec3 color = mix(color3, color1, intensity);
@@ -139,6 +164,8 @@ export default function ShaderBackground() {
     const timeLocation = gl.getUniformLocation(program, 'u_time')
     const mouseLocation = gl.getUniformLocation(program, 'u_mouse')
     const resolutionLocation = gl.getUniformLocation(program, 'u_resolution')
+    const color1Location = gl.getUniformLocation(program, 'u_color1')
+    const color2Location = gl.getUniformLocation(program, 'u_color2')
 
     gl.enableVertexAttribArray(positionLocation)
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0)
@@ -168,6 +195,10 @@ export default function ShaderBackground() {
         mousePos.x * canvas.width, 
         (1 - mousePos.y) * canvas.height
       )
+
+      // Kirim warna tema ke shader; jatuh ke default bila token belum siap.
+      gl.uniform3f(color1Location, ...(themeColors?.color1 || [0.5, 0.0, 0.07]))
+      gl.uniform3f(color2Location, ...(themeColors?.color2 || [0.99, 0.84, 0.0]))
       
       gl.drawArrays(gl.TRIANGLES, 0, 6)
       animationId = requestAnimationFrame(render)
@@ -193,7 +224,7 @@ export default function ShaderBackground() {
       gl.deleteShader(fragmentShader)
       gl.deleteBuffer(buffer)
     }
-  }, [mousePos])
+  }, [mousePos, themeColors])
 
   return (
     <canvas

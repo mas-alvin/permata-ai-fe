@@ -4,6 +4,7 @@ import { BoltIcon } from '@heroicons/react/24/solid';
 import { PaperClipIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { attachmentService } from '../../services/attachmentService';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import RagSourcePicker from '../Rag/RagSourcePicker';
 
 const models = [
   { id: 'permata-pro', label: 'Permata Pro', icon: 'psychology' },
@@ -21,7 +22,7 @@ function formatSize(bytes) {
   return `${Math.round(value * 10) / 10} ${units[unitIndex]}`;
 }
 
-export default function ChatInputActive({ onSend, disabled = false, prefill = '', onPrefillClear }) {
+export default function ChatInputActive({ onSend, disabled = false, prefill = '', onPrefillClear, ragConfig, onRagConfigChange }) {
   const [input, setInput] = useState(prefill);
   const [textareaHeight, setTextareaHeight] = useState(48);
   const [selectedModel, setSelectedModel] = useState(models[0]);
@@ -35,6 +36,11 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
   const conversationId = useAppSelector((state) => state.conversation.activeConversationId);
   const outOfCredits = credits <= 0;
   const sendDisabled = disabled || outOfCredits;
+
+  // RAG — sumber knowledge base untuk percakapan ini (Fase 7).
+  const effectiveConvId = conversationId && conversationId !== 'new' ? conversationId : null;
+  const ragEnabled = ragConfig?.ragEnabled ?? false;
+  const ragDocumentIds = ragConfig?.ragDocumentIds ?? [];
 
   // Voice input — Web Speech API. Fallback gracefully on unsupported browsers.
   const handleTranscript = useCallback((transcript, isFinal) => {
@@ -148,7 +154,7 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
         )}
 
         {/* Input Box — same style as MainContent/ChatInput.jsx */}
-        <div className="w-full bg-white rounded-3xl border border-on-surface/10 shadow-lg shadow-on-surface/5 overflow-hidden flex flex-col focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all">
+        <div className="w-full bg-surface-container rounded-3xl border border-on-surface/10 shadow-lg shadow-on-surface/5 overflow-hidden flex flex-col focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all">
           <div className="p-4 flex flex-col gap-3">
             {/* Attachment previews */}
             {attachments.length > 0 && (
@@ -226,12 +232,18 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
                   type="button"
                   onClick={handleAttachClick}
                   disabled={sendDisabled || uploading}
-                  className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center h-10 w-10 px-3 py-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   aria-label="Attach"
                   title="Lampirkan file"
                 >
                   <span className="material-symbols-outlined text-[22px]">attach_file</span>
                 </button>
+                <RagSourcePicker
+                  conversationId={effectiveConvId}
+                  ragEnabled={ragEnabled}
+                  ragDocumentIds={ragDocumentIds}
+                  onPersist={onRagConfigChange}
+                />
                 <span className="text-on-surface text-sm font-medium select-none">
                   {selectedModel.label}
                 </span>
@@ -248,7 +260,7 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
                         ? 'Berhikan merekam'
                         : 'Input suara'
                   }
-                  className={`p-2 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`flex items-center justify-center h-10 w-10 px-3 py-2 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                     listening
                       ? 'text-red-600 bg-red-50 animate-pulse'
                       : 'text-on-surface-variant hover:text-primary hover:bg-primary-container/10'
@@ -263,10 +275,10 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
                   type="button"
                   onClick={handleSubmit}
                   disabled={sendDisabled || !input.trim()}
-                  className="bg-gradient-pro text-white px-5 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center h-10 w-10 bg-gradient-pro text-white p-3 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
                   aria-label="Send"
                 >
-                  <span className="material-symbols-outlined text-[20px]">send</span>
+                  <span className="material-symbols-outlined text-[22px]">send</span>
                 </button>
               </div>
             </div>

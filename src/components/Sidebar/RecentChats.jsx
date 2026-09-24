@@ -103,9 +103,9 @@ export default function RecentChats() {
             <div
               key={chat.id}
               onClick={() => !isEditing && navigate(`/chat/${chat.id}`)}
-              className={`p-2 rounded-md cursor-pointer flex items-center gap-2 group transition-all ${
+              className={`px-2 rounded-md cursor-pointer flex items-center gap-2 group transition-all ${
                 isActive
-                  ? 'bg-primary/[0.08] border border-primary/10'
+                  ? 'bg-menu-active/[0.05] border border-menu-active/5'
                   : 'hover:bg-surface-container-low border-l-[3px] border-l-transparent'
               }`}
             >
@@ -119,18 +119,18 @@ export default function RecentChats() {
                     onBlur={() => handleSaveTitle(chat.id)}
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full text-xs font-medium text-on-surface bg-surface-container border border-primary/20 rounded-lg px-2 py-1 focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all"
+                    className="w-full text-xs font-medium text-on-surface bg-surface-container border border-primary/20 rounded-md px-2 py-1 focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all"
                   />
                 ) : (
                   <>
                     <p className={`font-medium text-xs truncate transition-colors ${
-                      isActive ? 'text-primary font-semibold' : 'text-on-surface group-hover:text-primary'
+                      isActive ? 'text-on-surface font-semibold' : 'text-on-surface group-hover:text-secondary'
                     }`}>
                       {chat.title || 'Percakapan tanpa judul'}
                     </p>
-                    <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                    {/* <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
                       {formatTime(chat.updated_at)}
-                    </p>
+                    </p> */}
                   </>
                 )}
               </div>

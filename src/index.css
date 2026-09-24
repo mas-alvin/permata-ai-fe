@@ -2,17 +2,197 @@
 
 @config "../tailwind.config.js";
 
+/*
+ * Design tokens sebagai CSS variables.
+ * Tailwind membaca token ini (tailwind.config.js), jadi satu class .dark
+ * pada <html> mengubah seluruh app sekaligus — tanpa override per-komponen.
+ */
 @layer base {
+  :root {
+    --color-background: #f8f9fa;
+    --color-on-background: #191c1d;
+    --color-dark-sidebar: #ffffff;
+    --color-dark-sidebar-container: #e1e3e4;
+    --color-menu-active: #570013;
+    --gelap: #141516;
+    --color-surface: #f8f9fa;
+    --color-on-surface: #191c1d;
+    --color-surface-variant: #e1e3e4;
+    --color-surface-dim: #d9dadb;
+    --color-surface-bright: #f8f9fa;
+    --color-surface-container-lowest: #ffffff;
+    --color-surface-container-low: #f3f4f5;
+    --color-surface-container: #edeeef;
+    --color-surface-container-high: #e7e8e9;
+    --color-surface-container-highest: #e1e3e4;
+    --color-on-surface-variant: #584141;
+    --color-primary: #570013;
+    --color-on-primary: #ffffff;
+    --color-primary-container: #800020;
+    --color-on-primary-container: #ff828a;
+    --color-primary-fixed: #ffdada;
+    --color-primary-fixed-dim: #ffb3b5;
+    --color-on-primary-fixed: #40000b;
+    --color-on-primary-fixed-variant: #8e0f28;
+    --color-secondary: #705d00;
+    --color-on-secondary: #ffffff;
+    --color-secondary-container: #fcd400;
+    --color-on-secondary-container: #6e5c00;
+    --color-secondary-fixed: #ffe16d;
+    --color-secondary-fixed-dim: #e9c400;
+    --color-on-secondary-fixed: #221b00;
+    --color-on-secondary-fixed-variant: #544600;
+    --color-tertiary: #282727;
+    --color-on-tertiary: #ffffff;
+    --color-tertiary-container: #3e3d3d;
+    --color-on-tertiary-container: #aaa8a7;
+    --color-tertiary-fixed: #e5e2e1;
+    --color-tertiary-fixed-dim: #c8c6c5;
+    --color-on-tertiary-fixed: #1c1b1b;
+    --color-on-tertiary-fixed-variant: #474746;
+    --color-error: #ba1a1a;
+    --color-on-error: #ffffff;
+    --color-error-container: #ffdad6;
+    --color-on-error-container: #93000a;
+    --color-outline: #8c7071;
+    --color-outline-variant: #e0bfbf;
+    --color-inverse-surface: #2e3132;
+    --color-inverse-on-surface: #f0f1f2;
+    --color-inverse-primary: #ffb3b5;
+    --color-surface-tint: #af2b3e;
+
+    color-scheme: light;
+  }
+
+  .dark {
+    --color-background: #141516;
+    --color-on-background: #f0f1f2;
+    --color-dark-sidebar: #191c1d;
+    --color-dark-sidebar-container: #363839;
+    --color-menu-active: #a4a4a4;
+    --color-surface: #141516;
+    --color-on-surface: #f0f1f2;
+    --color-surface-variant: #44474a;
+    --color-surface-dim: #141516;
+    --color-surface-bright: #3b3b3b;
+    --color-surface-container-lowest: #0f1011;
+    --color-surface-container-low: #1c1e1f;
+    --color-surface-container: #212324;
+    --color-surface-container-high: #2b2d2e;
+    --color-surface-container-highest: #363839;
+    --color-on-surface-variant: #d6cfcf;
+    --color-primary: #6a0017;
+    --color-on-primary: #ffffff;
+    --color-primary-container: #8e0f28;
+    --color-on-primary-container: #ffdada;
+    --color-primary-fixed: #ffdada;
+    --color-primary-fixed-dim: #ffb3b5;
+    --color-on-primary-fixed: #40000b;
+    --color-on-primary-fixed-variant: #ff828a;
+    --color-secondary: #e9c400;
+    --color-on-secondary: #3d3000;
+    --color-secondary-container: #544600;
+    --color-on-secondary-container: #ffe16d;
+    --color-secondary-fixed: #ffe16d;
+    --color-secondary-fixed-dim: #e9c400;
+    --color-on-secondary-fixed: #221b00;
+    --color-on-secondary-fixed-variant: #ffe16d;
+    --color-tertiary: #c8c6c5;
+    --color-on-tertiary: #2f2f2e;
+    --color-tertiary-container: #464545;
+    --color-on-tertiary-container: #e5e2e1;
+    --color-tertiary-fixed: #e5e2e1;
+    --color-tertiary-fixed-dim: #c8c6c5;
+    --color-on-tertiary-fixed: #1c1b1b;
+    --color-on-tertiary-fixed-variant: #c8c6c5;
+    --color-error: #ffb4ab;
+    --color-on-error: #690005;
+    --color-error-container: #93000a;
+    --color-on-error-container: #ffdad6;
+    --color-outline: #9d8b8b;
+    --color-outline-variant: #584141;
+    --color-inverse-surface: #f0f1f2;
+    --color-inverse-on-surface: #2e3132;
+    --color-inverse-primary: #570013;
+    --color-surface-tint: #ffb3b5;
+
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+  }
+
   /* Replace browser default blue focus outline with design-system focus style */
   *:focus-visible {
     outline: none;
     ring: 2px solid #570013;
     ring-offset: 2px;
-    ring-offset-color: #f8f9fa;
+    ring-offset-color: var(--color-surface);
   }
-  
+
   .dark *:focus-visible {
-    ring-offset-color: #2e3132;
+    ring: 2px solid #ffb3b5;
+  }
+
+  /* Komponen hardcoded bg-white kembali ke surface gelap */
+  .dark .bg-white {
+    background-color: var(--color-surface-container-low);
+  }
+
+  .dark .bg-white\/80 {
+    background-color: color-mix(in srgb, var(--color-surface-container-low) 80%, transparent);
+  }
+
+  /*
+   * Inversi global untuk utility color Tailwind yang masih dipakai hardcoded
+   * di banyak komponen (bg-red-50, text-emerald-600, dll). Alih-alih menulis
+   * varian dark: di 22 file, definisikan mappingnya sekali di sini.
+   * Hanya layer background & text yang di-invert; border tetap agar kontras.
+   */
+  .dark .bg-red-50 { background-color: rgba(255, 180, 171, 0.12); }
+  .dark .bg-red-100 { background-color: rgba(255, 180, 171, 0.18); }
+  .dark .bg-emerald-50 { background-color: rgba(105, 220, 184, 0.12); }
+  .dark .bg-amber-50 { background-color: rgba(255, 225, 109, 0.12); }
+  .dark .bg-blue-50 { background-color: rgba(167, 201, 255, 0.12); }
+  .dark .bg-indigo-50 { background-color: rgba(199, 210, 254, 0.12); }
+  .dark .bg-gray-50 { background-color: var(--color-surface-container-low); }
+  .dark .bg-gray-100 { background-color: var(--color-surface-container); }
+
+  .dark .text-red-600 { color: #ffb4ab; }
+  .dark .text-red-700 { color: #ffdad6; }
+  .dark .text-emerald-600 { color: #6ddcb8; }
+  .dark .text-emerald-700 { color: #8de9c8; }
+  .dark .text-amber-600 { color: #ffd84d; }
+  .dark .text-amber-700 { color: #ffe16d; }
+  .dark .text-blue-600 { color: #a7c9ff; }
+  .dark .text-blue-700 { color: #c7dcff; }
+  .dark .text-indigo-600 { color: #c7d2fe; }
+  .dark .text-gray-500 { color: var(--color-on-surface-variant); }
+  .dark .text-gray-700 { color: var(--color-on-surface); }
+  .dark .text-gray-900 { color: var(--color-on-surface); }
+
+  .dark .border-red-200 { border-color: rgba(255, 180, 171, 0.35); }
+  .dark .border-emerald-200 { border-color: rgba(105, 220, 184, 0.35); }
+  .dark .border-amber-200 { border-color: rgba(255, 225, 109, 0.35); }
+  .dark .border-blue-200 { border-color: rgba(167, 201, 255, 0.35); }
+  .dark .border-gray-200 { border-color: var(--color-outline-variant); }
+  .dark .border-gray-300 { border-color: var(--color-outline-variant); }
+
+  .dark .bg-red-500 { background-color: #ffb4ab; }
+  .dark .bg-emerald-500 { background-color: #6ddcb8; }
+  .dark .bg-amber-500 { background-color: #ffd84d; }
+  .dark .bg-blue-500 { background-color: #a7c9ff; }
+
+  .dark .ring-red-100 { --tw-ring-color: rgba(255, 180, 171, 0.25); }
+
+  /* Placeholder & backdrop overlay sidebar */
+  .dark .placeholder\:text-on-surface-variant\/50::placeholder {
+    color: color-mix(in srgb, var(--color-on-surface-variant) 50%, transparent);
+  }
+  .dark .bg-on-surface\/40 {
+    background-color: rgba(0, 0, 0, 0.55);
   }
 }
 

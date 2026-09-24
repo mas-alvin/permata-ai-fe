@@ -79,7 +79,7 @@ export default function RevealKeyOnceModal({ onClose }) {
               API Key
             </label>
             <div className="flex items-stretch gap-2">
-              <code className="flex-1 px-3 py-2.5 rounded-xl bg-surface-container-low border border-on-surface/10 text-sm font-mono text-on-surface break-all">
+              <code className="flex-1 px-3 py-2.5 rounded-md bg-surface-container-low border border-on-surface/10 text-sm font-mono text-on-surface break-all">
                 {plainKey}
               </code>
               <button
@@ -105,7 +105,7 @@ export default function RevealKeyOnceModal({ onClose }) {
             </div>
           </div>
 
-          <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-red-50 border border-red-100 text-red-700">
+          <div className="flex items-start gap-2 px-3 py-2.5 rounded-md bg-red-50 border border-red-100 text-red-700">
             <ExclamationTriangleIcon className="w-4 h-4 mt-0.5 shrink-0" />
             <p className="text-xs leading-relaxed">
               Demi keamanan, key ini <span className="font-semibold">tidak akan ditampilkan lagi</span> setelah Anda menutup jendela ini. Backend hanya menyimpan hash dari key.

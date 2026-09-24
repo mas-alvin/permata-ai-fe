@@ -39,9 +39,9 @@ export default function MessageActions({ content, role, isLast, onRegenerate, on
         aria-label="Salin pesan"
       >
         {copied ? (
-          <ClipboardDocumentCheckIcon className="w-3.5 h-3.5 text-emerald-600" />
+          <ClipboardDocumentCheckIcon className="w-4.5 h-4.5 text-emerald-600" />
         ) : (
-          <ClipboardDocumentIcon className="w-3.5 h-3.5" />
+          <ClipboardDocumentIcon className="w-4.5 h-4.5" />
         )}
       </button>
 
@@ -52,7 +52,7 @@ export default function MessageActions({ content, role, isLast, onRegenerate, on
           title="Regenerasi jawaban"
           aria-label="Regenerasi jawaban"
         >
-          <ArrowPathIcon className="w-3.5 h-3.5" />
+          <ArrowPathIcon className="w-4.5 h-4.5" />
         </button>
       )}
 
@@ -63,7 +63,7 @@ export default function MessageActions({ content, role, isLast, onRegenerate, on
           title="Edit pesan"
           aria-label="Edit pesan"
         >
-          <PencilSquareIcon className="w-3.5 h-3.5" />
+          <PencilSquareIcon className="w-4.5 h-4.5" />
         </button>
       )}
 
@@ -74,7 +74,7 @@ export default function MessageActions({ content, role, isLast, onRegenerate, on
           title="Hapus pesan"
           aria-label="Hapus pesan"
         >
-          <TrashIcon className="w-3.5 h-3.5" />
+          <TrashIcon className="w-4.5 h-4.5" />
         </button>
       )}
     </div>

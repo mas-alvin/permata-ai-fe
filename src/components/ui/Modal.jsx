@@ -48,7 +48,7 @@ export default function Modal({ open, onClose, size = 'md', dismissable = true, 
               leaveTo="opacity-0 scale-95"
             >
               <DialogPanel
-                className={`w-full ${SIZE_CLASSES[size] || SIZE_CLASSES.md} transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-2xl shadow-on-surface/20 ring-1 ring-on-surface/10 transition-all`}
+                className={`w-full ${SIZE_CLASSES[size] || SIZE_CLASSES.md} transform overflow-hidden rounded-2xl bg-surface-container-highest text-left align-middle shadow-2xl shadow-on-surface/20 ring-1 ring-on-surface/10 transition-all`}
               >
                 {children}
               </DialogPanel>

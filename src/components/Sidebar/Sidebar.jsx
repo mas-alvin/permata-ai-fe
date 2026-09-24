@@ -27,7 +27,7 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
         }`}
       >
         {/* Lebar tetap 72 di dalam agar konten tidak "gepeng" saat animasi collapse */}
-        <div className="w-72 h-full bg-white/80 backdrop-blur-3xl border-r border-on-surface/10 flex flex-col shrink-0 justify-between shadow-sm">
+        <div className="w-72 h-full bg-dark-sidebar backdrop-blur-3xl border-r border-on-surface/10 flex flex-col shrink-0 justify-between shadow-sm">
           {/* Top & Scrollable Nav Area */}
           <div className="flex flex-col flex-1 overflow-hidden min-h-0">
             <SidebarHeader onToggle={onToggle} />

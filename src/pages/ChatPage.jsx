@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
@@ -30,6 +30,8 @@ import QuickActions from '../components/MainContent/QuickActions';
 import TypingIndicator from '../components/Typing/TypingIndicator';
 import ModelSwitcher from '../components/Chat/ModelSwitcher';
 import ShaderBackground from '../components/MainContent/ShaderBackground';
+import ConfirmModal from '../components/ui/ConfirmModal';
+import { ragService } from '../services/ragService';
 
 export default function ChatPage() {
   const { id } = useParams();
@@ -46,6 +48,29 @@ export default function ChatPage() {
   const user = useAppSelector((state) => state.auth.user);
   const [editContent, setEditContent] = useState('');
 
+  // RAG (Fase 7) — sumber knowledge base untuk percakapan aktif.
+  const [ragConfig, setRagConfig] = useState({ ragEnabled: false, ragDocumentIds: [] });
+  const [ragSources, setRagSources] = useState([]);
+
+  // Modal konfirmasi hapus pesan (prompt user maupun jawaban AI).
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  // Persist pilihan sumber dokumen ke backend (ai-rul.md §3.4 — hanya dokumen
+  // milik user yang disimpan oleh backend).
+  const handleRagConfigChange = useCallback(
+    (next) => {
+      setRagConfig(next);
+      if (!id || id === 'new') return;
+      ragService
+        .updateConversationSources(id, {
+          ragEnabled: next.ragEnabled,
+          ragDocumentIds: next.ragDocumentIds,
+        })
+        .catch(() => setError('Gagal menyimpan pilihan sumber dokumen.'));
+    },
+    [id]
+  );
+
   const isNewChat = !id || id === 'new';
   const hasMessages = conversation.length > 0;
 
@@ -55,6 +80,23 @@ export default function ChatPage() {
   }, [partialContent]);
 
   const hasOptimisticRef = useRef(false);
+
+  // Setelah streaming selesai, ambil ulang pesan dari backend agar ID pesan
+  // di Redux adalah ID asli database (bukan ID sementara Date.now()). Tanpa
+  // ini, edit/hapus/regenerate mengirim ID palsu ke backend dan gagal dengan
+  // "No query results for model [App\Models\Message]".
+  const syncMessagesFromServer = (conversationId) => {
+    conversationService
+      .get(conversationId)
+      .then((res) => {
+        const apiMessages = res.data.messages || [];
+        if (apiMessages.length > 0) {
+          hasOptimisticRef.current = false;
+          dispatch(setMessages({ conversationId, messages: apiMessages }));
+        }
+      })
+      .catch(() => {});
+  };
 
   // Sync user profile (incl. credits) on mount
   useEffect(() => {
@@ -66,45 +108,12 @@ export default function ChatPage() {
       .catch(() => {});
   }, [dispatch]);
 
-  const handleEditMessage = (message, newContent) => {
-    if (!id || id === 'new') return;
-    setError(null);
-    messageService
-      .update(message.id, newContent)
-      .then(() => {
-        dispatch(updateMessage({ conversationId: id, messageId: message.id, content: newContent }));
-      })
-      .catch(() => {
-        setError('Gagal menyimpan perubahan pesan.');
-      });
-  };
-
-  const handleDeleteMessage = async (message) => {
-    if (!id || id === 'new') return;
-    setError(null);
-    // Optimistic: drop the message (and anything after it) from the UI first
-    dispatch(removeMessage({ conversationId: id, messageId: message.id }));
-    try {
-      await messageService.delete(message.id);
-    } catch (err) {
-      setError('Gagal menghapus pesan.');
-      // Best-effort reload to restore consistent state
-      conversationService.get(id).then((res) => {
-        dispatch(setMessages({ conversationId: id, messages: res.data.messages || [] }));
-      });
-    }
-  };
-
-  const handleRegenerate = async (message) => {
-    if (!id || id === 'new' || isStreaming) return;
-    setError(null);
-
-    // Optimistically remove the assistant message (and anything after it)
-    dispatch(removeMessagesAfter({ conversationId: id, messageId: message.id, inclusive: true }));
+  // Stream a fresh AI answer for an assistant message, replacing the old one.
+  // Dipakai bersama oleh "regenerate" dan "edit & kirim ulang".
+  const regenerateAssistant = (assistantMessage) => {
     dispatch(startStream());
-
     regenerateMessageStream(
-      message.id,
+      assistantMessage.id,
       (chunk) => dispatch(appendStreamChunk(chunk)),
       ({ creditsRemaining, creditsDeducted }) => {
         const fullContent = partialContentRef.current;
@@ -125,12 +134,83 @@ export default function ChatPage() {
         } else if (typeof creditsDeducted === 'number' && creditsDeducted > 0) {
           dispatch(decrementCredits(creditsDeducted));
         }
+
+        // Ganti ID sementara dengan ID asli dari database.
+        syncMessagesFromServer(id);
       },
       (err) => {
         dispatch(endStream());
         setError(err?.message || 'Terjadi kesalahan saat regenerasi.');
       }
     );
+  };
+
+  const handleEditMessage = async (message, newContent) => {
+    if (!id || id === 'new' || isStreaming) return;
+    setError(null);
+
+    // Cari pesan asisten pertama setelah prompt yang diedit — itulah jawaban
+    // lama yang harus dibuat ulang agar sesuai dengan prompt baru.
+    const index = conversation.findIndex((m) => String(m.id) === String(message.id));
+    const assistantMessage =
+      index !== -1 ? conversation.slice(index + 1).find((m) => m.role === 'assistant') : undefined;
+
+    // 1. Simpan prompt yang sudah diedit ke backend LEBIH DULU, supaya history
+    //    yang dibaca saat regenerasi sudah berisi teks baru.
+    try {
+      await messageService.update(message.id, newContent);
+    } catch {
+      setError('Gagal menyimpan perubahan pesan.');
+      return;
+    }
+    dispatch(updateMessage({ conversationId: id, messageId: message.id, content: newContent }));
+
+    // 2. Kalau belum ada jawaban AI setelahnya, tidak ada yang perlu dibuat ulang.
+    if (!assistantMessage) return;
+
+    // 3. Buang jawaban lama (beserta pesan setelahnya) secara optimis, lalu
+    //    stream jawaban baru dari prompt yang sudah diperbarui.
+    dispatch(removeMessagesAfter({ conversationId: id, messageId: assistantMessage.id, inclusive: true }));
+    regenerateAssistant(assistantMessage);
+  };
+
+  const handleDeleteMessage = async (message) => {
+    if (!id || id === 'new') return;
+    setError(null);
+    // Optimistic: drop the message (and anything after it) from the UI first
+    dispatch(removeMessage({ conversationId: id, messageId: message.id }));
+    try {
+      await messageService.delete(message.id);
+    } catch (err) {
+      setError('Gagal menghapus pesan.');
+      // Best-effort reload to restore consistent state
+      conversationService.get(id).then((res) => {
+        dispatch(setMessages({ conversationId: id, messages: res.data.messages || [] }));
+      });
+    }
+  };
+
+  // Hapus pesan (prompt user atau jawaban AI) selalu meminta konfirmasi dulu.
+  const requestDeleteMessage = (message) => {
+    if (!id || id === 'new') return;
+    setDeleteTarget(message);
+  };
+
+  const confirmDeleteMessage = async () => {
+    if (!deleteTarget) return;
+    const target = deleteTarget;
+    setDeleteTarget(null);
+    await handleDeleteMessage(target);
+  };
+
+  const handleRegenerate = (message) => {
+    if (!id || id === 'new' || isStreaming) return;
+    if (message.role !== 'assistant') return;
+    setError(null);
+
+    // Optimistically remove the assistant message (and anything after it)
+    dispatch(removeMessagesAfter({ conversationId: id, messageId: message.id, inclusive: true }));
+    regenerateAssistant(message);
   };
 
   useEffect(() => {
@@ -148,6 +228,12 @@ export default function ChatPage() {
         if (!hasOptimisticRef.current && apiMessages.length > 0) {
           dispatch(setMessages({ conversationId: id, messages: apiMessages }));
         }
+        // Muat preferensi RAG percakapan (Fase 7).
+        setRagConfig({
+          ragEnabled: !!res.data.rag_enabled,
+          ragDocumentIds: res.data.rag_document_ids || [],
+        });
+        setRagSources([]);
         setLoading(false);
         dispatch(setActiveConversation(id));
       })
@@ -193,9 +279,10 @@ export default function ChatPage() {
         content,
         selectedModelId,
         (chunk) => dispatch(appendStreamChunk(chunk)),
-        ({ creditsRemaining, creditsDeducted }) => {
+        ({ creditsRemaining, creditsDeducted, ragSources: sources }) => {
           const fullContent = partialContentRef.current;
           dispatch(endStream());
+          setRagSources(sources || []);
           dispatch(
             commitStreamedMessage({
               conversationId,
@@ -212,11 +299,16 @@ export default function ChatPage() {
           } else if (typeof creditsDeducted === 'number' && creditsDeducted > 0) {
             dispatch(decrementCredits(creditsDeducted));
           }
+
+          // Ganti ID sementara dengan ID asli dari database.
+          syncMessagesFromServer(conversationId);
         },
         (err) => {
           dispatch(endStream());
           setError(err?.message || 'Terjadi kesalahan saat streaming.');
-        }
+        },
+        attachments,
+        { ragEnabled: ragConfig.ragEnabled, ragDocumentIds: ragConfig.ragDocumentIds }
       );
     } catch (err) {
       setError('Gagal memproses pesan.');
@@ -239,6 +331,18 @@ export default function ChatPage() {
             </div>
           </div>
         </div>
+        <ConfirmModal
+          open={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={confirmDeleteMessage}
+          title="Hapus pesan?"
+          message={deleteTarget?.role === 'assistant'
+            ? 'Jawaban AI ini akan dihapus permanen bersama seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'
+            : 'Prompt Anda akan dihapus permanen bersama jawaban AI dan seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'}
+          confirmLabel="Hapus"
+          cancelLabel="Batal"
+          danger
+        />
       </div>
     );
   }
@@ -253,13 +357,53 @@ export default function ChatPage() {
         messages={conversation}
         onEdit={handleEditMessage}
         onRegenerate={handleRegenerate}
-        onDelete={handleDeleteMessage}
+        onDelete={requestDeleteMessage}
         isStreaming={isStreaming}
         partialContent={partialContent}
       />
 
+      {ragSources.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 px-4 pt-2 max-w-4xl mx-auto w-full">
+          <span className="text-[10px] font-semibold text-on-surface-variant/70 uppercase tracking-wide">
+            Sumber:
+          </span>
+          {ragSources.map((src, idx) => (
+            <span
+              key={`${src.document_id}-${idx}`}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/8 border border-primary/20 text-[10px] font-medium text-primary"
+              title={`Similarity: ${src.similarity}`}
+            >
+              <span className="material-symbols-outlined text-[11px]">menu_book</span>
+              {src.title}
+            </span>
+          ))}
+        </div>
+      )}
+
       {error && <div className="text-red-400 p-4 text-center text-sm">{error}</div>}
-      <ChatInputActive onSend={handleNewMessage} disabled={isStreaming} prefill={editContent} onPrefillClear={() => setEditContent('')} />
+      <ChatInputActive
+        onSend={handleNewMessage}
+        disabled={isStreaming}
+        prefill={editContent}
+        onPrefillClear={() => setEditContent('')}
+        ragConfig={ragConfig}
+        onRagConfigChange={handleRagConfigChange}
+      />
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDeleteMessage}
+        title="Hapus pesan?"
+        message={
+          deleteTarget?.role === 'assistant'
+            ? 'Jawaban AI ini akan dihapus permanen bersama seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'
+            : 'Prompt Anda akan dihapus permanen bersama jawaban AI dan seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'
+        }
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        danger
+      />
     </div>
   );
 }

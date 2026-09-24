@@ -8,7 +8,7 @@ export default function PinnedModels() {
     api
       .get('/models')
       .then((res) => {
-        setModels(res.data);
+        setModels(Array.isArray(res.data) ? res.data : []);
       })
       .catch(() => {});
   }, []);

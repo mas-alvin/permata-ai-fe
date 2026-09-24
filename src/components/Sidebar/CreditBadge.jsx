@@ -18,7 +18,7 @@ export default function CreditBadge() {
 
   return (
     <div
-      className={`px-3 py-2 rounded-xl border flex items-center justify-between text-xs transition-colors ${
+      className={`px-3 py-2 rounded-md border flex items-center justify-between text-xs transition-colors ${
         isCritical
           ? 'bg-red-50 border-red-200'
           : isLow

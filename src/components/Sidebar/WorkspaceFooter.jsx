@@ -1,16 +1,41 @@
-import { useAppDispatch } from '../../store/hooks';
+import { useState, useRef, useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/slices/authSlice';
 import { authService } from '../../services/authService';
+import { useConfirmModal } from '../../hooks/useConfirmModal';
 import CreditBadge from './CreditBadge';
+import { useTheme, THEME_CYCLE, THEME_META } from '../../hooks/useTheme';
+
+const ICON_BTN =
+  'flex items-center justify-center w-8 h-8 rounded-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors';
+
+// Baris menu umum di dalam panel pengaturan.
+const MENU_ROW =
+  'flex items-center gap-3 w-full px-3 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container-low transition-colors';
 
 export default function WorkspaceFooter() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { confirm } = useConfirmModal();
   const user = useAppSelector((state) => state.auth.user);
+  const { theme, setTheme } = useTheme();
+
+  // Satu-satunya menu sekarang: panel dialog pengaturan (tema, logout, dll).
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   const handleLogout = async () => {
+    setMenuOpen(false);
+    const ok = await confirm({
+      title: 'Keluar dari akun?',
+      message: 'Anda harus masuk kembali untuk melanjutkan percakapan Anda.',
+      confirmLabel: 'Keluar',
+      cancelLabel: 'Batal',
+      danger: true,
+    });
+    if (!ok) return;
+
     try {
       await authService.logout();
     } catch (err) {
@@ -21,51 +46,29 @@ export default function WorkspaceFooter() {
     }
   };
 
-  if (!user) {
-    return (
-      <div className="p-3 border-t border-on-surface/10 bg-surface-container-lowest/90 backdrop-blur-md space-y-2">
-        {/* Credits Progress Badge — live from auth slice */}
-        <CreditBadge />
+  const go = (path) => {
+    setMenuOpen(false);
+    navigate(path);
+  };
 
-        {/* User Account row */}
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2.5 cursor-pointer min-w-0">
-            <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-              PA
-            </div>
-            <div className="truncate">
-              <p className="text-xs font-semibold text-on-surface truncate leading-tight">Creative Studio</p>
-              <p className="text-[10px] text-on-surface-variant/60 truncate">studio@permata.ai</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-0.5 shrink-0 text-on-surface-variant">
-            <button
-              onClick={() => navigate('/settings')}
-              className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors"
-              title="Settings"
-            >
-              <span className="material-symbols-outlined text-[16px]">settings</span>
-            </button>
-            <button
-              className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors"
-              title="Help"
-            >
-              <span className="material-symbols-outlined text-[16px]">help</span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors text-red-500 hover:text-red-600"
-              title="Logout"
-            >
-              <span className="material-symbols-outlined text-[16px]">logout</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Tutup menu saat klik di luar.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
 
-  const initials = user.name
+  // Satu sumber data: pakai user asli atau fallback statis. Menghapus
+  // duplikasi blok render yang dulu ada untuk kondisi !user.
+  const displayName = user?.name || 'Creative Studio';
+  const displayEmail = user?.email || 'studio@permata.ai';
+
+  const initials = user?.name
     ? user.name
         .split(' ')
         .map((part) => part[0])
@@ -79,47 +82,109 @@ export default function WorkspaceFooter() {
       {/* Credits Progress Badge — live from auth slice */}
       <CreditBadge />
 
-      {/* User Account row */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-2.5 cursor-pointer min-w-0">
+      <div className="flex items-center justify-between gap-2">
+        {/* User Account row — klik untuk membuka halaman profil */}
+        <button
+          type="button"
+          onClick={() => go('/profile')}
+          className="flex items-center gap-2.5 min-w-0 flex-1 px-1.5 py-1 -mx-1.5 rounded-md hover:bg-surface-container-low transition-colors text-left"
+          title="Lihat profil"
+        >
           <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0">
             {initials}
           </div>
-          <div className="truncate">
-            <p className="text-xs font-semibold text-on-surface truncate leading-tight">{user.name || 'Creative Studio'}</p>
-            <p className="text-[10px] text-on-surface-variant/60 truncate">{user.email || 'studio@permata.ai'}</p>
+          <div className="min-w-0 truncate">
+            <p className="text-xs font-semibold text-on-surface truncate leading-tight">{displayName}</p>
+            <p className="text-[10px] text-on-surface-variant/60 truncate">{displayEmail}</p>
           </div>
-        </div>
-        <div className="flex items-center gap-0.5 shrink-0 text-on-surface-variant">
+        </button>
+
+        {/* Tombol tunggal — membuka menu dialog pengaturan (tema, logout, dll) */}
+        <div className="relative shrink-0" ref={menuRef}>
           <button
-            onClick={() => navigate('/settings')}
-            className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors"
-            title="Settings"
+            type="button"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className={ICON_BTN}
+            title="Pengaturan"
+            aria-label="Pengaturan"
           >
-            <span className="material-symbols-outlined text-[16px]">settings</span>
+            <span className="material-symbols-outlined text-[17px]">settings</span>
           </button>
-          <button
-            className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors"
-            title="Help"
-          >
-            <span className="material-symbols-outlined text-[16px]">help</span>
-          </button>
-          {user.role === 'admin' && (
-            <button
-              onClick={() => navigate('/admin')}
-              className="w-7 h-7 rounded-lg hover:bg-primary-container/20 flex items-center justify-center hover:text-primary transition-colors"
-              title="Admin Panel"
-            >
-              <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-            </button>
+
+          {menuOpen && (
+            <div className="absolute bottom-full right-0 mb-2 w-56 bg-surface rounded-md border border-on-surface/10 z-50 overflow-hidden">
+              <p className="px-3 py-2 text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wide border-b border-on-surface/8">
+                Pengaturan
+              </p>
+
+              {/* Tampilan / Tema — 3 pilihan dalam satu baris */}
+              <div className="px-2.5 py-2.5 space-y-1.5 border-b border-on-surface/8">
+                <p className="px-0.5 text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wide">
+                  Tampilan
+                </p>
+                <div className="grid grid-cols-3 gap-1">
+                  {THEME_CYCLE.map((value) => {
+                    const meta = THEME_META[value];
+                    const isActive = theme === value;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setTheme(value)}
+                        title={meta.label}
+                        className={`flex flex-col items-center gap-1 px-1 py-2 rounded-md text-[10px] font-semibold transition-all ${
+                          isActive
+                            ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
+                            : 'text-on-surface-variant hover:bg-surface-container-low'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[17px]">{meta.icon}</span>
+                        {meta.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Menu navigasi */}
+              <div className="py-1 border-b border-on-surface/8">
+                <button type="button" onClick={() => go('/settings')} className={MENU_ROW}>
+                  <span className="material-symbols-outlined text-[17px] text-on-surface-variant">settings</span>
+                  Pengaturan Aplikasi
+                </button>
+                <button type="button" onClick={() => go('/profile')} className={MENU_ROW}>
+                  <span className="material-symbols-outlined text-[17px] text-on-surface-variant">account_circle</span>
+                  Profil
+                </button>
+                <button type="button" onClick={() => go('/usage')} className={MENU_ROW}>
+                  <span className="material-symbols-outlined text-[17px] text-on-surface-variant">monitoring</span>
+                  Penggunaan &amp; Aktivitas
+                </button>
+                <button type="button" onClick={() => setMenuOpen(false)} className={MENU_ROW}>
+                  <span className="material-symbols-outlined text-[17px] text-on-surface-variant">help</span>
+                  Bantuan
+                </button>
+                {user?.role === 'admin' && (
+                  <button type="button" onClick={() => go('/admin')} className={MENU_ROW}>
+                    <span className="material-symbols-outlined text-[17px] text-on-surface-variant">admin_panel_settings</span>
+                    Admin Panel
+                  </button>
+                )}
+              </div>
+
+              {/* Keluar — dipisah di bagian bawah sebagai aksi berbahaya */}
+              <div className="py-1">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 w-full px-3 py-2 text-left text-xs font-medium text-red-500 dark:text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[17px]">logout</span>
+                  Keluar
+                </button>
+              </div>
+            </div>
           )}
-          <button
-            onClick={handleLogout}
-            className="w-7 h-7 rounded-lg hover:bg-surface-container-low flex items-center justify-center hover:text-on-surface transition-colors text-red-500 hover:text-red-600"
-            title="Logout"
-          >
-            <span className="material-symbols-outlined text-[16px]">logout</span>
-          </button>
         </div>
       </div>
     </div>

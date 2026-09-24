@@ -9,7 +9,10 @@ import RegisterPage from './pages/RegisterPage';
 import ChatPage from './pages/ChatPage';
 import SettingsPage from './pages/SettingsPage';
 import AdminPage from './pages/AdminPage';
+import ProfilePage from './pages/ProfilePage';
+import UsagePage from './pages/UsagePage';
 import { ConfirmModalProvider } from './context/ConfirmModalProvider';
+import { useFaviconTheme } from './hooks/useFaviconTheme';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -41,6 +44,9 @@ function ChatLayout() {
 }
 
 export default function App() {
+  // Favicon mengikuti tema aktif (terang → permata.svg, gelap → logodark.png).
+  useFaviconTheme();
+
   return (
     <ConfirmModalProvider>
       <BrowserRouter>
@@ -53,6 +59,8 @@ export default function App() {
           <Route element={<ProtectedRoute><ChatLayout /></ProtectedRoute>}>
             <Route path="/chat/:id" element={<ChatPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/usage" element={<UsagePage />} />
           </Route>
 
           {/* Admin panel — khusus role:admin, dengan sidebar */}

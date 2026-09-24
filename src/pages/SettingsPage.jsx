@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import ApiKeyManager from '../components/Settings/ApiKeyManager';
+import KnowledgeBasePanel from '../components/Rag/KnowledgeBasePanel';
 
 const TABS = [
   { id: 'api-keys', label: 'API Keys' },
+  { id: 'knowledge-base', label: 'Knowledge Base' },
 ];
 
 /**
@@ -31,7 +33,7 @@ export default function SettingsPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-all ${
                 activeTab === tab.id
-                  ? 'bg-white text-on-surface shadow-sm font-semibold'
+                  ? 'bg-surface text-on-surface shadow-sm font-semibold'
                   : 'text-on-surface-variant/70 hover:text-on-surface'
               }`}
             >
@@ -42,6 +44,7 @@ export default function SettingsPage() {
 
         {/* Tab content */}
         {activeTab === 'api-keys' && <ApiKeyManager />}
+        {activeTab === 'knowledge-base' && <KnowledgeBasePanel />}
       </div>
     </div>
   );

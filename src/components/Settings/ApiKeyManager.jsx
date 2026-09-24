@@ -42,7 +42,7 @@ export default function ApiKeyManager() {
       {/* Section header */}
       <div className="flex items-start justify-between gap-4 mb-6">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 flex items-center justify-center shrink-0">
             <KeyIcon className="w-5 h-5 text-primary" />
           </div>
           <div>
@@ -65,7 +65,7 @@ export default function ApiKeyManager() {
 
       {/* Error state */}
       {error && (
-        <div className="mb-4 px-4 py-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm">
+        <div className="mb-4 px-4 py-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
           {error}
         </div>
       )}
@@ -120,7 +120,7 @@ export default function ApiKeyManager() {
       )}
 
       {/* Security note */}
-      <div className="mt-6 px-4 py-3 rounded-2xl bg-surface-container-lowest/80 border border-on-surface/8">
+      <div className="mt-6 px-4 py-3 rounded-md bg-surface-container-lowest/80 border border-on-surface/8">
         <p className="text-[11px] text-on-surface-variant/70 leading-relaxed">
           Demi keamanan, backend hanya menyimpan <span className="font-semibold">hash</span> dari
           API key Anda. Simpan key di tempat aman — setelah dibuat, key tidak

@@ -21,6 +21,7 @@ async function consumeSseStream(response, onChunk, onDone, onError) {
   let buffer = '';
   let creditsRemaining = null;
   let creditsDeducted = null;
+  let ragSources = null;
 
   const flushParts = (parts) => {
     for (const part of parts) {
@@ -51,6 +52,9 @@ async function consumeSseStream(response, onChunk, onDone, onError) {
         if (typeof json.credits_deducted === 'number') {
           creditsDeducted = json.credits_deducted;
         }
+        if (Array.isArray(json.rag_sources)) {
+          ragSources = json.rag_sources;
+        }
       }
     }
   };
@@ -70,7 +74,7 @@ async function consumeSseStream(response, onChunk, onDone, onError) {
     flushParts([buffer]);
   }
 
-  onDone({ creditsRemaining, creditsDeducted });
+  onDone({ creditsRemaining, creditsDeducted, ragSources });
 }
 
 export async function sendMessageStream(
@@ -80,15 +84,24 @@ export async function sendMessageStream(
   onChunk,
   onDone,
   onError,
-  attachments = []
+  attachments = [],
+  ragParams = null
 ) {
   try {
+    const body = { content, model_id: modelId, attachments };
+
+    // RAG (Fase 7) — kirim sumber dokumen yang dipilih untuk percakapan.
+    if (ragParams) {
+      body.rag_enabled = ragParams.ragEnabled ?? false;
+      body.rag_document_ids = ragParams.ragDocumentIds ?? [];
+    }
+
     const response = await fetch(
       `${API_BASE}/conversations/${conversationId}/messages`,
       {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ content, model_id: modelId, attachments }),
+        body: JSON.stringify(body),
       }
     );
 

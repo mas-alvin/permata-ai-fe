@@ -60,11 +60,11 @@ export default function GenerateKeyModal({ onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-on-surface/10 overflow-hidden"
+        className="w-full max-w-lg bg-surface rounded-md border border-on-surface/10 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -87,7 +87,7 @@ export default function GenerateKeyModal({ onClose }) {
         {/* Body */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {error && (
-            <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+            <div className="px-3 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 dark:text-red-400 text-xs font-medium">
               {error}
             </div>
           )}
@@ -102,7 +102,7 @@ export default function GenerateKeyModal({ onClose }) {
               onChange={(e) => setName(e.target.value)}
               placeholder="mis. Skrip Internal Absensi"
               autoFocus
-              className="w-full px-3.5 py-2.5 bg-white border border-on-surface/15 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+              className="w-full px-3.5 py-2.5 bg-surface-container-low border border-on-surface/15 rounded-md text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
             />
             <p className="text-[10px] text-on-surface-variant/60 mt-1">
               Label bebas untuk memudahkan Anda mengenali key ini nanti.
@@ -117,13 +117,13 @@ export default function GenerateKeyModal({ onClose }) {
               {SCOPE_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
-                  className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-on-surface/10 hover:bg-surface-container-low/50 cursor-pointer transition-colors"
+                  className="flex items-center gap-3 px-3.5 py-2.5 rounded-md border border-on-surface/10 hover:bg-surface-container-low/50 cursor-pointer transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={scopes.includes(opt.value)}
                     onChange={() => toggleScope(opt.value)}
-                    className="w-4 h-4 rounded text-primary focus:ring-primary/20 border-on-surface/30 accent-[#570013]"
+                    className="w-4 h-4 rounded-md text-primary focus:ring-primary/20 border-on-surface/30 accent-secondary"
                   />
                   <div className="min-w-0">
                     <span className="text-sm font-medium text-on-surface font-mono">
@@ -145,7 +145,7 @@ export default function GenerateKeyModal({ onClose }) {
               value={expiry}
               onChange={(e) => setExpiry(e.target.value)}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3.5 py-2.5 bg-white border border-on-surface/15 rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
+              className="w-full px-3.5 py-2.5 bg-surface-container-low border border-on-surface/15 rounded-md text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all dark:[color-scheme:dark]"
             />
             <p className="text-[10px] text-on-surface-variant/60 mt-1">
               Disarankan untuk kebutuhan sementara (mis. testing).
