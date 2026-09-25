@@ -5,6 +5,7 @@ import chatStreamReducer from './slices/chatStreamSlice';
 import apiKeyReducer from './slices/apiKeySlice';
 import modelsReducer from './slices/modelsSlice';
 import ragReducer from './slices/ragSlice';
+import guestReducer from './slices/guestSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +15,6 @@ export const store = configureStore({
     apiKey: apiKeyReducer,
     models: modelsReducer,
     rag: ragReducer,
+    guest: guestReducer,
   },
 });

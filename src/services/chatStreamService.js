@@ -1,13 +1,24 @@
-const API_BASE = 'http://localhost:8011/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8011/api';
 
+/**
+ * Header untuk request streaming. Autentikasi memakai JWT httpOnly cookie,
+ * jadi fetch harus menyertakan credentials: 'include'. Token tidak bisa
+ * dibaca JavaScript (memang itulah inti pencegahan XSS).
+ */
 function getAuthHeaders(extra = {}) {
-  const token = localStorage.getItem('token');
   return {
     'Content-Type': 'application/json',
     Accept: 'text/event-stream',
-    Authorization: `Bearer ${token}`,
     ...extra,
   };
+}
+
+function fetchWithAuth(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: getAuthHeaders(options.headers),
+  });
 }
 
 /**
@@ -96,11 +107,10 @@ export async function sendMessageStream(
       body.rag_document_ids = ragParams.ragDocumentIds ?? [];
     }
 
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${API_BASE}/conversations/${conversationId}/messages`,
       {
         method: 'POST',
-        headers: getAuthHeaders(),
         body: JSON.stringify(body),
       }
     );
@@ -123,9 +133,8 @@ export async function regenerateMessageStream(
   onError
 ) {
   try {
-    const response = await fetch(`${API_BASE}/messages/${messageId}/regenerate`, {
+    const response = await fetchWithAuth(`${API_BASE}/messages/${messageId}/regenerate`, {
       method: 'POST',
-      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {

@@ -31,10 +31,13 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  // Credits from auth slice — when 0, the user cannot send messages
-  const credits = useAppSelector((state) => state.auth.user?.credits ?? 0);
+  // Credits dari auth slice — hanya untuk user login. Tamu (belum login)
+  // tidak memakai kredit, melainkan kuota harian per device_id, jadi tombol
+  // kirim tetap aktif untuk mereka.
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const credits = useAppSelector((state) => state.auth.user?.credits ?? null);
   const conversationId = useAppSelector((state) => state.conversation.activeConversationId);
-  const outOfCredits = credits <= 0;
+  const outOfCredits = isAuthenticated !== false && credits !== null && credits <= 0;
   const sendDisabled = disabled || outOfCredits;
 
   // RAG — sumber knowledge base untuk percakapan ini (Fase 7).

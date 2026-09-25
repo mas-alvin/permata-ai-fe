@@ -76,7 +76,7 @@ export default function ConversationMenu({ chat, onStartRename, onPin, onDelete 
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-white rounded-md border border-on-surface/8 shadow-lg shadow-on-surface/5 py-1 animate-in fade-in duration-100">
+        <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-surface rounded-md border border-on-surface/8 py-1 animate-in fade-in duration-100">
           <button
             onClick={handleRename}
             className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-on-surface hover:bg-surface-container-low transition-colors text-left"
@@ -96,7 +96,7 @@ export default function ConversationMenu({ chat, onStartRename, onPin, onDelete 
           <div className="my-1 border-t border-on-surface/5"></div>
           <button
             onClick={handleDelete}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-500 hover:bg-red-50/60 transition-colors text-left"
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-500 hover:bg-surface-container-low transition-colors text-left"
           >
             <span className="material-symbols-outlined text-[16px]">delete</span>
             <span>Delete</span>

@@ -1,23 +1,42 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+// Status auth ditentukan oleh httpOnly cookie JWT, bukan localStorage.
+// Awalnya asumsikan belum login; App akan memanggil bootstrapAuth() yang
+// mengecek cookie via /me. Mencegah kedipan "sudah login" palsu dari
+// sisa-sisa token lama di localStorage.
+const initialState = {
+  token: null,
+  user: null,
+  isAuthenticated: false,
+  isAuthResolved: false,
+};
+
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    token: localStorage.getItem('token') || null,
-    user: null,
-    isAuthenticated: !!localStorage.getItem('token'),
-  },
+  initialState,
   reducers: {
+    // Dipanggil setelah login/register berhasil: cookie sudah dipasai server,
+    // simpan user ke state. Token JWT sendiri tidak bisa dibaca JS (httpOnly).
     setCredentials(state, action) {
-      state.token = action.payload.token;
       state.user = action.payload.user;
+      state.token = action.payload.token ?? null;
       state.isAuthenticated = true;
-      localStorage.setItem('token', action.payload.token);
+      state.isAuthResolved = true;
+      localStorage.removeItem('token');
+    },
+    // Cookie tidak ada / invalid → pastikan state bersih (mode tamu).
+    clearCredentials(state) {
+      state.token = null;
+      state.user = null;
+      state.isAuthenticated = false;
+      state.isAuthResolved = true;
+      localStorage.removeItem('token');
     },
     logout(state) {
       state.token = null;
       state.user = null;
       state.isAuthenticated = false;
+      state.isAuthResolved = true;
       localStorage.removeItem('token');
     },
     setUser(state, action) {
@@ -35,5 +54,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, logout, setUser, setCredits, decrementCredits } = authSlice.actions;
+export const { setCredentials, clearCredentials, logout, setUser, setCredits, decrementCredits } = authSlice.actions;
 export default authSlice.reducer;

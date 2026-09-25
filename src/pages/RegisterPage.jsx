@@ -152,9 +152,9 @@ export default function RegisterPage() {
         confirm
       );
 
+      // Autentikasi memakai JWT httpOnly cookie — server yang memasang cookie.
       dispatch(
         setCredentials({
-          token: res.data.token,
           user: res.data.user,
         })
       );

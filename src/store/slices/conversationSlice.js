@@ -78,6 +78,14 @@ const conversationSlice = createSlice({
       const id = action.payload;
       state.topics = state.topics.filter((t) => t.id !== id);
     },
+    // Reset penuh state percakapan — dipakai saat login (chat tamu dihapus)
+    // dan saat logout (kembali ke mode tamu dengan state bersih).
+    clearConversations(state) {
+      state.conversations = [];
+      state.activeConversationId = null;
+      state.messages = {};
+      state.topics = [];
+    },
   },
 });
 
@@ -100,6 +108,7 @@ export const {
   setTopics,
   addTopic,
   removeTopic,
+  clearConversations,
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;

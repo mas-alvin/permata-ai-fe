@@ -65,7 +65,7 @@ export default function ChatInput() {
               <select
                 value={selectedModel.id}
                 onChange={(e) => setSelectedModel(models.find(m => m.id === e.target.value))}
-                className="bg-transparent border-none text-on-surface text-sm font-medium focus:ring-0 focus:ring-offset-0 min-w-[140px] cursor-pointer"
+                className="bg-transparent border-none text-on-surface text-sm font-medium focus:ring-0 focus:ring-offset-0 min-w-35 cursor-pointer"
               >
                 {models.map((model) => (
                   <option key={model.id} value={model.id}>

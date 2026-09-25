@@ -18,11 +18,12 @@ import {
   endStream,
   selectSelectedModelId,
 } from '../store/slices/chatStreamSlice';
-import { setUser, setCredits, decrementCredits } from '../store/slices/authSlice';
+import { setUser, setCredits, decrementCredits, clearCredentials } from '../store/slices/authSlice';
 import { conversationService } from '../services/conversationService';
 import { messageService } from '../services/messageService';
 import { authService } from '../services/authService';
 import { sendMessageStream, regenerateMessageStream } from '../services/chatStreamService';
+import { sendGuestMessageStream } from '../services/guestChatService';
 import MessageList from '../components/Message/MessageList';
 import ChatInputActive from '../components/Chat/ChatInputActive';
 import HeroSection from '../components/MainContent/HeroSection';
@@ -98,15 +99,17 @@ export default function ChatPage() {
       .catch(() => {});
   };
 
-  // Sync user profile (incl. credits) on mount
+  // Sync user profile (incl. credits) on mount — hanya untuk user login.
+  // Tamu tidak punya data user; /me hanya valid bersama cookie JWT.
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!isAuthenticated) return;
     authService
       .me()
       .then((res) => dispatch(setUser(res.data)))
       .catch(() => {});
-  }, [dispatch]);
+  }, [dispatch, isAuthenticated]);
 
   // Stream a fresh AI answer for an assistant message, replacing the old one.
   // Dipakai bersama oleh "regenerate" dan "edit & kirim ulang".
@@ -247,6 +250,65 @@ export default function ChatPage() {
     setError(null);
     let conversationId = id;
 
+    // ── Mode tamu: belum login ──────────────────────────────────────────
+    // Tamu memakai endpoint khusus /guest/chat yang dibatasi kuota harian
+    // per device_id. Pesan disimpan backend dengan user_id NULL dan akan
+    // dihapus permanen saat user login (AuthController::purgeGuestChats).
+    if (!isAuthenticated) {
+      // Pakai id rute sebagai key store — sama seperti mode user login —
+      // agar selectMessagesByConversationId(id) menemukan pesan tamu.
+      // Sebelumnya memakai key 'guest' sehingga pesan tidak pernah tampil
+      // dan UI macet di HeroSection (hasMessages tetap false).
+      const guestConvId = conversationId && conversationId !== 'new' ? conversationId : 'new';
+
+      const userMsg = {
+        id: Date.now(),
+        role: 'user',
+        content,
+        attachments: (attachments || []).map((att) => ({
+          id: att.id,
+          filename: att.filename,
+          url: att.url,
+          mime_type: att.mime_type,
+          size: att.size,
+        })),
+        created_at: new Date().toISOString(),
+      };
+      hasOptimisticRef.current = true;
+      dispatch(appendMessage({ conversationId: guestConvId, message: userMsg }));
+      dispatch(startStream());
+
+      sendGuestMessageStream(
+        content,
+        (chunk) => dispatch(appendStreamChunk(chunk)),
+        ({ quota }) => {
+          const fullContent = partialContentRef.current;
+          dispatch(endStream());
+          dispatch(
+            commitStreamedMessage({
+              conversationId: guestConvId,
+              message: {
+                id: Date.now() + 1,
+                role: 'assistant',
+                content: fullContent,
+                created_at: new Date().toISOString(),
+              },
+            })
+          );
+          // Kuota harian tamu habis → arahkan ke login untuk lanjut.
+          if (quota && typeof quota.remaining === 'number' && quota.remaining === 0) {
+            setError('Batas harian tamu tercapai. Masuk dengan akun untuk melanjutkan.');
+          }
+        },
+        (err) => {
+          dispatch(endStream());
+          setError(err?.message || 'Terjadi kesalahan saat streaming.');
+        }
+      );
+      return;
+    }
+
+    // ── Mode user login ─────────────────────────────────────────────────
     try {
       if (!conversationId || conversationId === 'new') {
         const res = await conversationService.create(content.substring(0, 30), selectedModelId);

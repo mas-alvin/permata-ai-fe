@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch } from '../store/hooks';
 import { setCredentials } from '../store/slices/authSlice';
+import { clearConversations } from '../store/slices/conversationSlice';
 import { authService } from '../services/authService';
 import {
   Gem,
@@ -38,16 +39,21 @@ export default function LoginPage() {
     try {
       const res = await authService.login(email, password);
 
+      // Autentikasi memakai JWT httpOnly cookie — server yang memasang cookie,
+      // jadi tidak ada token yang dibaca JS. Simpan hanya data user ke state.
       dispatch(
         setCredentials({
-          token: res.data.token,
           user: res.data.user,
         })
       );
 
+      // Backend sudah menghapus semua chat tamu dari device ini (purgeGuestChats).
+      // Bersihkan juga state UI agar tidak ada pesan tamu yang tersisa.
+      dispatch(clearConversations());
+
       navigate('/chat/new', { replace: true });
     } catch (err) {
-      setError('Email atau password salah');
+      setError(err.response?.data?.message || 'Email atau password salah');
     } finally {
       setIsLoading(false);
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectModels, setModels, setModelsLoading, setModelsError } from '../../store/slices/modelsSlice';
 import { selectSelectedModelId, setSelectedModelId } from '../../store/slices/chatStreamSlice';
+import api from '../../services/api';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
@@ -18,13 +19,8 @@ const ModelSwitcher = () => {
       if (models.length > 0) return; // Only fetch once
       dispatch(setModelsLoading());
       try {
-        const response = await fetch('http://localhost:8011/api/models', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        if (!response.ok) throw new Error('Failed to fetch models');
-        const data = await response.json();
+        const response = await api.get('/models');
+        const data = response.data;
         dispatch(setModels(data));
         // Set default selected model if none selected
         if (!selectedModelId && data.length > 0) {
@@ -63,7 +59,7 @@ const ModelSwitcher = () => {
   if (models.length === 0) {
     return (
       <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
-        <span className="text-sm text-gray-500">No models available</span>
+        <span className="text-sm text-gray-500">No models availables</span>
       </div>
     );
   }
