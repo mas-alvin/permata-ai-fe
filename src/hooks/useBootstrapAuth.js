@@ -3,6 +3,20 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setCredentials, clearCredentials } from '../store/slices/authSlice';
 import { authService } from '../services/authService';
 
+// Promise bootstrap disimpan di level modul: hanya 1x request /me seumur
+// halaman, sekalipun effect dijalankan ulang.
+let bootPromise = null;
+
+function getBootPromise() {
+  if (!bootPromise) {
+    bootPromise = authService
+      .me()
+      .then((res) => ({ ok: true, user: res.data }))
+      .catch(() => ({ ok: false }));
+  }
+  return bootPromise;
+}
+
 /**
  * Cek sesi JWT httpOnly cookie saat aplikasi pertama kali dimuat.
  *
@@ -15,40 +29,35 @@ import { authService } from '../services/authService';
  * Itu cara normal mendeteksi "belum login" — bukan bug. Setelah itu,
  * isAuthResolved=true dan tidak ada lagi request endpoint login.
  *
- * Selama pengecekan, isAuthResolved=false agar UI tidak mengedip memutuskan
- * status login. Hanya /chat/* yang butuh auth; halaman lain (login/register)
- * tetap bisa diakses tanpa menunggu.
+ * ⚠️ Penting: cleanup effect TIDAK BOLEH membatalkan promise bootstrap.
+ * React StrictMode (main.jsx) me-mount effect 2x di dev: mount → unmount →
+ * mount. Versi lama memakai ref `hasBooted` + `cancelled`, sehingga invokasi
+ * kedua skip tapi invokasi pertama sudah ditandai cancelled → dispatch
+ * tidak pernah jalan → isAuthResolved selamanya false setelah reload penuh.
+ * Akibatnya RequireAuth merender null (sidebar & GuestNotice hilang) dan
+ * footer kembali ke profil palsu "Creative Studio".
  */
 export function useBootstrapAuth() {
   const dispatch = useAppDispatch();
   const isAuthResolved = useAppSelector((state) => state.auth.isAuthResolved);
-  // Guard: React StrictMode (main.jsx) double-invoke useEffect di dev.
-  // Tanpa ini /me dipanggil 2x untuk tamu → 2 error 401 identik di console.
-  // Ref tetap valid lintas re-invoke StrictMode, jadi panggilan kedua skip.
-  const hasBooted = useRef(false);
+  const dispatchedRef = useRef(false);
 
   useEffect(() => {
-    if (isAuthResolved || hasBooted.current) return;
-    hasBooted.current = true;
+    if (isAuthResolved || dispatchedRef.current) return;
+    // Tandai sinkron sebelum await. StrictMode menjalankan effect kedua secara
+    // sinkron setelah yang pertama, jadi guard ini mencegah dispatch ganda
+    // tanpa membatalkan promise yang masih berjalan.
+    dispatchedRef.current = true;
 
-    let cancelled = false;
-
-    authService
-      .me()
-      .then((res) => {
-        if (cancelled) return;
+    getBootPromise().then((result) => {
+      if (result.ok) {
         // Data user (termasuk kredit) sudah didapat di sini — tidak perlu
         // request /me kedua setelah login terkonfirmasi.
-        dispatch(setCredentials({ user: res.data }));
-      })
-      .catch(() => {
-        if (cancelled) return;
+        dispatch(setCredentials({ user: result.user }));
+      } else {
         // Cookie tidak ada / invalid / sudah logout → mode tamu.
         dispatch(clearCredentials());
-      });
-
-    return () => {
-      cancelled = true;
-    };
+      }
+    });
   }, [isAuthResolved, dispatch]);
 }

@@ -20,12 +20,13 @@ export default function WorkspaceFooter() {
   const navigate = useNavigate();
   const { confirm } = useConfirmModal();
   const user = useAppSelector((state) => state.auth.user);
-  // Mode tamu: user belum login. Cookie JWT belum ada / belum terverifikasi
-  // (bootstrapAuth sedang jalan). State auth hanya dianggap valid setelah
-  // isAuthResolved=true, agar tidak mengedip memutuskan status login.
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const isAuthResolved = useAppSelector((state) => state.auth.isAuthResolved);
-  const isGuest = isAuthResolved && !isAuthenticated;
+  // Selama bootstrap cookie JWT belum selesai dicek, jangan tampilkan UI apa
+  // pun: memunculkan tombol tamu lebih dulu akan membuat user login terlihat
+  // "di logout" selama beberapa ms, sementara memunculkan profil lebih dulu
+  // memunculkan placeholder palsu "Creative Studio".
+  const isGuest = !isAuthenticated;
   const { theme, setTheme } = useTheme();
 
   // Satu-satunya menu sekarang: panel dialog pengaturan (tema, logout, dll).
@@ -90,9 +91,19 @@ export default function WorkspaceFooter() {
 
   return (
     <div className="p-3 border-t border-on-surface/10 bg-surface-container-lowest/90 backdrop-blur-md space-y-2">
-      <CreditBadge />
-
-      {isGuest ? (
+      {/* Status login belum selesai dicek → tampilkan placeholder netral.
+          Menampilkan tombol tamu terlebih dulu membuat user login tampak
+          "sudah logout" untuk sementara; menampilkan profil terlebih dulu
+          memunculkan placeholder palsu "Creative Studio" untuk tamu. */}
+      {!isAuthResolved ? (
+        <div className="flex items-center gap-2.5 px-1.5 py-1">
+          <div className="w-8 h-8 rounded-full bg-on-surface/10 animate-pulse shrink-0" />
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="h-2.5 w-24 rounded-full bg-on-surface/10 animate-pulse" />
+            <div className="h-2 w-32 rounded-full bg-on-surface/5 animate-pulse" />
+          </div>
+        </div>
+      ) : isGuest ? (
         // ── Mode tamu: tampilkan CTA login/register (funnel konversi) ──
         // guest.md §3.4: tamu tetap bisa chat, tapi fitur akun diblokir dan
         // selalu ada jalur jelas untuk mendaftar.
@@ -113,25 +124,28 @@ export default function WorkspaceFooter() {
           </button>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-2">
-          {/* User Account row — klik untuk membuka halaman profil */}
-          <button
-            type="button"
-            onClick={() => go('/profile')}
-            className="flex items-center gap-2.5 min-w-0 flex-1 px-1.5 py-1 -mx-1.5 rounded-md hover:bg-surface-container-low transition-colors text-left"
-            title="Lihat profil"
-          >
-            <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-              {initials}
-            </div>
-            <div className="min-w-0 truncate">
-              <p className="text-xs font-semibold text-on-surface truncate leading-tight">{displayName}</p>
-              <p className="text-[10px] text-on-surface-variant/60 truncate">{displayEmail}</p>
-            </div>
-          </button>
+        <>
+          {/* Indikator kredit hanya untuk user login; tamu tidak punya kredit */}
+          <CreditBadge />
+          <div className="flex items-center justify-between gap-2">
+            {/* User Account row — klik untuk membuka halaman profil */}
+            <button
+              type="button"
+              onClick={() => go('/profile')}
+              className="flex items-center gap-2.5 min-w-0 flex-1 px-1.5 py-1 -mx-1.5 rounded-md hover:bg-surface-container-low transition-colors text-left"
+              title="Lihat profil"
+            >
+              <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                {initials}
+              </div>
+              <div className="min-w-0 truncate">
+                <p className="text-xs font-semibold text-on-surface truncate leading-tight">{displayName}</p>
+                <p className="text-[10px] text-on-surface-variant/60 truncate">{displayEmail}</p>
+              </div>
+            </button>
 
-          {/* Tombol tunggal — membuka menu dialog pengaturan (tema, logout, dll) */}
-          <div className="relative shrink-0" ref={menuRef}>
+            {/* Tombol tunggal — membuka menu dialog pengaturan (tema, logout, dll) */}
+            <div className="relative shrink-0" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
@@ -217,7 +231,8 @@ export default function WorkspaceFooter() {
               </div>
             )}
           </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
