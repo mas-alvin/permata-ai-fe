@@ -22,7 +22,7 @@ function formatSize(bytes) {
   return `${Math.round(value * 10) / 10} ${units[unitIndex]}`;
 }
 
-export default function ChatInputActive({ onSend, disabled = false, prefill = '', onPrefillClear, ragConfig, onRagConfigChange }) {
+export default function ChatInputActive({ onSend, disabled = false, prefill = '', onPrefillClear, replyContent = null, onReplyClear, ragConfig, onRagConfigChange }) {
   const [input, setInput] = useState(prefill);
   const [textareaHeight, setTextareaHeight] = useState(48);
   const [selectedModel, setSelectedModel] = useState(models[0]);
@@ -107,6 +107,8 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
     }
     // Clear edit mode
     if (onPrefillClear) onPrefillClear();
+    // Clear reply quote
+    if (onReplyClear) onReplyClear();
   };
 
   // Update input when prefill changes (edit feature)
@@ -153,6 +155,27 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
             >
               Top up
             </a>
+          </div>
+        )}
+
+        {/* Quoted reply preview */}
+        {replyContent && (
+          <div className="px-4 pb-2">
+            <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-surface-container-high/50 border border-on-surface/10">
+              <span className="material-symbols-outlined text-on-surface-variant text-[16px] mt-0.5">reply</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-on-surface-variant/70 uppercase tracking-wide mb-1">Quoted reply</p>
+                <p className="text-sm text-on-surface line-clamp-2">{replyContent}</p>
+              </div>
+              <button
+                type="button"
+                onClick={onReplyClear}
+                className="p-0.5 rounded-md hover:bg-surface-container-high text-on-surface-variant hover:text-red-600 transition-colors shrink-0"
+                aria-label="Cancel reply"
+              >
+                <XMarkIcon className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
 

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import MessageActions from './MessageActions';
 import AttachmentPreview from './AttachmentPreview';
+import MarkdownRenderer from './MarkdownRenderer';
+import SelectionReply from './SelectionReply';
 
 export default function MessageBubble({
   message,
@@ -10,6 +10,7 @@ export default function MessageBubble({
   onEdit,
   onRegenerate,
   onDelete,
+  onReply,
 }) {
   const isUser = message.role === 'user';
   const content = message.content || '';
@@ -110,12 +111,12 @@ export default function MessageBubble({
 
   // AI message: no bubble, plain text + actions on hover
   return (
-    <div className="flex flex-col items-start py-1 group">
-      <div className="max-w-4xl px-1">
-        <div className="prose prose-sm max-w-none text-on-surface">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+    <div className="flex flex-col items-start py-1 group w-full">
+      <SelectionReply onReply={onReply}>
+        <div className="max-w-4xl px-1 w-full">
+          <MarkdownRenderer content={content} />
         </div>
-      </div>
+      </SelectionReply>
       <MessageActions
         content={content}
         role="assistant"

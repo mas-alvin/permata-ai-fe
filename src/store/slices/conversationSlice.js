@@ -68,6 +68,18 @@ const conversationSlice = createSlice({
       if (index === -1) return;
       state.messages[conversationId] = inclusive ? list.slice(0, index) : list.slice(0, index + 1);
     },
+    insertMessageAfter(state, action) {
+      const { conversationId, afterMessageId, message } = action.payload;
+      const list = state.messages[conversationId];
+      if (!list) return;
+      const index = list.findIndex((m) => String(m.id) === String(afterMessageId));
+      if (index === -1) return;
+      state.messages[conversationId] = [
+        ...list.slice(0, index + 1),
+        message,
+        ...list.slice(index + 1)
+      ];
+    },
     setTopics(state, action) {
       state.topics = action.payload;
     },
@@ -105,6 +117,7 @@ export const {
   updateMessage,
   removeMessage,
   removeMessagesAfter,
+  insertMessageAfter,
   setTopics,
   addTopic,
   removeTopic,

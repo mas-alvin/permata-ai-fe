@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import MessageBubble from './MessageBubble';
+import MarkdownRenderer from './MarkdownRenderer';
 
-export default function MessageList({ messages, onEdit, onRegenerate, onDelete, isStreaming, partialContent }) {
+export default function MessageList({ messages, onEdit, onRegenerate, onDelete, onReply, isStreaming, partialContent }) {
   const endRef = useRef(null);
   const containerRef = useRef(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -47,16 +46,15 @@ export default function MessageList({ messages, onEdit, onRegenerate, onDelete, 
             onEdit={onEdit}
             onRegenerate={onRegenerate}
             onDelete={onDelete}
+            onReply={onReply}
           />
         ))}
 
         {/* Streaming AI response — same styling as final messages */}
         {isStreaming && partialContent && (
-          <div className="flex flex-col items-start py-1">
-            <div className="max-w-4xl px-1">
-              <div className="prose prose-sm max-w-none text-on-surface">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{partialContent}</ReactMarkdown>
-              </div>
+          <div className="flex flex-col items-start py-1 w-full">
+            <div className="max-w-4xl px-1 w-full">
+              <MarkdownRenderer content={partialContent} />
             </div>
           </div>
         )}

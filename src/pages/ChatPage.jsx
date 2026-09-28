@@ -9,6 +9,7 @@ import {
   updateMessage,
   removeMessage,
   removeMessagesAfter,
+  insertMessageAfter,
   selectMessagesByConversationId,
   setActiveConversation,
 } from '../store/slices/conversationSlice';
@@ -48,6 +49,7 @@ export default function ChatPage() {
   const selectedModelId = useAppSelector((state) => state.chatStream.selectedModelId);
   const user = useAppSelector((state) => state.auth.user);
   const [editContent, setEditContent] = useState('');
+  const [replyContent, setReplyContent] = useState(null);
 
   // RAG (Fase 7) — sumber knowledge base untuk percakapan aktif.
   const [ragConfig, setRagConfig] = useState({ ragEnabled: false, ragDocumentIds: [] });
@@ -152,14 +154,12 @@ export default function ChatPage() {
     if (!id || id === 'new' || isStreaming) return;
     setError(null);
 
-    // Cari pesan asisten pertama setelah prompt yang diedit — itulah jawaban
-    // lama yang harus dibuat ulang agar sesuai dengan prompt baru.
+    // Cari pesan asisten pertama setelah prompt yang diedit
     const index = conversation.findIndex((m) => String(m.id) === String(message.id));
     const assistantMessage =
       index !== -1 ? conversation.slice(index + 1).find((m) => m.role === 'assistant') : undefined;
 
-    // 1. Simpan prompt yang sudah diedit ke backend LEBIH DULU, supaya history
-    //    yang dibaca saat regenerasi sudah berisi teks baru.
+    // 1. Simpan prompt yang sudah diedit ke backend LEBIH DULU
     try {
       await messageService.update(message.id, newContent);
     } catch {
@@ -168,13 +168,48 @@ export default function ChatPage() {
     }
     dispatch(updateMessage({ conversationId: id, messageId: message.id, content: newContent }));
 
-    // 2. Kalau belum ada jawaban AI setelahnya, tidak ada yang perlu dibuat ulang.
+    // 2. Kalau belum ada jawaban AI setelahnya, tidak ada yang perlu dibuat ulang
     if (!assistantMessage) return;
 
-    // 3. Buang jawaban lama (beserta pesan setelahnya) secara optimis, lalu
-    //    stream jawaban baru dari prompt yang sudah diperbarui.
-    dispatch(removeMessagesAfter({ conversationId: id, messageId: assistantMessage.id, inclusive: true }));
-    regenerateAssistant(assistantMessage);
+    // 3. JANGAN hapus jawaban lama — biarkan tetap terlihat (percabangan percakapan)
+    //    Stream jawaban baru dan sisipkan SETELAH pesan user yang baru diedit
+    dispatch(startStream());
+    regenerateMessageStream(
+      assistantMessage.id,
+      (chunk) => dispatch(appendStreamChunk(chunk)),
+      ({ creditsRemaining, creditsDeducted }) => {
+        const fullContent = partialContentRef.current;
+        dispatch(endStream());
+        
+        // Buat pesan assistant baru dengan ID sementara
+        const newAssistantMessage = {
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: fullContent,
+          created_at: new Date().toISOString(),
+        };
+        
+        // Sisipkan jawaban baru SETELAH pesan user yang diedit (bukan menggantikan yang lama)
+        dispatch(insertMessageAfter({
+          conversationId: id,
+          afterMessageId: message.id,
+          message: newAssistantMessage,
+        }));
+        
+        if (typeof creditsRemaining === 'number') {
+          dispatch(setCredits(creditsRemaining));
+        } else if (typeof creditsDeducted === 'number' && creditsDeducted > 0) {
+          dispatch(decrementCredits(creditsDeducted));
+        }
+
+        // Ganti ID sementara dengan ID asli dari database
+        syncMessagesFromServer(id);
+      },
+      (err) => {
+        dispatch(endStream());
+        setError(err?.message || 'Terjadi kesalahan saat regenerasi.');
+      }
+    );
   };
 
   const handleDeleteMessage = async (message) => {
@@ -377,6 +412,22 @@ export default function ChatPage() {
     }
   };
 
+  // ==========================================================================
+  // Balas (reply) terhadap potongan teks yang diseleksi di jawaban AI.
+  // Teks terpilih ditampilkan sebagai kutipan di atas input chat, bukan
+  // di dalam textarea, sehingga user bisa mengetik respons tanpa teks
+  // yang dibalas ikut terkirim sebagai isi pesan.
+  // ==========================================================================
+  const handleReply = (selectedText) => {
+    if (!selectedText) return;
+    setReplyContent(selectedText);
+  };
+
+  // Saat pindah percakapan, kosongkan kutipan balas yang masih tertahan.
+  useEffect(() => {
+    setReplyContent(null);
+  }, [id]);
+
   if (loading) return <div className="flex-1 flex items-center justify-center animate-pulse">Memuat...</div>;
 
   // Empty state (new chat, no messages) — show HeroSection centered
@@ -420,6 +471,7 @@ export default function ChatPage() {
         onEdit={handleEditMessage}
         onRegenerate={handleRegenerate}
         onDelete={requestDeleteMessage}
+        onReply={handleReply}
         isStreaming={isStreaming}
         partialContent={partialContent}
       />
@@ -448,6 +500,8 @@ export default function ChatPage() {
         disabled={isStreaming}
         prefill={editContent}
         onPrefillClear={() => setEditContent('')}
+        replyContent={replyContent}
+        onReplyClear={() => setReplyContent(null)}
         ragConfig={ragConfig}
         onRagConfigChange={handleRagConfigChange}
       />
@@ -468,4 +522,4 @@ export default function ChatPage() {
       />
     </div>
   );
-}
+};

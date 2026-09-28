@@ -5,6 +5,7 @@ import {
   ArrowPathIcon,
   PencilSquareIcon,
   TrashIcon,
+  ArrowUturnLeftIcon,
 } from '@heroicons/react/24/outline';
 
 /**
@@ -17,7 +18,7 @@ import {
  * - onEdit: () => void        (user only)
  * - onDelete: () => void
  */
-export default function MessageActions({ content, role, isLast, onRegenerate, onEdit, onDelete }) {
+export default function MessageActions({ content, role, isLast, onRegenerate, onEdit, onDelete, onReply }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -53,6 +54,18 @@ export default function MessageActions({ content, role, isLast, onRegenerate, on
           aria-label="Regenerasi jawaban"
         >
           <ArrowPathIcon className="w-4.5 h-4.5" />
+        </button>
+      )}
+
+      {/* Reply button for assistant messages */}
+      {role === 'assistant' && onReply && (
+        <button
+          onClick={() => onReply({ content, id: null })}
+          className="p-1.5 rounded-md hover:bg-surface-container-low transition-colors text-on-surface-variant/60 hover:text-on-surface"
+          title="Balas"
+          aria-label="Balas pesan"
+        >
+          <ArrowUturnLeftIcon className="w-4.5 h-4.5" />
         </button>
       )}
 
