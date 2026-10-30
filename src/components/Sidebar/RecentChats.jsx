@@ -4,8 +4,9 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setConversations, updateConversationTitle, toggleConversationPin, removeConversation } from '../../store/slices/conversationSlice';
 import { conversationService } from '../../services/conversationService';
 import ConversationMenu from './ConversationMenu';
+import { History, MessageCircle } from 'lucide-react';
 
-export default function RecentChats() {
+export default function RecentChats({ searchQuery = '' }) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const conversations = useAppSelector((state) => state.conversation.conversations);
@@ -20,16 +21,20 @@ export default function RecentChats() {
     }).catch(() => {});
   }, [dispatch]);
 
+  const filtered = conversations.filter(c => 
+    !searchQuery.trim() || (c.title && c.title.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   const formatTime = (dateStr) => {
     if (!dateStr) return '';
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Baru saja';
-    if (mins < 60) return `${mins}m yang lalu`;
+    if (mins < 1) return 'Edited just now';
+    if (mins < 60) return `Edited ${mins}m ago`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}j yang lalu`;
+    if (hrs < 24) return `Edited ${hrs}h ago`;
     const days = Math.floor(hrs / 24);
-    return `${days}h yang lalu`;
+    return `Edited ${days}d ago`;
   };
 
   const handleStartRename = (chat) => {
@@ -85,17 +90,18 @@ export default function RecentChats() {
 
   return (
     <div>
-      <div className="flex items-center justify-between px-2 mb-1.5 text-[11px] font-semibold text-on-surface-variant/80 uppercase tracking-wider">
+      <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1.5 px-1">
         <div className="flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-[14px]">history</span>
-          <span>Recent Chats</span>
+          <History className="w-3.5 h-3.5" />
+          <span>Riwayat Terbaru</span>
         </div>
+        <span className="text-[10px]">{filtered.length}</span>
       </div>
-      <div className="space-y-0.5">
-        {conversations.length === 0 && (
-          <p className="px-2 py-3 text-xs text-on-surface-variant/40 italic">Belum ada percakapan</p>
+      <div className="flex flex-col gap-1">
+        {filtered.length === 0 && (
+          <p className="px-2 py-2 text-xs text-slate-400 italic">Belum ada obrolan</p>
         )}
-        {conversations.map((chat) => {
+        {filtered.map((chat) => {
           const isActive = activeId === String(chat.id);
           const isEditing = editingId === chat.id;
 
@@ -103,10 +109,10 @@ export default function RecentChats() {
             <div
               key={chat.id}
               onClick={() => !isEditing && navigate(`/chat/${chat.id}`)}
-              className={`px-2 rounded-md cursor-pointer flex items-center gap-2 group transition-all ${
+              className={`group cursor-pointer p-2 rounded-xl transition-all flex items-center justify-between gap-2 ${
                 isActive
-                  ? 'bg-menu-active/[0.05] border border-menu-active/5'
-                  : 'hover:bg-surface-container-low border-l-[3px] border-l-transparent'
+                  ? 'bg-slate-100/90 dark:bg-slate-800 text-blue-600'
+                  : 'hover:bg-slate-100/70 dark:hover:bg-slate-800/70'
               }`}
             >
               <div className="overflow-hidden pr-1 flex-1 min-w-0">
@@ -119,28 +125,31 @@ export default function RecentChats() {
                     onBlur={() => handleSaveTitle(chat.id)}
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full text-xs font-medium text-on-surface bg-surface-container border border-primary/20 rounded-md px-2 py-1 focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all"
+                    className="w-full text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 border border-blue-400 rounded-lg px-2 py-1 focus:outline-none transition-all"
                   />
                 ) : (
                   <>
-                    <p className={`font-medium text-xs truncate transition-colors ${
-                      isActive ? 'text-on-surface font-semibold' : 'text-on-surface group-hover:text-secondary'
+                    <h4 className={`text-xs font-medium truncate transition-colors ${
+                      isActive ? 'text-blue-600 font-semibold' : 'text-slate-800 dark:text-slate-200 group-hover:text-blue-600'
                     }`}>
-                      {chat.title || 'Percakapan tanpa judul'}
-                    </p>
-                    {/* <p className="text-[10px] text-on-surface-variant/60 mt-0.5">
+                      {chat.title || 'Percakapan baru'}
+                    </h4>
+                    <span className="text-[10px] text-slate-400 block truncate">
                       {formatTime(chat.updated_at)}
-                    </p> */}
+                    </span>
                   </>
                 )}
               </div>
               {!isEditing && (
-                <ConversationMenu
-                  chat={chat}
-                  onStartRename={handleStartRename}
-                  onPin={handlePin}
-                  onDelete={handleDelete}
-                />
+                <div className="flex items-center gap-1 shrink-0">
+                  <ConversationMenu
+                    chat={chat}
+                    onStartRename={handleStartRename}
+                    onPin={handlePin}
+                    onDelete={handleDelete}
+                  />
+                  <MessageCircle className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+                </div>
               )}
             </div>
           );

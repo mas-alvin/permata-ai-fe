@@ -1,14 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppSelector } from '../../store/hooks';
-import { BoltIcon } from '@heroicons/react/24/solid';
-import { PaperClipIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Paperclip, Lightbulb, AudioLines, Sparkles, X, ArrowUpRight, Timer } from 'lucide-react';
 import { attachmentService } from '../../services/attachmentService';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import RagSourcePicker from '../Rag/RagSourcePicker';
-
-const models = [
-  { id: 'permata-pro', label: 'Permata Pro', icon: 'psychology' },
-];
+import QuickActions from '../MainContent/QuickActions';
 
 function formatSize(bytes) {
   if (!bytes) return '';
@@ -22,33 +18,37 @@ function formatSize(bytes) {
   return `${Math.round(value * 10) / 10} ${units[unitIndex]}`;
 }
 
-export default function ChatInputActive({ onSend, disabled = false, prefill = '', onPrefillClear, replyContent = null, onReplyClear, ragConfig, onRagConfigChange }) {
+export default function ChatInputActive({ 
+  onSend, 
+  disabled = false, 
+  prefill = '', 
+  onPrefillClear, 
+  replyContent = null, 
+  onReplyClear, 
+  ragConfig, 
+  onRagConfigChange,
+  showQuickActions = false
+}) {
   const [input, setInput] = useState(prefill);
-  const [textareaHeight, setTextareaHeight] = useState(48);
-  const [selectedModel, setSelectedModel] = useState(models[0]);
+  const [textareaHeight, setTextareaHeight] = useState(38);
+  const [deepThinkActive, setDeepThinkActive] = useState(false);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
   const [attachments, setAttachments] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  // Credits dari auth slice — hanya untuk user login. Tamu (belum login)
-  // tidak memakai kredit, melainkan kuota harian per device_id, jadi tombol
-  // kirim tetap aktif untuk mereka.
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const credits = useAppSelector((state) => state.auth.user?.credits ?? null);
   const conversationId = useAppSelector((state) => state.conversation.activeConversationId);
   const outOfCredits = isAuthenticated !== false && credits !== null && credits <= 0;
   const sendDisabled = disabled || outOfCredits;
 
-  // RAG — sumber knowledge base untuk percakapan ini (Fase 7).
   const effectiveConvId = conversationId && conversationId !== 'new' ? conversationId : null;
   const ragEnabled = ragConfig?.ragEnabled ?? false;
   const ragDocumentIds = ragConfig?.ragDocumentIds ?? [];
 
-  // Voice input — Web Speech API. Fallback gracefully on unsupported browsers.
   const handleTranscript = useCallback((transcript, isFinal) => {
     setInput((prev) => {
-      // Replace any interim text at the end, keep confirmed text
       const base = prev.replace(/\s*$/, '');
       if (isFinal) {
         return base ? `${base} ${transcript}` : transcript;
@@ -74,7 +74,7 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    e.target.value = ''; // allow re-selecting the same file
+    e.target.value = '';
     if (!file) return;
 
     setUploading(true);
@@ -90,28 +90,23 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
 
   const handleRemoveAttachment = (attachmentId) => {
     setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
-    // Best-effort delete on the server
     attachmentService.delete(attachmentId).catch(() => {});
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!input.trim() || sendDisabled) return;
     onSend(input, attachments);
     setInput('');
     setAttachments([]);
-    // Reset textarea height after sending
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      setTextareaHeight(48);
+      setTextareaHeight(38);
     }
-    // Clear edit mode
     if (onPrefillClear) onPrefillClear();
-    // Clear reply quote
     if (onReplyClear) onReplyClear();
   };
 
-  // Update input when prefill changes (edit feature)
   useEffect(() => {
     setInput(prefill);
     adjustHeight();
@@ -121,7 +116,7 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      const height = Math.min(textarea.scrollHeight, 160);
+      const height = Math.min(textarea.scrollHeight, 120);
       setTextareaHeight(height);
       textarea.style.height = `${height}px`;
     }
@@ -139,114 +134,93 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
   };
 
   return (
-    <div className="p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Out-of-credits banner */}
-        {outOfCredits && (
-          <div className="mb-3 flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-red-50 border border-red-200 text-red-700">
-            <BoltIcon className="w-4 h-4 shrink-0" />
-            <p className="text-xs font-medium">
-              Kredit Anda telah habis. Isi ulang untuk melanjutkan percakapan.
-            </p>
-            <a
-              href="#"
-              onClick={(e) => e.preventDefault()}
-              className="ml-auto text-xs font-semibold text-primary hover:underline shrink-0"
-            >
-              Top up
-            </a>
-          </div>
-        )}
+    <div className="px-3 sm:px-6 pb-2.5 sm:pb-3 pt-1 max-w-2xl mx-auto w-full flex flex-col gap-2 shrink-0">
+      {/* Suggestion pills if empty state */}
+      {showQuickActions && (
+        <QuickActions onSelectPrompt={(prompt) => setInput(prompt)} />
+      )}
 
-        {/* Quoted reply preview */}
-        {replyContent && (
-          <div className="px-4 pb-2">
-            <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-surface-container-high/50 border border-on-surface/10">
-              <span className="material-symbols-outlined text-on-surface-variant text-[16px] mt-0.5">reply</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-on-surface-variant/70 uppercase tracking-wide mb-1">Quoted reply</p>
-                <p className="text-sm text-on-surface line-clamp-2">{replyContent}</p>
-              </div>
+      {/* Quoted reply preview */}
+      {replyContent && (
+        <div className="px-1">
+          <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 shadow-2xs">
+            <span className="material-symbols-outlined text-slate-500 text-[16px] mt-0.5">reply</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Balas potongan teks</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2">{replyContent}</p>
+            </div>
+            <button
+              type="button"
+              onClick={onReplyClear}
+              className="p-1 rounded-md text-slate-400 hover:text-red-600 transition-colors shrink-0"
+              aria-label="Batalkan balasan"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Attachments preview */}
+      {attachments.length > 0 && (
+        <div className="flex flex-wrap gap-2 px-1">
+          {attachments.map((att) => (
+            <div
+              key={att.id}
+              className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 text-xs shadow-2xs max-w-[14rem]"
+            >
+              <Paperclip className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span className="truncate flex-1 text-slate-700 dark:text-slate-300">{att.filename}</span>
               <button
                 type="button"
-                onClick={onReplyClear}
-                className="p-0.5 rounded-md hover:bg-surface-container-high text-on-surface-variant hover:text-red-600 transition-colors shrink-0"
-                aria-label="Cancel reply"
+                onClick={() => handleRemoveAttachment(att.id)}
+                className="text-slate-400 hover:text-red-500"
               >
-                <XMarkIcon className="w-4 h-4" />
+                <X className="w-3 h-3" />
               </button>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
+      )}
 
-        {/* Input Box — same style as MainContent/ChatInput.jsx */}
-        <div className="w-full bg-surface-container rounded-3xl border border-on-surface/10 shadow-lg shadow-on-surface/5 overflow-hidden flex flex-col focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all">
-          <div className="p-4 flex flex-col gap-3">
-            {/* Attachment previews */}
-            {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {attachments.map((att) => (
-                  <div
-                    key={att.id}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container-low border border-on-surface/10 max-w-[16rem]"
-                  >
-                    <PaperClipIcon className="w-4 h-4 text-on-surface-variant shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-on-surface truncate">{att.filename}</p>
-                      {att.size ? <p className="text-[10px] text-on-surface-variant/70">{formatSize(att.size)}</p> : null}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAttachment(att.id)}
-                      className="p-0.5 rounded-md hover:bg-surface-container-high text-on-surface-variant hover:text-red-600 transition-colors shrink-0"
-                      aria-label="Hapus lampiran"
-                    >
-                      <XMarkIcon className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            {uploading && (
-              <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-                <span className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                <span>Mengunggah file...</span>
-              </div>
-            )}
-
-            {listening && (
-              <div className="flex items-center gap-2 text-xs font-medium text-red-600">
-                <span className="flex items-end gap-0.5 h-3.5">
-                  <span className="w-1 bg-red-500 rounded-full animate-pulse" style={{ height: '40%' }} />
-                  <span className="w-1 bg-red-500 rounded-full animate-pulse" style={{ height: '75%', animationDelay: '120ms' }} />
-                  <span className="w-1 bg-red-500 rounded-full animate-pulse" style={{ height: '55%', animationDelay: '240ms' }} />
-                </span>
-                <span>Mendengarkan... klik mic untuk berhenti</span>
-              </div>
-            )}
-
-            {voiceError && (
-              <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
-                <span className="material-symbols-outlined text-[14px]">error</span>
-                <span>{voiceError}</span>
-              </div>
-            )}
-
-            <div style={{ minHeight: `${textareaHeight}px` }} className="relative">
-              <textarea
-                ref={textareaRef}
-                className="w-full h-full bg-transparent border-none focus:ring-0 text-on-surface font-body-md placeholder:text-on-surface-variant/50 p-0 resize-none overflow-y-auto"
-                placeholder="Ask Permata anything..."
-                rows="1"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={sendDisabled}
-              />
+      {/* Combined Trial Banner + Input Box Container */}
+      <div className="rounded-2xl p-[1.5px] bg-gradient-to-r from-amber-200/70 via-pink-200/70 to-blue-300/80 shadow-glow">
+        <div className="rounded-[15px] bg-trial-banner overflow-hidden">
+          
+          {/* Top Banner inside Input Card */}
+          <div className="px-3 sm:px-3.5 py-1.5 flex items-center justify-between text-[10px] sm:text-[11px] gap-2">
+            <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-medium truncate">
+              <Timer className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300 shrink-0" />
+              <span className="truncate">Free Trial ending soon continue your workflow</span>
             </div>
+            <button 
+              type="button"
+              onClick={() => alert('Fitur Upgrade Gemini Ultra')}
+              className="font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+            >
+              <span>Upgrade Now</span>
+              <ArrowUpRight className="w-3 h-3 border border-orange-500 rounded-full p-0.5" />
+            </button>
+          </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-on-surface/5">
-              <div className="flex items-center gap-2">
+          {/* White Chat Input Box */}
+          <div className="bg-white dark:bg-slate-900 rounded-t-2xl px-3 sm:px-3.5 pt-2.5 pb-2.5 flex flex-col gap-2">
+            <textarea
+              ref={textareaRef}
+              rows="1"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={sendDisabled}
+              placeholder="Ask me anything..."
+              className="w-full resize-none border-0 bg-transparent text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none leading-relaxed"
+              style={{ minHeight: `${textareaHeight}px` }}
+            />
+
+            {/* Bottom Bar inside Input */}
+            <div className="flex items-center justify-between pt-1 gap-1">
+              {/* Left Pills: Attach, RAG, & Deep Think */}
+              <div className="flex items-center gap-1 sm:gap-1.5">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -258,66 +232,72 @@ export default function ChatInputActive({ onSend, disabled = false, prefill = ''
                   type="button"
                   onClick={handleAttachClick}
                   disabled={sendDisabled || uploading}
-                  className="flex items-center justify-center h-10 w-10 px-3 py-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  aria-label="Attach"
-                  title="Lampirkan file"
+                  className="py-1 px-2 sm:px-2.5 rounded-full bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[22px]">attach_file</span>
+                  <Paperclip className="w-3 h-3 text-slate-500" />
+                  <span>Attach</span>
                 </button>
+
                 <RagSourcePicker
                   conversationId={effectiveConvId}
                   ragEnabled={ragEnabled}
                   ragDocumentIds={ragDocumentIds}
                   onPersist={onRagConfigChange}
                 />
-                <span className="text-on-surface text-sm font-medium select-none">
-                  {selectedModel.label}
-                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setDeepThinkActive((prev) => !prev)}
+                  className={`py-1 px-2 sm:px-2.5 rounded-full border text-slate-700 dark:text-slate-300 font-medium text-[11px] flex items-center gap-1 transition-all cursor-pointer ${
+                    deepThinkActive
+                      ? 'bg-deep-think text-white border-transparent shadow-xs'
+                      : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200/80 dark:border-slate-700'
+                  }`}
+                >
+                  <Lightbulb className={`w-3 h-3 ${deepThinkActive ? 'text-white' : 'text-slate-500'}`} />
+                  <span>Deep Think</span>
+                </button>
               </div>
-              <div className="flex items-center gap-2">
+
+              {/* Right Pills: Voice & Gradient Send */}
+              <div className="flex items-center gap-1 sm:gap-1.5">
                 <button
                   type="button"
                   onClick={handleMicClick}
                   disabled={sendDisabled || !voiceSupported}
-                  title={
-                    !voiceSupported
-                      ? 'Browser tidak mendukung voice input'
-                      : listening
-                        ? 'Berhikan merekam'
-                        : 'Input suara'
-                  }
-                  className={`flex items-center justify-center h-10 w-10 px-3 py-2 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`py-1 px-2 sm:px-2.5 rounded-full border border-slate-200/80 dark:border-slate-700 font-medium text-[11px] flex items-center gap-1 transition-colors cursor-pointer ${
                     listening
-                      ? 'text-red-600 bg-red-50 animate-pulse'
-                      : 'text-on-surface-variant hover:text-primary hover:bg-primary-container/10'
+                      ? 'bg-red-50 text-red-600 animate-pulse border-red-200'
+                      : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
                   }`}
-                  aria-label={listening ? 'Stop voice input' : 'Voice input'}
                 >
-                  <span className="material-symbols-outlined text-[22px]">
-                    {listening ? 'mic_off' : 'mic'}
-                  </span>
+                  <AudioLines className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+                  <span className="hidden xs:inline">Voice</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={sendDisabled || !input.trim()}
-                  className="flex items-center justify-center h-10 w-10 bg-gradient-pro text-white p-3 py-2 rounded-xl hover:opacity-90 transition-opacity shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
-                  aria-label="Send"
+                  className="py-1 px-3 sm:px-3.5 rounded-full bg-send-btn hover:opacity-95 text-white font-semibold text-[11px] flex items-center gap-1 shadow-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[22px]">send</span>
+                  <Sparkles className="w-3 h-3 fill-white" />
+                  <span>Send</span>
                 </button>
               </div>
             </div>
           </div>
+
         </div>
-        <p className="text-[10px] text-on-surface-variant mt-3 text-center max-w-xl mx-auto">
-          Permata AI generates AI-based answers. Review key details for accuracy.{' '}
-          <a className="underline hover:text-on-surface transition-colors" href="#">
-            Cookie Preferences
-          </a>
-          .
-        </p>
       </div>
+
+      {/* Footer Disclaimer */}
+      <p className="text-center text-[10px] text-slate-400 truncate">
+        Gemini AI generates AI-based answers. Review key detail for accuracy.{' '}
+        <span className="underline text-slate-500 hover:text-slate-700 font-medium cursor-pointer">
+          Cookie Preferences.
+        </span>
+      </p>
     </div>
   );
 }

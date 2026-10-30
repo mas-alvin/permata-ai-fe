@@ -90,149 +90,133 @@ export default function WorkspaceFooter() {
 
 
   return (
-    <div className="p-3 border-t border-on-surface/10 bg-surface-container-lowest/90 backdrop-blur-md space-y-2">
-      {/* Status login belum selesai dicek → tampilkan placeholder netral.
-          Menampilkan tombol tamu terlebih dulu membuat user login tampak
-          "sudah logout" untuk sementara; menampilkan profil terlebih dulu
-          memunculkan placeholder palsu "Creative Studio" untuk tamu. */}
+    <div className="w-full">
       {!isAuthResolved ? (
-        <div className="flex items-center gap-2.5 px-1.5 py-1">
-          <div className="w-8 h-8 rounded-full bg-on-surface/10 animate-pulse shrink-0" />
+        <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+          <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse shrink-0" />
           <div className="min-w-0 flex-1 space-y-1.5">
-            <div className="h-2.5 w-24 rounded-full bg-on-surface/10 animate-pulse" />
-            <div className="h-2 w-32 rounded-full bg-on-surface/5 animate-pulse" />
+            <div className="h-2.5 w-20 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse" />
+            <div className="h-2 w-24 rounded-full bg-slate-100 dark:bg-slate-800 animate-pulse" />
           </div>
         </div>
       ) : isGuest ? (
-        // ── Mode tamu: tampilkan CTA login/register (funnel konversi) ──
-        // guest.md §3.4: tamu tetap bisa chat, tapi fitur akun diblokir dan
-        // selalu ada jalur jelas untuk mendaftar.
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => go('/login')}
-            className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold border border-on-surface/15 text-on-surface hover:bg-surface-container-low transition-colors"
+            className="flex-1 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors"
           >
             Masuk
           </button>
           <button
             type="button"
             onClick={() => go('/register')}
-            className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:opacity-90 transition-opacity shadow-sm"
+            className="flex-1 px-3 py-2 rounded-xl text-xs font-semibold bg-blue-600 text-white hover:opacity-90 transition-opacity shadow-sm"
           >
             Daftar
           </button>
         </div>
       ) : (
-        <>
-          {/* Indikator kredit hanya untuk user login; tamu tidak punya kredit */}
-          <CreditBadge />
-          <div className="flex items-center justify-between gap-2">
-            {/* User Account row — klik untuk membuka halaman profil */}
+        <div className="relative" ref={menuRef}>
+          <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-between">
             <button
               type="button"
               onClick={() => go('/profile')}
-              className="flex items-center gap-2.5 min-w-0 flex-1 px-1.5 py-1 -mx-1.5 rounded-md hover:bg-surface-container-low transition-colors text-left"
+              className="flex items-center gap-2 min-w-0 flex-1 text-left"
               title="Lihat profil"
             >
-              <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs shrink-0">
                 {initials}
               </div>
-              <div className="min-w-0 truncate">
-                <p className="text-xs font-semibold text-on-surface truncate leading-tight">{displayName}</p>
-                <p className="text-[10px] text-on-surface-variant/60 truncate">{displayEmail}</p>
+              <div className="flex flex-col min-w-0 truncate">
+                <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 leading-tight truncate">
+                  {displayName}
+                </span>
+                <CreditBadge />
               </div>
             </button>
 
-            {/* Tombol tunggal — membuka menu dialog pengaturan (tema, logout, dll) */}
-            <div className="relative shrink-0" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
-              className={ICON_BTN}
-              title="Pengaturan"
-              aria-label="Pengaturan"
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white dark:hover:bg-slate-700 transition-colors shrink-0"
+              title="Setelan"
             >
-              <span className="material-symbols-outlined text-[17px]">settings</span>
+              <span className="material-symbols-outlined text-[16px]">settings</span>
             </button>
+          </div>
 
-            {menuOpen && (
-              <div className="absolute bottom-full right-0 mb-2 w-56 bg-surface rounded-md border border-on-surface/10 z-50 overflow-hidden">
-                <p className="px-3 py-2 text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wide border-b border-on-surface/8">
-                  Pengaturan
+          {menuOpen && (
+            <div className="absolute bottom-full right-0 mb-2 w-56 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl z-50 overflow-hidden">
+              <p className="px-3 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 dark:border-slate-800">
+                Pengaturan
+              </p>
+
+              {/* Tampilan / Tema */}
+              <div className="px-2.5 py-2.5 space-y-1.5 border-b border-slate-100 dark:border-slate-800">
+                <p className="px-0.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
+                  Tampilan
                 </p>
-
-                {/* Tampilan / Tema — 3 pilihan dalam satu baris */}
-                <div className="px-2.5 py-2.5 space-y-1.5 border-b border-on-surface/8">
-                  <p className="px-0.5 text-[10px] font-semibold text-on-surface-variant/60 uppercase tracking-wide">
-                    Tampilan
-                  </p>
-                  <div className="grid grid-cols-3 gap-1">
-                    {THEME_CYCLE.map((value) => {
-                      const meta = THEME_META[value];
-                      const isActive = theme === value;
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => setTheme(value)}
-                          title={meta.label}
-                          className={`flex flex-col items-center gap-1 px-1 py-2 rounded-md text-[10px] font-semibold transition-all ${
-                            isActive
-                              ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
-                              : 'text-on-surface-variant hover:bg-surface-container-low'
-                          }`}
-                        >
-                          <span className="material-symbols-outlined text-[17px]">{meta.icon}</span>
-                          {meta.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Menu navigasi */}
-                <div className="py-1 border-b border-on-surface/8">
-                  <button type="button" onClick={() => go('/settings')} className={MENU_ROW}>
-                    <span className="material-symbols-outlined text-[17px] text-on-surface-variant">settings</span>
-                    Pengaturan Aplikasi
-                  </button>
-                  <button type="button" onClick={() => go('/profile')} className={MENU_ROW}>
-                    <span className="material-symbols-outlined text-[17px] text-on-surface-variant">account_circle</span>
-                    Profil
-                  </button>
-                  <button type="button" onClick={() => go('/usage')} className={MENU_ROW}>
-                    <span className="material-symbols-outlined text-[17px] text-on-surface-variant">monitoring</span>
-                    Penggunaan &amp; Aktivitas
-                  </button>
-                  <button type="button" onClick={() => setMenuOpen(false)} className={MENU_ROW}>
-                    <span className="material-symbols-outlined text-[17px] text-on-surface-variant">help</span>
-                    Bantuan
-                  </button>
-                  {user?.role === 'admin' && (
-                    <button type="button" onClick={() => go('/admin')} className={MENU_ROW}>
-                      <span className="material-symbols-outlined text-[17px] text-on-surface-variant">admin_panel_settings</span>
-                      Admin Panel
-                    </button>
-                  )}
-                </div>
-
-                {/* Keluar — dipisah di bagian bawah sebagai aksi berbahaya */}
-                <div className="py-1">
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-left text-xs font-medium text-red-500 dark:text-red-400 hover:bg-red-500/10 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[17px]">logout</span>
-                    Keluar
-                  </button>
+                <div className="grid grid-cols-3 gap-1">
+                  {THEME_CYCLE.map((value) => {
+                    const meta = THEME_META[value];
+                    const isActive = theme === value;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setTheme(value)}
+                        title={meta.label}
+                        className={`flex flex-col items-center gap-1 px-1 py-2 rounded-lg text-[10px] font-semibold transition-all ${
+                          isActive
+                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 ring-1 ring-blue-300'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[17px]">{meta.icon}</span>
+                        {meta.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            )}
-          </div>
-          </div>
-        </>
+
+              {/* Menu navigasi */}
+              <div className="py-1 border-b border-slate-100 dark:border-slate-800">
+                <button type="button" onClick={() => go('/settings')} className={MENU_ROW}>
+                  <span className="material-symbols-outlined text-[17px] text-slate-500">settings</span>
+                  Pengaturan Aplikasi
+                </button>
+                <button type="button" onClick={() => go('/profile')} className={MENU_ROW}>
+                  <span className="material-symbols-outlined text-[17px] text-slate-500">account_circle</span>
+                  Profil
+                </button>
+                <button type="button" onClick={() => go('/usage')} className={MENU_ROW}>
+                  <span className="material-symbols-outlined text-[17px] text-slate-500">monitoring</span>
+                  Penggunaan &amp; Aktivitas
+                </button>
+                {user?.role === 'admin' && (
+                  <button type="button" onClick={() => go('/admin')} className={MENU_ROW}>
+                    <span className="material-symbols-outlined text-[17px] text-slate-500">admin_panel_settings</span>
+                    Admin Panel
+                  </button>
+                )}
+              </div>
+
+              {/* Keluar */}
+              <div className="py-1">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 w-full px-3 py-2 text-left text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[17px]">logout</span>
+                  Keluar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI - Workspace Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Inter / Helvetica Neue fallback -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Helvetica Neue"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                    },
+                    colors: {
+                        gemini: {
+                            blue: '#2B7FFF',
+                            yellow: '#F5B800',
+                            bg: '#EEF4FF',
+                            card: '#FFFFFF',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(15, 23, 42, 0.04)',
+                        'glow': '0 10px 30px -5px rgba(59, 130, 246, 0.12)',
+                        'float': '0 8px 25px -4px rgba(0, 0, 0, 0.06)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.45);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom Gradients matching the image */
+        .bg-deep-think {
+            background: linear-gradient(90deg, #3B82F6 0%, #93A5CF 45%, #F59E0B 80%, #EAB308 100%);
+        }
+        
+        .bg-send-btn {
+            background: linear-gradient(90deg, #EAB308 0%, #7C96C9 50%, #3B82F6 100%);
+        }
+
+        .text-hero-gradient {
+            background: linear-gradient(90deg, #B45309 0%, #D97706 20%, #7E22CE 50%, #2563EB 80%, #1D4ED8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .bg-hero-mesh {
+            background: 
+                radial-gradient(circle at 25% 15%, rgba(254, 243, 199, 0.65) 0%, transparent 45%),
+                radial-gradient(circle at 50% 10%, rgba(252, 231, 243, 0.5) 0%, transparent 45%),
+                radial-gradient(circle at 80% 15%, rgba(219, 234, 254, 0.75) 0%, transparent 50%),
+                #FFFFFF;
+        }
+
+        .bg-trial-banner {
+            background: linear-gradient(90deg, #FEF3C7 0%, #FCE7F3 45%, #DBEAFE 100%);
+        }
+
+        .bg-sidebar-gradient {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 65%, #EFF6FF 100%);
+        }
+
+        /* Subtle floating animation for Gemini Hero Icon */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-[#E6EEF8] text-slate-800 antialiased h-dvh w-screen overflow-hidden flex flex-col select-none">
+
+    <!-- Mobile Backdrop Overlay -->
+    <div id="mobileBackdrop" onclick="closeAllMobileDrawers()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 hidden opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Main Application Container (2-Area Layout: Left Sidebar + Full-width Main Area) -->
+    <div class="flex-1 flex overflow-hidden p-0 sm:p-2 gap-0 sm:gap-2 bg-gradient-to-br from-[#E9F1FA] via-[#F2F6FC] to-[#E6EEF8] relative">
+        
+        <!-- LEFT NAVIGATION WRAPPER (Slide-over Drawer on < lg, Flex Row on >= lg) -->
+        <div id="leftDrawerWrapper" class="fixed lg:static inset-y-0 left-0 z-50 flex h-full transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out p-2 lg:p-0 bg-[#E9F1FA]/95 lg:bg-transparent backdrop-blur-md lg:backdrop-blur-none shadow-2xl lg:shadow-none">
+            
+            <!-- 1. LEFT SIDEBAR (Menu Gemini + Riwayat Chat Lengkap) -->
+            <aside id="leftSidebar" class="w-[275px] bg-white/95 lg:bg-white/90 backdrop-blur-md rounded-2xl border border-white/90 shadow-soft flex flex-col justify-between p-3.5 shrink-0 overflow-hidden transition-all duration-300 ease-in-out opacity-100 h-full">
+                <!-- Inner container to prevent content distortion when collapsing -->
+                <div class="w-[245px] flex flex-col justify-between h-full overflow-hidden">
+                    
+                    <!-- Top & Scrollable Content Section -->
+                    <div class="flex flex-col gap-3 overflow-y-auto no-scrollbar pr-0.5">
+                        
+                        <!-- Header Sidebar: Logo Gemini + Teks Gemini + Search + Toggle Collapse Button -->
+                        <div class="flex items-center justify-between px-1 pt-0.5">
+                            <div onclick="resetToHome()" class="flex items-center gap-2 cursor-pointer group">
+                                <svg class="w-6 h-6 transition-transform group-hover:scale-105" viewBox="0 0 32 32" fill="none">
+                                    <path d="M16 2C16 9.732 22.268 16 30 16C22.268 16 16 22.268 16 30C16 22.268 9.732 16 2 16C9.732 16 16 9.732 16 2Z" fill="url(#gemini-sparkle-side)"/>
+                                    <defs>
+                                        <linearGradient id="gemini-sparkle-side" x1="2" y1="16" x2="30" y2="16" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0%" stop-color="#10B981"/>
+                                            <stop offset="35%" stop-color="#3B82F6"/>
+                                            <stop offset="70%" stop-color="#EF4444"/>
+                                            <stop offset="100%" stop-color="#F59E0B"/>
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                <span class="font-semibold text-base text-slate-900 tracking-tight">Gemini</span>
+                            </div>
+
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="focusSearchInput()" class="p-1.5 rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors" title="Cari Chat (⌘F)">
+                                    <i data-lucide="search" class="w-4 h-4"></i>
+                                </button>
+                                <!-- Toggle Collapse Button Desktop / Close Drawer Mobile -->
+                                <button onclick="handleSidebarToggle()" class="w-8 h-8 rounded-full bg-slate-100/90 hover:bg-slate-200/80 text-slate-600 flex items-center justify-center transition-all active:scale-95" title="Tutup / Perkecil Sidebar (⌘B)">
+                                    <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Pill Tombol Utama: Percakapan Baru -->
+                        <div class="pt-0.5">
+                            <button onclick="startNewChat(); closeAllMobileDrawers();" class="w-full py-2.5 px-3.5 rounded-full bg-slate-100/90 hover:bg-slate-200/80 text-slate-800 font-medium text-xs flex items-center gap-3 transition-all active:scale-[0.98]">
+                                <i data-lucide="pen-tool" class="w-4 h-4 text-slate-700"></i>
+                                <span>Percakapan baru</span>
+                            </button>
+                        </div>
+
+                        <!-- Search Chats Input (Dipindah ke Sidebar Kiri) -->
+                        <div class="relative mt-0.5">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input 
+                                id="historySearchInput"
+                                type="text" 
+                                oninput="filterHistory(this.value)"
+                                placeholder="Cari obrolan..." 
+                                class="w-full pl-8 pr-12 py-1.5 rounded-full bg-slate-50 border border-slate-200/70 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-400 transition-all"
+                            >
+                            <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200/70">⌘ F</span>
+                        </div>
+
+                        <!-- Menu Navigasi Vertikal Khas Gemini -->
+                        <div class="flex flex-col gap-0.5">
+                            <button onclick="fillPrompt('Bantu rancang ide eksplorasi inovatif untuk proyek digital'); sendMessage(); closeAllMobileDrawers();" class="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 text-slate-700 font-medium text-xs flex items-center gap-3 transition-colors text-left group">
+                                <i data-lucide="layout-grid" class="w-4 h-4 text-slate-500 group-hover:text-slate-800"></i>
+                                <span>Eksplorasi Ide</span>
+                            </button>
+                            <button onclick="fillPrompt('Buat konsep ilustrasi visual kreatif dan modern'); sendMessage(); closeAllMobileDrawers();" class="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 text-slate-700 font-medium text-xs flex items-center gap-3 transition-colors text-left group">
+                                <i data-lucide="palette" class="w-4 h-4 text-slate-500 group-hover:text-slate-800"></i>
+                                <span>Studio Kreatif</span>
+                            </button>
+                            <button onclick="fillPrompt('Bantu review kode dan berikan solusi optimasi'); sendMessage(); closeAllMobileDrawers();" class="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 text-slate-700 font-medium text-xs flex items-center gap-3 transition-colors text-left group">
+                                <i data-lucide="code-2" class="w-4 h-4 text-slate-500 group-hover:text-slate-800"></i>
+                                <span>Asisten Koding</span>
+                            </button>
+                            <button onclick="fillPrompt('Rangkum dokumen panjang ini menjadi 5 poin aksi utama'); sendMessage(); closeAllMobileDrawers();" class="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 text-slate-700 font-medium text-xs flex items-center gap-3 transition-colors text-left group">
+                                <i data-lucide="file-check-2" class="w-4 h-4 text-slate-500 group-hover:text-slate-800"></i>
+                                <span>Rangkuman Dokumen</span>
+                            </button>
+                            <button onclick="fillPrompt('Buat jadwal sprint harian dan manajemen waktu produktif'); sendMessage(); closeAllMobileDrawers();" class="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 text-slate-700 font-medium text-xs flex items-center gap-3 transition-colors text-left group">
+                                <i data-lucide="clock" class="w-4 h-4 text-slate-500 group-hover:text-slate-800"></i>
+                                <span>Aktivitas Terjadwal</span>
+                            </button>
+                            <button onclick="showToast('Menu lainnya segera hadir'); closeAllMobileDrawers();" class="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 text-slate-700 font-medium text-xs flex items-center gap-3 transition-colors text-left group">
+                                <i data-lucide="more-horizontal" class="w-4 h-4 text-slate-500 group-hover:text-slate-800"></i>
+                                <span>Selengkapnya</span>
+                            </button>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="h-px bg-slate-200/70 my-0.5"></div>
+
+                        <!-- Riwayat Chat: Saved Topics (Dipindah ke Sini) -->
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1.5 px-1">
+                                <div class="flex items-center gap-1.5">
+                                    <i data-lucide="star" class="w-3.5 h-3.5"></i>
+                                    <span>Topik Tersimpan</span>
+                                </div>
+                                <span class="text-[10px]">2</span>
+                            </div>
+
+                            <div class="flex flex-col gap-1" id="savedTopicsList">
+                                <div onclick="loadHistoryChat('Give me unique name logo for...'); closeAllMobileDrawers();" class="history-item group cursor-pointer p-2 rounded-xl hover:bg-slate-100/70 transition-all flex items-start justify-between gap-2">
+                                    <div class="overflow-hidden">
+                                        <h4 class="text-xs font-medium text-slate-800 truncate group-hover:text-blue-600">Give me unique name logo for...</h4>
+                                        <span class="text-[10px] text-slate-400">Edited 2m ago</span>
+                                    </div>
+                                    <button onclick="event.stopPropagation(); toggleStar(this)" class="text-amber-400 hover:scale-110 transition-transform shrink-0 mt-0.5">
+                                        <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
+                                    </button>
+                                </div>
+
+                                <div onclick="loadHistoryChat('Create a logo for a tech startup'); closeAllMobileDrawers();" class="history-item group cursor-pointer p-2 rounded-xl hover:bg-slate-100/70 transition-all flex items-start justify-between gap-2">
+                                    <div class="overflow-hidden">
+                                        <h4 class="text-xs font-medium text-slate-800 truncate group-hover:text-blue-600">Create a logo for a tech startup</h4>
+                                        <span class="text-[10px] text-slate-400">Edited Oct 2, 2:05 PM</span>
+                                    </div>
+                                    <button onclick="event.stopPropagation(); toggleStar(this)" class="text-amber-400 hover:scale-110 transition-transform shrink-0 mt-0.5">
+                                        <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="h-px bg-slate-200/70 my-0.5"></div>
+
+                        <!-- Riwayat Chat: Recent Chats (Dipindah ke Sini) -->
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1.5 px-1">
+                                <div class="flex items-center gap-1.5">
+                                    <i data-lucide="history" class="w-3.5 h-3.5"></i>
+                                    <span>Riwayat Terbaru</span>
+                                </div>
+                                <span class="text-[10px]">6</span>
+                            </div>
+
+                            <div class="flex flex-col gap-1" id="recentChatsList">
+                                <div onclick="loadHistoryChat('New Chat'); closeAllMobileDrawers();" class="history-item group cursor-pointer p-2 rounded-xl bg-slate-50 hover:bg-slate-100/70 transition-all flex items-center justify-between gap-2">
+                                    <div class="overflow-hidden">
+                                        <h4 class="text-xs font-medium text-slate-800 truncate">New Chat</h4>
+                                        <span class="text-[10px] text-slate-400">Edited 1m ago</span>
+                                    </div>
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0"></i>
+                                </div>
+
+                                <div onclick="loadHistoryChat('Give me unique name logo for...'); closeAllMobileDrawers();" class="history-item group cursor-pointer p-2 rounded-xl hover:bg-slate-100/70 transition-all flex items-center justify-between gap-2">
+                                    <div class="overflow-hidden">
+                                        <h4 class="text-xs font-medium text-slate-800 truncate group-hover:text-blue-600">Give me unique name logo for...</h4>
+                                        <span class="text-[10px] text-slate-400">Edited 2m ago</span>
+                                    </div>
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0"></i>
+                                </div>
+
+                                <div onclick="loadHistoryChat('Create a logo for a tech startup'); closeAllMobileDrawers();" class="history-item group cursor-pointer p-2 rounded-xl hover:bg-slate-100/70 transition-all flex items-center justify-between gap-2">
+                                    <div class="overflow-hidden">
+                                        <h4 class="text-xs font-medium text-slate-800 truncate group-hover:text-blue-600">Create a logo for a tech startup</h4>
+                                        <span class="text-[10px] text-slate-400">Edited 5m ago</span>
+                                    </div>
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0"></i>
+                                </div>
+
+                                <div onclick="loadHistoryChat('Design a logo for a sustainable brand'); closeAllMobileDrawers();" class="history-item group cursor-pointer p-2 rounded-xl hover:bg-slate-100/70 transition-all flex items-center justify-between gap-2">
+                                    <div class="overflow-hidden">
+                                        <h4 class="text-xs font-medium text-slate-800 truncate group-hover:text-blue-600">Design a logo for a sustainable...</h4>
+                                        <span class="text-[10px] text-slate-400">Edited Oct 3, 1:44 PM</span>
+                                    </div>
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0"></i>
+                                </div>
+
+                                <div onclick="loadHistoryChat('Develop a logo for an online learning platform'); closeAllMobileDrawers();" class="history-item group cursor-pointer p-2 rounded-xl hover:bg-slate-100/70 transition-all flex items-center justify-between gap-2">
+                                    <div class="overflow-hidden">
+                                        <h4 class="text-xs font-medium text-slate-800 truncate group-hover:text-blue-600">Develop a logo for an online le...</h4>
+                                        <span class="text-[10px] text-slate-400">Edited Oct 4, 2:05 PM</span>
+                                    </div>
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0"></i>
+                                </div>
+
+                                <div onclick="loadHistoryChat('Create content for privacy policy page'); closeAllMobileDrawers();" class="history-item group cursor-pointer p-2 rounded-xl hover:bg-slate-100/70 transition-all flex items-center justify-between gap-2">
+                                    <div class="overflow-hidden">
+                                        <h4 class="text-xs font-medium text-slate-800 truncate group-hover:text-blue-600">Create content for privacy poli...</h4>
+                                        <span class="text-[10px] text-slate-400">Edited Oct 5, 3:06 PM</span>
+                                    </div>
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 shrink-0"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Bottom Section (User Profile Card) -->
+                    <div class="pt-2 border-t border-slate-100">
+                        <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                                    G
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[11px] font-semibold text-slate-800 leading-tight">Gemini Pro</span>
+                                    <span class="text-[9px] text-emerald-600 font-medium">80 credits aktif</span>
+                                </div>
+                            </div>
+                            <button onclick="showToast('Membuka setelan akun...')" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-white transition-colors" title="Setelan">
+                                <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </aside>
+        </div>
+
+        <!-- RIGHT WORKSPACE AREA (MAIN CHAT EXPANDED FULL-WIDTH) -->
+        <div class="flex-1 flex flex-col gap-2 overflow-hidden min-w-0">
+            <!-- MAIN CHAT AREA (MELEBAR PENUH) -->
+            <div class="flex-1 flex gap-2.5 overflow-hidden relative min-w-0">
+                <main class="flex-1 bg-hero-mesh sm:rounded-2xl border-0 sm:border border-white shadow-soft flex flex-col justify-between overflow-hidden relative min-w-0">
+                    
+                    <!-- Top Bar Inside Main Card: Sidebar Collapsible Icon + Model Selector -->
+                    <div class="h-12 px-3 sm:px-5 flex items-center justify-between shrink-0 z-10 border-b sm:border-b-0 border-slate-100/60">
+                        <!-- Left Controls: Sidebar Toggle Button (Mobile & Desktop) + Model Selector Dropdown -->
+                        <div class="flex items-center gap-2">
+                            <!-- Sidebar Toggle Button (Desktop & Mobile) -->
+                            <button 
+                                id="mainSidebarToggleBtn" 
+                                onclick="handleSidebarToggle()" 
+                                class="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 border border-slate-200/80 shadow-2xs flex items-center justify-center transition-all active:scale-95" 
+                                title="Buka / Tutup Menu (⌘B)"
+                            >
+                                <i id="mainSidebarToggleIcon" data-lucide="panel-left" class="w-4 h-4"></i>
+                            </button>
+
+                            <!-- Model Selector Dropdown -->
+                            <div class="relative">
+                                <button onclick="toggleModelDropdown()" class="py-1.5 px-3 rounded-full bg-white/80 hover:bg-white border border-slate-200/70 text-slate-800 font-semibold text-xs flex items-center gap-1.5 shadow-2xs transition-all">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 32 32" fill="none">
+                                        <path d="M16 2C16 9.732 22.268 16 30 16C22.268 16 16 22.268 16 30C16 22.268 9.732 16 2 16C9.732 16 16 9.732 16 2Z" fill="url(#gemini-sparkle)"/>
+                                    </svg>
+                                    <span id="currentModelLabel">2.5 Flash</span>
+                                    <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+                                </button>
+
+                                <!-- Dropdown Menu -->
+                                <div id="modelDropdown" class="hidden absolute left-0 mt-1.5 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-30 text-xs">
+                                    <button onclick="changeFlashModel('2.5 Flash')" class="w-full px-3.5 py-2 text-left hover:bg-slate-50 flex items-center justify-between font-medium text-slate-800">
+                                        <span>2.5 Flash</span>
+                                        <span class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Fast</span>
+                                    </button>
+                                    <button onclick="changeFlashModel('2.5 Pro Experimental')" class="w-full px-3.5 py-2 text-left hover:bg-slate-50 flex items-center justify-between font-medium text-slate-700">
+                                        <span>2.5 Pro</span>
+                                        <span class="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">Reasoning</span>
+                                    </button>
+                                    <button onclick="changeFlashModel('Deep Research')" class="w-full px-3.5 py-2 text-left hover:bg-slate-50 flex items-center justify-between font-medium text-slate-700">
+                                        <span>Deep Research</span>
+                                        <span class="text-[10px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded">Plus</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Controls inside Card -->
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <button onclick="showToast('Panel Konfigurasi Model')" class="hidden sm:flex py-1.5 px-3 rounded-full bg-white/90 hover:bg-white text-slate-700 font-medium text-xs items-center gap-1.5 shadow-2xs border border-white transition-all">
+                                <span>Configuration</span>
+                                <i data-lucide="SlidersHorizontal" class="w-3.5 h-3.5 text-slate-500"></i>
+                            </button>
+
+                            <button onclick="copyShareLink()" class="py-1.5 px-3 rounded-full bg-white/90 hover:bg-white text-slate-700 font-medium text-xs flex items-center gap-1.5 shadow-2xs border border-white transition-all">
+                                <span>Share</span>
+                                <i data-lucide="upload" class="w-3.5 h-3.5 text-slate-500"></i>
+                            </button>
+
+                            <!-- Gradient Star Avatar Badge -->
+                            <button onclick="showToast('Gemini Ultra Profil Aktif')" class="w-8 h-8 rounded-full p-0.5 bg-gradient-to-tr from-blue-500 via-amber-400 to-rose-500 shadow-sm flex items-center justify-center hover:scale-105 transition-transform ml-1">
+                                <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-600/80 via-amber-500/80 to-pink-500/80 flex items-center justify-center text-white">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SCROLLABLE MIDDLE CONTENT (HERO + PINNED CHATS OR LIVE CONVERSATION) -->
+                    <div id="mainScrollArea" class="flex-1 overflow-y-auto px-4 sm:px-8 py-2 flex flex-col justify-start sm:justify-center">
+                        
+                        <!-- DEFAULT DASHBOARD EMPTY STATE -->
+                        <div id="welcomeState" class="max-w-2xl mx-auto w-full flex flex-col items-center my-auto py-2">
+                            
+                            <!-- Floating Gemini Sparkle Icon Card -->
+                            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white shadow-float border border-slate-100/80 flex items-center justify-center mb-3 sm:mb-4 animate-float">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7" viewBox="0 0 32 32" fill="none">
+                                    <path d="M16 3C16 10.18 21.82 16 29 16C21.82 16 16 21.82 16 29C16 21.82 10.18 16 3 16C10.18 16 16 10.18 16 3Z" fill="url(#hero-gemini)"/>
+                                    <defs>
+                                        <linearGradient id="hero-gemini" x1="3" y1="16" x2="29" y2="16" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0%" stop-color="#10B981"/>
+                                            <stop offset="30%" stop-color="#3B82F6"/>
+                                            <stop offset="68%" stop-color="#EF4444"/>
+                                            <stop offset="100%" stop-color="#F59E0B"/>
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+
+                            <!-- Gradient Heading with decorative confetti accents -->
+                            <div class="relative text-center max-w-lg mb-2 px-2">
+                                <svg class="hidden sm:block w-3.5 h-3.5 absolute -left-4 bottom-0 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7 3C4 6 10 11 6 16C11 15 14 10 10 6Z" />
+                                </svg>
+                                <h1 class="text-lg sm:text-[22px] font-semibold tracking-tight leading-snug text-hero-gradient">
+                                    Think bigger with Gemini AI for insights and innovation at your command
+                                </h1>
+                            </div>
+
+                            <!-- Subtitle -->
+                            <p class="text-center text-[11px] sm:text-xs text-slate-500 max-w-md leading-relaxed mb-5 sm:mb-6 relative px-2">
+                                Turn imagination into impact with Gemini AI. AI built to unfold endless possibilities and shape your ideas into intelligent results.
+                                <span class="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block ml-1"></span>
+                            </p>
+
+                            <!-- Pinned Chats Section -->
+                            <div class="w-full">
+                                <div class="flex items-center justify-between mb-2.5 px-0.5">
+                                    <button onclick="togglePinnedSection()" class="flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900">
+                                        <i data-lucide="pin" class="w-3.5 h-3.5 text-slate-500 rotate-45"></i>
+                                        <span>Pinned Chats</span>
+                                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    </button>
+                                    <button onclick="showToast('Menampilkan semua berkas disematkan')" class="text-[11px] font-medium text-slate-400 hover:text-slate-700 flex items-center gap-0.5 transition-colors">
+                                        <span>See all</span>
+                                        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+
+                                <!-- 3 Horizontal Cards Grid -->
+                                <div id="pinnedCardsGrid" class="flex sm:grid sm:grid-cols-3 gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+                                    <!-- Card 1: Project Brief.gsheet -->
+                                    <div onclick="openPinnedDoc('Project Brief.gsheet', 'Analyze key deliverables and Q4 milestones from Project Brief.gsheet')" class="min-w-[200px] sm:min-w-0 flex-1 group cursor-pointer p-3 sm:p-3.5 rounded-2xl bg-[#F8FAFC]/90 hover:bg-white border border-slate-200/60 hover:border-emerald-200 hover:shadow-md transition-all flex flex-col justify-between gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                            <div class="w-4 h-5 rounded-xs bg-emerald-500 text-white flex items-center justify-center">
+                                                <i data-lucide="table-2" class="w-3 h-3"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-xs font-semibold text-slate-800 group-hover:text-emerald-700 truncate">Project Brief.gsheet</h3>
+                                            <p class="text-[11px] text-slate-500 truncate mt-0.5">Creative services don't just make thi...</p>
+                                        </div>
+                                        <span class="text-[10px] font-medium text-slate-400">Just now</span>
+                                    </div>
+
+                                    <!-- Card 2: Design Notes.gdoc -->
+                                    <div onclick="openPinnedDoc('Design Notes.gdoc', 'Summarize the typography and brand system tokens inside Design Notes.gdoc')" class="min-w-[200px] sm:min-w-0 flex-1 group cursor-pointer p-3 sm:p-3.5 rounded-2xl bg-[#F8FAFC]/90 hover:bg-white border border-slate-200/60 hover:border-blue-200 hover:shadow-md transition-all flex flex-col justify-between gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                            <div class="w-4 h-5 rounded-xs bg-blue-500 text-white flex items-center justify-center">
+                                                <i data-lucide="align-left" class="w-3 h-3"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-xs font-semibold text-slate-800 group-hover:text-blue-700 truncate">Design Notes.gdoc</h3>
+                                            <p class="text-[11px] text-slate-500 truncate mt-0.5">Creative services don't just save thi...</p>
+                                        </div>
+                                        <span class="text-[10px] font-medium text-slate-400">11 September</span>
+                                    </div>
+
+                                    <!-- Card 3: User Feedback.gform -->
+                                    <div onclick="openPinnedDoc('User Feedback.gform', 'Extract top 5 user pain points from User Feedback.gform responses')" class="min-w-[200px] sm:min-w-0 flex-1 group cursor-pointer p-3 sm:p-3.5 rounded-2xl bg-[#F8FAFC]/90 hover:bg-white border border-slate-200/60 hover:border-purple-200 hover:shadow-md transition-all flex flex-col justify-between gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-purple-600/10 flex items-center justify-center">
+                                            <div class="w-4 h-5 rounded-xs bg-purple-600 text-white flex items-center justify-center">
+                                                <i data-lucide="list-todo" class="w-3 h-3"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-xs font-semibold text-slate-800 group-hover:text-purple-700 truncate">User Feedback.gform</h3>
+                                            <p class="text-[11px] text-slate-500 truncate mt-0.5">Creative services don't...</p>
+                                        </div>
+                                        <span class="text-[10px] font-medium text-slate-400">12 September</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVE CHAT CONVERSATION THREAD -->
+                        <div id="chatThread" class="hidden max-w-2xl mx-auto w-full flex-col gap-4 py-4"></div>
+
+                    </div>
+
+                    <!-- BOTTOM PROMPT AREA -->
+                    <div class="px-3 sm:px-6 pb-2.5 sm:pb-3 pt-1 max-w-2xl mx-auto w-full flex flex-col gap-2 shrink-0">
+                        
+                        <!-- Row of Suggestion Pills -->
+                        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                            <button onclick="fillPrompt('Help me write a compelling product launch announcement')" class="shrink-0 py-1.5 px-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-medium text-[11px] flex items-center gap-1.5 shadow-2xs transition-all hover:border-slate-300">
+                                <i data-lucide="wand-2" class="w-3 h-3 text-slate-500"></i>
+                                <span>Help me write</span>
+                            </button>
+                            <button onclick="fillPrompt('Design a smart UI component hierarchy for a SaaS analytics dashboard')" class="shrink-0 py-1.5 px-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-medium text-[11px] flex items-center gap-1.5 shadow-2xs transition-all hover:border-slate-300">
+                                <i data-lucide="pencil-ruler" class="w-3 h-3 text-slate-500"></i>
+                                <span>Design Smart</span>
+                            </button>
+                            <button onclick="fillPrompt('Explain quantum computing concepts in simple executive terms')" class="shrink-0 py-1.5 px-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-medium text-[11px] flex items-center gap-1.5 shadow-2xs transition-all hover:border-slate-300">
+                                <i data-lucide="book-open-check" class="w-3 h-3 text-slate-500"></i>
+                                <span>Learn about</span>
+                            </button>
+                            <button onclick="fillPrompt('Analyze the visual hierarchy and color palette of my attached mockup')" class="shrink-0 py-1.5 px-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-medium text-[11px] flex items-center gap-1.5 shadow-2xs transition-all hover:border-slate-300">
+                                <i data-lucide="scan-eye" class="w-3 h-3 text-slate-500"></i>
+                                <span>Analyze Image</span>
+                            </button>
+                            <button onclick="fillPrompt('Create a high-leverage daily productivity workflow for a design team')" class="shrink-0 py-1.5 px-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-medium text-[11px] flex items-center gap-1.5 shadow-2xs transition-all hover:border-slate-300">
+                                <i data-lucide="sparkles" class="w-3 h-3 text-slate-500"></i>
+                                <span>Productivity Focus</span>
+                            </button>
+                        </div>
+
+                        <!-- Combined Trial Banner + Input Box Container -->
+                        <div class="rounded-2xl p-[1.5px] bg-gradient-to-r from-amber-200/70 via-pink-200/70 to-blue-300/80 shadow-glow">
+                            <div class="rounded-[15px] bg-trial-banner overflow-hidden">
+                                
+                                <!-- Top Banner inside Input Card -->
+                                <div class="px-3 sm:px-3.5 py-1.5 flex items-center justify-between text-[10px] sm:text-[11px] gap-2">
+                                    <div class="flex items-center gap-1.5 text-slate-800 font-medium truncate">
+                                        <i data-lucide="timer" class="w-3.5 h-3.5 text-slate-700 shrink-0"></i>
+                                        <span class="truncate">Free Trial ending soon continue your workflow</span>
+                                    </div>
+                                    <button onclick="showToast('Upgrading workspace to Gemini Ultra...')" class="font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1 shrink-0 transition-colors">
+                                        <span>Upgrade Now</span>
+                                        <i data-lucide="arrow-up-right" class="w-3 h-3 border border-orange-500 rounded-full p-0.5"></i>
+                                    </button>
+                                </div>
+
+                                <!-- White Chat Input Box -->
+                                <div class="bg-white rounded-t-xl px-3 sm:px-3.5 pt-2.5 pb-2.5 flex flex-col gap-2">
+                                    <textarea 
+                                        id="chatInput" 
+                                        rows="2" 
+                                        placeholder="Ask me anything..." 
+                                        class="w-full resize-none border-0 bg-transparent text-xs text-slate-800 placeholder-slate-400 focus:outline-none leading-relaxed"
+                                        onkeydown="handleEnterKey(event)"
+                                    ></textarea>
+
+                                    <!-- Bottom Bar inside Input -->
+                                    <div class="flex items-center justify-between pt-1 gap-1">
+                                        <!-- Left Pills: Attach & Deep Think -->
+                                        <div class="flex items-center gap-1 sm:gap-1.5">
+                                            <button onclick="showToast('Pilih berkas dari perangkat Anda')" class="py-1 px-2 sm:px-2.5 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 font-medium text-[11px] flex items-center gap-1 transition-colors">
+                                                <i data-lucide="paperclip" class="w-3 h-3 text-slate-500"></i>
+                                                <span>Attach</span>
+                                            </button>
+                                            <button id="deepThinkToggle" onclick="toggleDeepThinkBtn(this)" class="py-1 px-2 sm:px-2.5 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 font-medium text-[11px] flex items-center gap-1 transition-all">
+                                                <i data-lucide="lightbulb" class="w-3 h-3 text-slate-500"></i>
+                                                <span>Deep Think</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Right Pills: Voice & Gradient Send -->
+                                        <div class="flex items-center gap-1 sm:gap-1.5">
+                                            <button onclick="showToast('Mendengarkan... Silakan bicara')" class="py-1 px-2 sm:px-2.5 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 font-medium text-[11px] flex items-center gap-1 transition-colors">
+                                                <i data-lucide="audio-lines" class="w-3 h-3 text-slate-600"></i>
+                                                <span class="hidden xs:inline">Voice</span>
+                                            </button>
+                                            <button onclick="sendMessage()" class="py-1 px-3 sm:px-3.5 rounded-full bg-send-btn hover:opacity-95 text-white font-semibold text-[11px] flex items-center gap-1 shadow-sm transition-all active:scale-95">
+                                                <i data-lucide="sparkles" class="w-3 h-3 fill-white"></i>
+                                                <span>Send</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Footer Disclaimer -->
+                        <p class="text-center text-[10px] text-slate-400 truncate">
+                            Gemini AI generates AI-based answers. Review key detail for accuracy. 
+                            <button onclick="showToast('Preferensi Cookie')" class="underline text-slate-500 hover:text-slate-700 font-medium">Cookie Preferences.</button>
+                        </p>
+                    </div>
+
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-2 transition-all duration-300 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span id="toastMessage">Action completed</span>
+    </div>
+
+    <!-- Interactive Logic -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        let deepThinkActive = false;
+        let isLeftCollapsed = false;
+
+        // Unified Sidebar Toggle (Works on both Mobile & Desktop)
+        function handleSidebarToggle() {
+            if (window.innerWidth < 1024) {
+                const leftWrapper = document.getElementById('leftDrawerWrapper');
+                const isOpened = !leftWrapper.classList.contains('-translate-x-full');
+                if (isOpened) {
+                    closeAllMobileDrawers();
+                } else {
+                    openMobileLeftDrawer();
+                }
+            } else {
+                toggleLeftSidebar();
+            }
+        }
+
+        // Desktop Collapsible Left Sidebar
+        function toggleLeftSidebar() {
+            const leftSidebar = document.getElementById('leftSidebar');
+            const toggleIcon = document.getElementById('mainSidebarToggleIcon');
+
+            isLeftCollapsed = !isLeftCollapsed;
+
+            if (isLeftCollapsed) {
+                leftSidebar.classList.remove('w-[275px]', 'p-3.5', 'opacity-100', 'border');
+                leftSidebar.classList.add('w-0', 'p-0', 'opacity-0', 'border-0');
+                if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'panel-left-open');
+            } else {
+                leftSidebar.classList.remove('w-0', 'p-0', 'opacity-0', 'border-0');
+                leftSidebar.classList.add('w-[275px]', 'p-3.5', 'opacity-100', 'border');
+                if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'panel-left');
+            }
+            lucide.createIcons();
+        }
+
+        // Mobile / Tablet Slide-over Drawer Handlers
+        function showBackdrop() {
+            const backdrop = document.getElementById('mobileBackdrop');
+            backdrop.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+            });
+        }
+
+        function openMobileLeftDrawer() {
+            const leftWrapper = document.getElementById('leftDrawerWrapper');
+            const leftSidebar = document.getElementById('leftSidebar');
+            if (isLeftCollapsed) {
+                leftSidebar.classList.remove('w-0', 'p-0', 'opacity-0', 'border-0');
+                leftSidebar.classList.add('w-[275px]', 'p-3.5', 'opacity-100', 'border');
+            }
+            leftWrapper.classList.remove('-translate-x-full');
+            showBackdrop();
+        }
+
+        function closeAllMobileDrawers() {
+            const leftWrapper = document.getElementById('leftDrawerWrapper');
+            const backdrop = document.getElementById('mobileBackdrop');
+
+            leftWrapper.classList.add('-translate-x-full');
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            setTimeout(() => {
+                backdrop.classList.add('hidden');
+            }, 300);
+        }
+
+        // Toast Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 2400);
+        }
+
+        // Toggle Top Model Dropdown
+        function toggleModelDropdown() {
+            const dropdown = document.getElementById('modelDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function changeFlashModel(name) {
+            document.getElementById('currentModelLabel').textContent = name;
+            document.getElementById('modelDropdown').classList.add('hidden');
+            showToast(`Model beralih ke Gemini ${name}`);
+        }
+
+        // Toggle Pinned Chats collapse
+        function togglePinnedSection() {
+            const grid = document.getElementById('pinnedCardsGrid');
+            grid.classList.toggle('hidden');
+        }
+
+        // Fill prompt from suggestion pill
+        function fillPrompt(text) {
+            const input = document.getElementById('chatInput');
+            input.value = text;
+            input.focus();
+        }
+
+        // Open Pinned Document into chat
+        function openPinnedDoc(docName, promptText) {
+            fillPrompt(promptText);
+            sendMessage();
+        }
+
+        // Toggle Deep Think pill inside chat input
+        function toggleDeepThinkBtn(btn) {
+            deepThinkActive = !deepThinkActive;
+            if (deepThinkActive) {
+                btn.className = 'py-1 px-2.5 rounded-full bg-deep-think text-white font-medium text-[11px] flex items-center gap-1.5 shadow-xs transition-all';
+                showToast('Mode Deep Think diaktifkan');
+            } else {
+                btn.className = 'py-1 px-2.5 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-700 font-medium text-[11px] flex items-center gap-1.5 transition-all';
+                showToast('Mode Deep Think dinonaktifkan');
+            }
+        }
+
+        // Handle Enter key inside textarea
+        function handleEnterKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Send Chat Message & Render AI Response
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) {
+                showToast('Silakan masukkan prompt terlebih dahulu');
+                return;
+            }
+
+            const welcome = document.getElementById('welcomeState');
+            const thread = document.getElementById('chatThread');
+            const scrollArea = document.getElementById('mainScrollArea');
+
+            // Switch from Hero view to Conversation view
+            welcome.classList.add('hidden');
+            thread.classList.remove('hidden');
+            thread.classList.add('flex');
+            scrollArea.classList.remove('justify-center');
+            scrollArea.classList.add('justify-start');
+
+            const shortTitle = text.length > 26 ? text.substring(0, 26) + '...' : text;
+
+            // Append User Message Bubble
+            const userBubble = document.createElement('div');
+            userBubble.className = 'self-end max-w-md bg-slate-900 text-white text-xs px-4 py-3 rounded-2xl rounded-tr-xs shadow-sm leading-relaxed';
+            userBubble.textContent = text;
+            thread.appendChild(userBubble);
+
+            input.value = '';
+            scrollArea.scrollTop = scrollArea.scrollHeight;
+
+            // Append Gemini AI Response Bubble
+            const aiBubble = document.createElement('div');
+            aiBubble.className = 'self-start max-w-xl bg-white/95 border border-slate-200/80 text-slate-800 text-xs p-4 rounded-2xl rounded-tl-xs shadow-soft flex gap-3 leading-relaxed';
+            aiBubble.innerHTML = `
+                <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-600"></i>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <span class="font-semibold text-slate-900 flex items-center gap-1.5">
+                        Gemini ${document.getElementById('currentModelLabel').textContent}
+                        ${deepThinkActive ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">Deep Think</span>' : ''}
+                    </span>
+                    <p class="text-slate-600">Berikut struktur wawasan untuk <strong>"${text}"</strong>: Anda dapat membagi alur kerja ini ke dalam fase eksplorasi, perancangan prototipe digital, dan validasi cerdas menggunakan Gemini 2.5 Flash.</p>
+                </div>
+            `;
+            thread.appendChild(aiBubble);
+            lucide.createIcons();
+            scrollArea.scrollTop = scrollArea.scrollHeight;
+
+            // Prepend ke Recent Chats di Sidebar Kiri
+            const recentList = document.getElementById('recentChatsList');
+            const newHistoryItem = document.createElement('div');
+            newHistoryItem.onclick = () => {
+                loadHistoryChat(text);
+                closeAllMobileDrawers();
+            };
+            newHistoryItem.className = 'history-item group cursor-pointer p-2 rounded-xl bg-blue-50/60 hover:bg-blue-50 transition-all flex items-center justify-between gap-2';
+            newHistoryItem.innerHTML = `
+                <div class="overflow-hidden">
+                    <h4 class="text-xs font-medium text-blue-700 truncate">${shortTitle}</h4>
+                    <span class="text-[10px] text-slate-400">Baru saja</span>
+                </div>
+                <i data-lucide="message-circle" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i>
+            `;
+            recentList.prepend(newHistoryItem);
+            lucide.createIcons();
+        }
+
+        // Reset back to Hero Dashboard state
+        function resetToHome() {
+            const welcome = document.getElementById('welcomeState');
+            const thread = document.getElementById('chatThread');
+            const scrollArea = document.getElementById('mainScrollArea');
+
+            thread.innerHTML = '';
+            thread.classList.add('hidden');
+            thread.classList.remove('flex');
+            welcome.classList.remove('hidden');
+            scrollArea.classList.add('justify-center');
+            scrollArea.classList.remove('justify-start');
+        }
+
+        function startNewChat() {
+            resetToHome();
+            document.getElementById('chatInput').focus();
+            showToast('Sesi percakapan baru dimulai');
+        }
+
+        function loadHistoryChat(title) {
+            if (title === 'New Chat') {
+                resetToHome();
+                return;
+            }
+            document.getElementById('chatInput').value = title;
+            sendMessage();
+        }
+
+        // Filter Sidebar Left History
+        function filterHistory(query) {
+            const q = query.toLowerCase();
+            document.querySelectorAll('#leftSidebar .history-item').forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(q) ? 'flex' : 'none';
+            });
+        }
+
+        function focusSearchInput() {
+            if (window.innerWidth < 1024) {
+                openMobileLeftDrawer();
+            } else if (isLeftCollapsed) {
+                toggleLeftSidebar();
+            }
+            setTimeout(() => {
+                document.getElementById('historySearchInput').focus();
+            }, 150);
+        }
+
+        // Toggle Star in Saved Topics
+        function toggleStar(btn) {
+            btn.classList.toggle('text-amber-400');
+            btn.classList.toggle('text-slate-300');
+            showToast('Topik tersimpan diperbarui');
+        }
+
+        // Copy Share Link
+        function copyShareLink() {
+            const dummy = document.createElement('textarea');
+            dummy.value = window.location.href;
+            document.body.appendChild(dummy);
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            showToast('Tautan obrolan disalin ke papan klip');
+        }
+
+        // Keyboard shortcuts: Cmd/Ctrl+F (Search), Cmd/Ctrl+B (Sidebar)
+        window.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                focusSearchInput();
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+                e.preventDefault();
+                handleSidebarToggle();
+            }
+        });
+    </script>
+</body>
+</html>

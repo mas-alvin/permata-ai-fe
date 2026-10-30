@@ -25,13 +25,12 @@ import { messageService } from '../services/messageService';
 import { authService } from '../services/authService';
 import { sendMessageStream, regenerateMessageStream } from '../services/chatStreamService';
 import { sendGuestMessageStream } from '../services/guestChatService';
+import { useOutletContext } from 'react-router-dom';
+import { PanelLeft, SlidersHorizontal, Upload, Sparkles } from 'lucide-react';
 import MessageList from '../components/Message/MessageList';
 import ChatInputActive from '../components/Chat/ChatInputActive';
 import HeroSection from '../components/MainContent/HeroSection';
-import QuickActions from '../components/MainContent/QuickActions';
-import TypingIndicator from '../components/Typing/TypingIndicator';
 import ModelSwitcher from '../components/Chat/ModelSwitcher';
-import ShaderBackground from '../components/MainContent/ShaderBackground';
 import ConfirmModal from '../components/ui/ConfirmModal';
 import { ragService } from '../services/ragService';
 
@@ -48,6 +47,10 @@ export default function ChatPage() {
   const conversationsList = useAppSelector((state) => state.conversation.conversations);
   const selectedModelId = useAppSelector((state) => state.chatStream.selectedModelId);
   const user = useAppSelector((state) => state.auth.user);
+  const outletContext = useOutletContext();
+  const onToggleSidebar = outletContext?.onToggleSidebar;
+  const isSidebarOpen = outletContext?.isSidebarOpen ?? true;
+
   const [editContent, setEditContent] = useState('');
   const [replyContent, setReplyContent] = useState(null);
 
@@ -428,98 +431,138 @@ export default function ChatPage() {
     setReplyContent(null);
   }, [id]);
 
-  if (loading) return <div className="flex-1 flex items-center justify-center animate-pulse">Memuat...</div>;
+  const handleShare = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Tautan obrolan disalin ke clipboard');
+    }
+  };
 
-  // Empty state (new chat, no messages) — show HeroSection centered
-  if (isNewChat && !hasMessages) {
+  if (loading) {
     return (
-      <div className="flex-1 flex flex-col min-h-0">
-        <ShaderBackground />
-        {/* Centered Hero + Input */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 pt-16">
-          <div className="w-full max-w-4xl flex flex-col">
-            <HeroSection />
-            <div className="w-full mt-8 md:mt-12">
-              <ChatInputActive onSend={handleNewMessage} disabled={isStreaming} prefill={editContent} onPrefillClear={() => setEditContent('')} />
-            </div>
+      <div className="flex-1 flex items-center justify-center animate-pulse text-slate-500 text-xs">
+        Memuat...
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 flex gap-2.5 overflow-hidden relative min-w-0 h-full">
+      <main className="flex-1 bg-hero-mesh sm:rounded-2xl border-0 sm:border border-white dark:border-slate-800 shadow-soft flex flex-col justify-between overflow-hidden relative min-w-0 h-full">
+        
+        {/* Top Bar inside Card */}
+        <div className="h-12 px-3 sm:px-5 flex items-center justify-between shrink-0 z-10 border-b sm:border-b-0 border-slate-100/60 dark:border-slate-800/60">
+          {/* Left Controls: Sidebar Toggle Button + Model Selector */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onToggleSidebar}
+              className="w-8 h-8 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 shadow-2xs flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+              title="Buka / Tutup Sidebar"
+            >
+              <PanelLeft className="w-4 h-4" />
+            </button>
+
+            <ModelSwitcher />
+          </div>
+
+          {/* Right Controls inside Card */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={() => alert('Panel Konfigurasi Model')}
+              className="hidden sm:flex py-1.5 px-3 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs items-center gap-1.5 shadow-2xs border border-white dark:border-slate-700 transition-all cursor-pointer"
+            >
+              <span>Configuration</span>
+              <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+            </button>
+
+            <button
+              onClick={handleShare}
+              className="py-1.5 px-3 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1.5 shadow-2xs border border-white dark:border-slate-700 transition-all cursor-pointer"
+            >
+              <span>Share</span>
+              <Upload className="w-3.5 h-3.5 text-slate-500" />
+            </button>
+
+            {/* Gradient Star Avatar Badge */}
+            <button
+              onClick={() => alert('Gemini Ultra Profil')}
+              className="w-8 h-8 rounded-full p-0.5 bg-gradient-to-tr from-blue-500 via-amber-400 to-rose-500 shadow-sm flex items-center justify-center hover:scale-105 transition-transform ml-1 cursor-pointer"
+              title="Gemini Workspace"
+            >
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-600/80 via-amber-500/80 to-pink-500/80 flex items-center justify-center text-white">
+                <Sparkles className="w-3.5 h-3.5 fill-white" />
+              </div>
+            </button>
           </div>
         </div>
+
+        {/* Scrollable Middle Content */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-2 flex flex-col justify-start sm:justify-center min-h-0">
+          {isNewChat && !hasMessages ? (
+            <HeroSection onPrefillSelect={(prompt) => setEditContent(prompt)} />
+          ) : (
+            <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col py-2">
+              <MessageList
+                messages={conversation}
+                onEdit={handleEditMessage}
+                onRegenerate={handleRegenerate}
+                onDelete={requestDeleteMessage}
+                onReply={handleReply}
+                isStreaming={isStreaming}
+                partialContent={partialContent}
+              />
+
+              {ragSources.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 px-4 pt-2 max-w-4xl mx-auto w-full">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
+                    Sumber:
+                  </span>
+                  {ragSources.map((src, idx) => (
+                    <span
+                      key={`${src.document_id}-${idx}`}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 text-[10px] font-medium text-blue-600 dark:text-blue-400"
+                      title={`Similarity: ${src.similarity}`}
+                    >
+                      <span className="material-symbols-outlined text-[11px]">menu_book</span>
+                      {src.title}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {error && <div className="text-red-400 p-4 text-center text-sm">{error}</div>}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Chat Input */}
+        <ChatInputActive
+          onSend={handleNewMessage}
+          disabled={isStreaming}
+          prefill={editContent}
+          onPrefillClear={() => setEditContent('')}
+          replyContent={replyContent}
+          onReplyClear={() => setReplyContent(null)}
+          ragConfig={ragConfig}
+          onRagConfigChange={handleRagConfigChange}
+          showQuickActions={isNewChat && !hasMessages}
+        />
+
         <ConfirmModal
           open={!!deleteTarget}
           onClose={() => setDeleteTarget(null)}
           onConfirm={confirmDeleteMessage}
           title="Hapus pesan?"
-          message={deleteTarget?.role === 'assistant'
-            ? 'Jawaban AI ini akan dihapus permanen bersama seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'
-            : 'Prompt Anda akan dihapus permanen bersama jawaban AI dan seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'}
+          message={
+            deleteTarget?.role === 'assistant'
+              ? 'Jawaban AI ini akan dihapus permanen bersama seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'
+              : 'Prompt Anda akan dihapus permanen bersama jawaban AI dan seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'
+          }
           confirmLabel="Hapus"
           cancelLabel="Batal"
           danger
         />
-      </div>
-    );
-  }
-
-  // Active conversation — show messages + input
-  return (
-    <div className="flex-1 flex flex-col min-h-0">
-      <div className="flex justify-end p-2">
-        <ModelSwitcher />
-      </div>
-      <MessageList
-        messages={conversation}
-        onEdit={handleEditMessage}
-        onRegenerate={handleRegenerate}
-        onDelete={requestDeleteMessage}
-        onReply={handleReply}
-        isStreaming={isStreaming}
-        partialContent={partialContent}
-      />
-
-      {ragSources.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 px-4 pt-2 max-w-4xl mx-auto w-full">
-          <span className="text-[10px] font-semibold text-on-surface-variant/70 uppercase tracking-wide">
-            Sumber:
-          </span>
-          {ragSources.map((src, idx) => (
-            <span
-              key={`${src.document_id}-${idx}`}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/8 border border-primary/20 text-[10px] font-medium text-primary"
-              title={`Similarity: ${src.similarity}`}
-            >
-              <span className="material-symbols-outlined text-[11px]">menu_book</span>
-              {src.title}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {error && <div className="text-red-400 p-4 text-center text-sm">{error}</div>}
-      <ChatInputActive
-        onSend={handleNewMessage}
-        disabled={isStreaming}
-        prefill={editContent}
-        onPrefillClear={() => setEditContent('')}
-        replyContent={replyContent}
-        onReplyClear={() => setReplyContent(null)}
-        ragConfig={ragConfig}
-        onRagConfigChange={handleRagConfigChange}
-      />
-
-      <ConfirmModal
-        open={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={confirmDeleteMessage}
-        title="Hapus pesan?"
-        message={
-          deleteTarget?.role === 'assistant'
-            ? 'Jawaban AI ini akan dihapus permanen bersama seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'
-            : 'Prompt Anda akan dihapus permanen bersama jawaban AI dan seluruh pesan setelahnya. Tindakan ini tidak dapat dibatalkan.'
-        }
-        confirmLabel="Hapus"
-        cancelLabel="Batal"
-        danger
-      />
+      </main>
     </div>
   );
-};
+}
