@@ -198,7 +198,7 @@
 
 @layer utilities {
   .bg-gradient-pro {
-    background: linear-gradient(135deg, #800020 0%, #ffd700 100%);
+    background: linear-gradient(135deg, #40000b 0%, #800020 45%, #c58a27 100%);
   }
   .backdrop-blur-3xl {
     backdrop-filter: blur(64px);
@@ -224,17 +224,17 @@
     scrollbar-width: none;
   }
 
-  /* Custom Stitch Gemini Styles */
+  /* Permata AI Brand Styles (Maroon & Circuit Gold) */
   .bg-deep-think {
-    background: linear-gradient(90deg, #3B82F6 0%, #93A5CF 45%, #F59E0B 80%, #EAB308 100%);
+    background: linear-gradient(90deg, #40000b 0%, #6a0017 35%, #b87a1d 75%, #d49b2c 100%);
   }
 
   .bg-send-btn {
-    background: linear-gradient(90deg, #EAB308 0%, #7C96C9 50%, #3B82F6 100%);
+    background: linear-gradient(135deg, #c58a27 0%, #800020 50%, #40000b 100%);
   }
 
   .text-hero-gradient {
-    background: linear-gradient(90deg, #B45309 0%, #D97706 20%, #7E22CE 50%, #2563EB 80%, #1D4ED8 100%);
+    background: linear-gradient(90deg, #40000b 0%, #800020 30%, #b87a1d 70%, #d49b2c 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -242,25 +242,25 @@
   .bg-hero-mesh {
     background: 
       radial-gradient(circle at 25% 15%, rgba(254, 243, 199, 0.65) 0%, transparent 45%),
-      radial-gradient(circle at 50% 10%, rgba(252, 231, 243, 0.5) 0%, transparent 45%),
-      radial-gradient(circle at 80% 15%, rgba(219, 234, 254, 0.75) 0%, transparent 50%),
+      radial-gradient(circle at 50% 10%, rgba(254, 226, 226, 0.45) 0%, transparent 45%),
+      radial-gradient(circle at 80% 15%, rgba(254, 215, 170, 0.55) 0%, transparent 50%),
       #FFFFFF;
   }
 
   .dark .bg-hero-mesh {
     background:
-      radial-gradient(circle at 25% 15%, rgba(180, 83, 9, 0.15) 0%, transparent 45%),
-      radial-gradient(circle at 50% 10%, rgba(126, 34, 206, 0.15) 0%, transparent 45%),
-      radial-gradient(circle at 80% 15%, rgba(37, 99, 235, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 25% 15%, rgba(197, 138, 39, 0.14) 0%, transparent 45%),
+      radial-gradient(circle at 50% 10%, rgba(128, 0, 32, 0.16) 0%, transparent 45%),
+      radial-gradient(circle at 80% 15%, rgba(184, 122, 29, 0.12) 0%, transparent 50%),
       var(--color-surface);
   }
 
   .bg-trial-banner {
-    background: linear-gradient(90deg, #FEF3C7 0%, #FCE7F3 45%, #DBEAFE 100%);
+    background: linear-gradient(90deg, #FEF3C7 0%, #FEE2E2 50%, #FFEDD5 100%);
   }
 
   .dark .bg-trial-banner {
-    background: linear-gradient(90deg, rgba(254, 243, 199, 0.12) 0%, rgba(252, 231, 243, 0.12) 45%, rgba(219, 234, 254, 0.12) 100%);
+    background: linear-gradient(90deg, rgba(254, 243, 199, 0.12) 0%, rgba(254, 226, 226, 0.12) 50%, rgba(255, 237, 213, 0.12) 100%);
   }
 
   .shadow-soft {
@@ -268,11 +268,11 @@
   }
 
   .shadow-glow {
-    box-shadow: 0 10px 30px -5px rgba(59, 130, 246, 0.12);
+    box-shadow: 0 10px 30px -5px rgba(197, 138, 39, 0.18);
   }
 
   .shadow-float {
-    box-shadow: 0 8px 25px -4px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 25px -4px rgba(64, 0, 11, 0.08);
   }
 
   @keyframes floatSlow {

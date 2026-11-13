@@ -32,7 +32,7 @@ export default function ConfirmModal({
         <div className="flex items-start gap-4">
           <div
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-              danger ? 'bg-red-50 text-red-600' : 'bg-primary/10 text-primary'
+              danger ? 'bg-red-50 text-red-600' : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20'
             }`}
           >
             <ExclamationTriangleIcon className="h-5 w-5" />

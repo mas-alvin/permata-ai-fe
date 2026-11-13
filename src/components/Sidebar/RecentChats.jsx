@@ -109,9 +109,9 @@ export default function RecentChats({ searchQuery = '' }) {
             <div
               key={chat.id}
               onClick={() => !isEditing && navigate(`/chat/${chat.id}`)}
-              className={`group cursor-pointer p-2 rounded-xl transition-all flex items-center justify-between gap-2 ${
+              className={`group cursor-pointer px-1.5 rounded-sm flex items-center justify-between gap-2 ${
                 isActive
-                  ? 'bg-slate-100/90 dark:bg-slate-800 text-blue-600'
+                  ? 'bg-[#bcbcbc]/10 dark:bg-[#40000b]/30 text-amber-800 dark:text-amber-300'
                   : 'hover:bg-slate-100/70 dark:hover:bg-slate-800/70'
               }`}
             >
@@ -125,18 +125,18 @@ export default function RecentChats({ searchQuery = '' }) {
                     onBlur={() => handleSaveTitle(chat.id)}
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 border border-blue-400 rounded-lg px-2 py-1 focus:outline-none transition-all"
+                    className="w-full text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 border border-amber-500 rounded-sm px-2 py-1 focus:outline-none transition-all"
                   />
                 ) : (
                   <>
                     <h4 className={`text-xs font-medium truncate transition-colors ${
-                      isActive ? 'text-blue-600 font-semibold' : 'text-slate-800 dark:text-slate-200 group-hover:text-blue-600'
+                      isActive ? 'text-amber-800 dark:text-amber-300 font-semibold' : 'text-slate-800 dark:text-slate-200 group-hover:text-amber-700 dark:group-hover:text-amber-400'
                     }`}>
                       {chat.title || 'Percakapan baru'}
                     </h4>
-                    <span className="text-[10px] text-slate-400 block truncate">
+                    {/* <span className="text-[10px] text-slate-400 block truncate">
                       {formatTime(chat.updated_at)}
-                    </span>
+                    </span> */}
                   </>
                 )}
               </div>

@@ -64,7 +64,7 @@ export default function SavedTopics({ searchQuery = '' }) {
             className="group cursor-pointer p-2 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition-all flex items-start justify-between gap-2"
           >
             <div className="overflow-hidden min-w-0 flex-1">
-              <h4 className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-blue-600 transition-colors">
+              <h4 className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
                 {topic.title || 'Untitled'}
               </h4>
               <span className="text-[10px] text-slate-400 mt-0.5 block truncate">

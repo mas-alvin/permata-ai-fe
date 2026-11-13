@@ -7,10 +7,10 @@
  */
 export default function GuestNotice() {
   return (
-    <div className="rounded-md border border-dashed border-on-surface/15 bg-surface-container-low/50 p-3.5 space-y-2">
+    <div className="rounded-md border border-dashed border-amber-500/30 bg-amber-50/20 dark:bg-amber-950/20 p-3.5 space-y-2">
       <div className="flex items-center gap-2 text-on-surface-variant">
-        <span className="material-symbols-outlined text-[16px] text-primary">timer</span>
-        <p className="text-[11px] font-semibold leading-tight">Mode Tamu</p>
+        <span className="material-symbols-outlined text-[16px] text-amber-600 dark:text-amber-400">timer</span>
+        <p className="text-[11px] font-semibold leading-tight text-slate-800 dark:text-slate-200">Mode Tamu</p>
       </div>
       <p className="text-[11px] text-on-surface-variant/70 leading-relaxed">
         Riwayat percakapan, model pilihan, dan topik tidak disimpan di mode

@@ -30,13 +30,13 @@ export default function AttachmentPreview({ attachment, onRemove }) {
         <img
           src={url}
           alt={filename}
-          className="w-20 h-20 object-cover rounded-xl border border-on-surface/10"
+          className="w-20 h-20 object-cover rounded-xl border border-slate-200 dark:border-slate-700"
         />
         {onRemove && (
           <button
             type="button"
             onClick={onRemove}
-            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-on-surface text-white flex items-center justify-center shadow-md opacity-0 group-hover/attach:opacity-100 transition-opacity"
+            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-slate-900/90 text-white flex items-center justify-center shadow-md opacity-0 group-hover/attach:opacity-100 transition-opacity"
             aria-label="Hapus lampiran"
           >
             <XMarkIcon className="w-3 h-3" />
@@ -47,7 +47,7 @@ export default function AttachmentPreview({ attachment, onRemove }) {
   }
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container-low border border-on-surface/10 max-w-[16rem]">
+    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 max-w-[16rem]">
       <PaperClipIcon className="w-4 h-4 text-on-surface-variant shrink-0" />
       <div className="min-w-0 flex-1">
         <p className="text-xs font-medium text-on-surface truncate">{filename}</p>

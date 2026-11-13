@@ -55,19 +55,19 @@ export default function MessageBubble({
   if (isUser && editing) {
     return (
       <div className="flex flex-col items-end py-1">
-        <div className="w-full max-w-xl bg-primary/[0.04] border border-primary/20 rounded-2xl rounded-br-sm p-3 space-y-2">
+        <div className="w-full max-w-xl bg-[#40000b]/[0.05] dark:bg-[#40000b]/20 border border-amber-500/30 rounded-2xl rounded-br-sm p-3 space-y-2">
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             autoFocus
             rows={Math.min(8, Math.max(1, draft.split('\n').length))}
-            className="w-full bg-white text-sm text-on-surface rounded-xl border border-on-surface/10 p-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 p-2 resize-none focus:outline-none focus:ring-1 focus:ring-amber-500/40"
           />
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={cancelEdit}
-              className="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container-low transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               Batal
             </button>
@@ -95,8 +95,8 @@ export default function MessageBubble({
             ))}
           </div>
         )}
-        <div className="bg-primary text-on-primary rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xl">
-          <span className="text-sm leading-relaxed whitespace-pre-wrap">{content}</span>
+        <div className="bg-gradient-to-r from-[#40000b] to-[#600016] text-white border border-[#800020]/40 rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xl shadow-xs">
+          <span className="text-sm leading-relaxed whitespace-pre-wrap selection:bg-amber-500 selection:text-white">{content}</span>
         </div>
         <MessageActions
           content={content}

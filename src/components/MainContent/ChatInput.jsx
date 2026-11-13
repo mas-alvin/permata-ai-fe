@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import QuickActions from './QuickActions'
 
 const models = [
+  { id: 'permata-flash:1.0', label: 'Permata Flash 1.0', icon: 'bolt' },
   { id: 'permata-pro', label: 'Permata Pro', icon: 'psychology' },
   { id: 'create-image', label: 'Create Image', icon: 'image' },
   { id: 'canvas', label: 'Canvas', icon: 'draw' },

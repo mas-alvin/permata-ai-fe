@@ -120,15 +120,15 @@ export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumen
         onClick={() => setOpen((prev) => !prev)}
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
           localEnabled && activeCount > 0
-            ? 'bg-primary/10 text-primary border-primary/30'
+            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30'
             : 'text-on-surface-variant border-on-surface/10 hover:bg-surface-container-high'
         }`}
         title="Sumber knowledge base"
       >
-        <BookOpenIcon className="w-4 h-4" />
+        <BookOpenIcon className="w-4 h-4 text-amber-600/80 dark:text-amber-400/80" />
         <span className="hidden sm:inline">Knowledge</span>
         {activeCount > 0 && (
-          <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-primary text-white text-[10px] font-bold">
+          <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-[#800020] to-amber-600 text-white text-[10px] font-bold">
             {activeCount}
           </span>
         )}
@@ -140,7 +140,7 @@ export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumen
           <div
             ref={popoverRef}
             style={{ top: `${popoverPos.top}px`, left: `${popoverPos.left}px`, width: `${popoverPos.width}px` }}
-            className="fixed z-[9999] bg-white rounded-2xl border border-on-surface/10 shadow-xl shadow-on-surface/10 overflow-hidden"
+            className="fixed z-[9999] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-on-surface/10 overflow-hidden"
           >
             {/* Header toggle */}
             <div className="p-3 border-b border-on-surface/8">
@@ -155,7 +155,7 @@ export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumen
                 </div>
                 <span
                   className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                    localEnabled ? 'bg-primary' : 'bg-on-surface/15'
+                    localEnabled ? 'bg-amber-600' : 'bg-on-surface/15'
                   }`}
                 >
                   <span
@@ -189,7 +189,7 @@ export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumen
                         >
                           <span
                             className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-colors ${
-                              isChecked ? 'bg-primary border-primary' : 'border-on-surface/25'
+                              isChecked ? 'bg-amber-600 border-amber-600 text-white' : 'border-on-surface/25'
                             }`}
                           >
                             {isChecked && <CheckIcon className="w-3 h-3 text-white" />}

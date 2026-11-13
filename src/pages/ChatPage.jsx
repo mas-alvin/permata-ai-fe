@@ -21,6 +21,7 @@ import {
 } from '../store/slices/chatStreamSlice';
 import { setUser, setCredits, decrementCredits, clearCredentials } from '../store/slices/authSlice';
 import { conversationService } from '../services/conversationService';
+import permataIcon from '../assets/permata-icon.png';
 import { messageService } from '../services/messageService';
 import { authService } from '../services/authService';
 import { sendMessageStream, regenerateMessageStream } from '../services/chatStreamService';
@@ -469,28 +470,28 @@ export default function ChatPage() {
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => alert('Panel Konfigurasi Model')}
-              className="hidden sm:flex py-1.5 px-3 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs items-center gap-1.5 shadow-2xs border border-white dark:border-slate-700 transition-all cursor-pointer"
+              className="hidden sm:flex py-1.5 px-3 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-slate-700 hover:border-amber-500/40 transition-all cursor-pointer"
             >
               <span>Configuration</span>
-              <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-600/70 dark:text-amber-400/70" />
             </button>
 
             <button
               onClick={handleShare}
-              className="py-1.5 px-3 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1.5 shadow-2xs border border-white dark:border-slate-700 transition-all cursor-pointer"
+              className="py-1.5 px-3 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-slate-700 hover:border-amber-500/40 transition-all cursor-pointer"
             >
               <span>Share</span>
-              <Upload className="w-3.5 h-3.5 text-slate-500" />
+              <Upload className="w-3.5 h-3.5 text-amber-600/70 dark:text-amber-400/70" />
             </button>
 
             {/* Gradient Star Avatar Badge */}
             <button
-              onClick={() => alert('Gemini Ultra Profil')}
-              className="w-8 h-8 rounded-full p-0.5 bg-gradient-to-tr from-blue-500 via-amber-400 to-rose-500 shadow-sm flex items-center justify-center hover:scale-105 transition-transform ml-1 cursor-pointer"
-              title="Gemini Workspace"
+              onClick={() => alert('Profil Permata AI')}
+              className="w-8 h-8 rounded-full p-0.5 bg-amber-50 border border-amber-300/40 shadow-xs flex items-center justify-center hover:scale-105 transition-transform ml-1 cursor-pointer"
+              title="Permata AI Workspace"
             >
-              <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-600/80 via-amber-500/80 to-pink-500/80 flex items-center justify-center text-white">
-                <Sparkles className="w-3.5 h-3.5 fill-white" />
+              <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center p-1">
+                <img src={permataIcon} alt="Permata AI" className="w-full h-full object-contain" />
               </div>
             </button>
           </div>
@@ -520,7 +521,7 @@ export default function ChatPage() {
                   {ragSources.map((src, idx) => (
                     <span
                       key={`${src.document_id}-${idx}`}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 text-[10px] font-medium text-blue-600 dark:text-blue-400"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-300/50 dark:border-amber-800/50 text-[10px] font-medium text-amber-700 dark:text-amber-300"
                       title={`Similarity: ${src.similarity}`}
                     >
                       <span className="material-symbols-outlined text-[11px]">menu_book</span>

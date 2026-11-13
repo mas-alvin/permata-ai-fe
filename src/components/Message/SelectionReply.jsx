@@ -63,7 +63,7 @@ export default function SelectionReply({ onReply, children }) {
         >
           <button
             onClick={handleReplyClick}
-            className="pointer-events-auto px-3 py-1.5 text-xs font-medium text-white bg-primary rounded-full shadow-lg hover:opacity-90 transition-opacity flex items-center gap-1.5 whitespace-nowrap"
+            className="pointer-events-auto px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-[#40000b] to-[#600016] border border-amber-500/40 rounded-full shadow-lg hover:opacity-95 transition-opacity flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
             title="Balas teks terpilih"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -73,7 +73,7 @@ export default function SelectionReply({ onReply, children }) {
           </button>
           
           {/* Triangle pointer */}
-          <div className="pointer-events-auto absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-primary border-r-transparent border-l-transparent" />
+          <div className="pointer-events-auto absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-[#600016] border-r-transparent border-l-transparent" />
         </div>
       )}
     </div>

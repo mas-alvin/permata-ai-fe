@@ -18,11 +18,11 @@ export default function CodeBlock({ language, value }) {
   const displayLanguage = language ? language.toLowerCase() : 'code';
 
   return (
-    <div className="my-4 rounded-md border border-slate-700/60 bg-[#0d1117] overflow-hidden shadow-lg font-mono text-sm group/code">
+    <div className="my-4 rounded-md border border-slate-800/80 bg-[#0d1117] overflow-hidden shadow-lg font-mono text-sm group/code">
       {/* Header Bar */}
       <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-slate-800 text-xs text-slate-400 select-none">
         <div className="flex items-center gap-2">
-          <Code className="w-4 h-4 text-primary-fixed-dim" />
+          <Code className="w-4 h-4 text-amber-500" />
           <span className="font-semibold uppercase tracking-wider text-slate-300">
             {displayLanguage}
           </span>
@@ -31,7 +31,7 @@ export default function CodeBlock({ language, value }) {
           type="button"
           onClick={handleCopy}
           className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-all duration-200 cursor-pointer ${copied
-              ? 'bg-emerald-500/20 text-emerald-400 border'
+              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
               : 'text-slate-300 hover:text-white hover:bg-slate-800'
             }`}
           title="Salin kode ke clipboard"
@@ -39,7 +39,7 @@ export default function CodeBlock({ language, value }) {
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <Check className="w-3.5 h-3.5 text-amber-400" />
               <span>Tersalin!</span>
             </>
           ) : (

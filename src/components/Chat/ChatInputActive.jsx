@@ -144,7 +144,7 @@ export default function ChatInputActive({
       {replyContent && (
         <div className="px-1">
           <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 shadow-2xs">
-            <span className="material-symbols-outlined text-slate-500 text-[16px] mt-0.5">reply</span>
+            <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[16px] mt-0.5">reply</span>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Balas potongan teks</p>
               <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2">{replyContent}</p>
@@ -174,7 +174,7 @@ export default function ChatInputActive({
               <button
                 type="button"
                 onClick={() => handleRemoveAttachment(att.id)}
-                className="text-slate-400 hover:text-red-500"
+                className="text-slate-400 hover:text-red-500 rounded-md"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -184,22 +184,22 @@ export default function ChatInputActive({
       )}
 
       {/* Combined Trial Banner + Input Box Container */}
-      <div className="rounded-2xl p-[1.5px] bg-gradient-to-r from-amber-200/70 via-pink-200/70 to-blue-300/80 shadow-glow">
+      <div className="rounded-2xl p-[1.5px] bg-gradient-to-r from-amber-500/40 via-[#800020]/40 to-amber-600/40 shadow-glow">
         <div className="rounded-[15px] bg-trial-banner overflow-hidden">
           
           {/* Top Banner inside Input Card */}
           <div className="px-3 sm:px-3.5 py-1.5 flex items-center justify-between text-[10px] sm:text-[11px] gap-2">
             <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-medium truncate">
-              <Timer className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300 shrink-0" />
+              <Timer className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
               <span className="truncate">Free Trial ending soon continue your workflow</span>
             </div>
             <button 
               type="button"
-              onClick={() => alert('Fitur Upgrade Gemini Ultra')}
-              className="font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+              onClick={() => alert('Fitur Upgrade Permata Pro')}
+              className="font-semibold text-amber-800 dark:text-amber-400 hover:text-amber-900 flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
             >
               <span>Upgrade Now</span>
-              <ArrowUpRight className="w-3 h-3 border border-orange-500 rounded-full p-0.5" />
+              <ArrowUpRight className="w-3 h-3 border border-amber-600/60 dark:border-amber-400/60 rounded-full p-0.5" />
             </button>
           </div>
 
@@ -254,7 +254,7 @@ export default function ChatInputActive({
                       : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200/80 dark:border-slate-700'
                   }`}
                 >
-                  <Lightbulb className={`w-3 h-3 ${deepThinkActive ? 'text-white' : 'text-slate-500'}`} />
+                  <Lightbulb className={`w-3 h-3 ${deepThinkActive ? 'text-amber-300' : 'text-slate-500'}`} />
                   <span>Deep Think</span>
                 </button>
               </div>
@@ -281,7 +281,7 @@ export default function ChatInputActive({
                   disabled={sendDisabled || !input.trim()}
                   className="py-1 px-3 sm:px-3.5 rounded-full bg-send-btn hover:opacity-95 text-white font-semibold text-[11px] flex items-center gap-1 shadow-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  <Sparkles className="w-3 h-3 fill-white" />
+                  <Sparkles className="w-3 h-3 fill-amber-200 text-amber-200" />
                   <span>Send</span>
                 </button>
               </div>
@@ -293,7 +293,7 @@ export default function ChatInputActive({
 
       {/* Footer Disclaimer */}
       <p className="text-center text-[10px] text-slate-400 truncate">
-        Gemini AI generates AI-based answers. Review key detail for accuracy.{' '}
+        Permata Flash 1.0 generates AI-based answers. Review key details for accuracy.{' '}
         <span className="underline text-slate-500 hover:text-slate-700 font-medium cursor-pointer">
           Cookie Preferences.
         </span>

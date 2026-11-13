@@ -19,7 +19,7 @@ export default function MarkdownRenderer({ content = '' }) {
       if (isInline) {
         return (
           <code
-            className="bg-surface-container-high text-primary dark:text-primary-fixed font-mono text-xs px-1.5 py-0.5 rounded border border-outline/10"
+            className="bg-amber-500/10 text-amber-800 dark:text-amber-300 font-mono text-xs px-1.5 py-0.5 rounded border border-amber-500/20"
             {...props}
           >
             {children}

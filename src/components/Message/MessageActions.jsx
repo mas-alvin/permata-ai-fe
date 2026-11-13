@@ -35,12 +35,12 @@ export default function MessageActions({ content, role, isLast, onRegenerate, on
     <div className="flex items-center gap-0.5 mt-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150">
       <button
         onClick={handleCopy}
-        className="p-1.5 rounded-md hover:bg-surface-container-low transition-colors text-on-surface-variant/60 hover:text-on-surface"
+        className="p-1.5 rounded-md hover:bg-surface-container-low transition-colors text-on-surface-variant/60 hover:text-amber-700 dark:hover:text-amber-400"
         title="Salin"
         aria-label="Salin pesan"
       >
         {copied ? (
-          <ClipboardDocumentCheckIcon className="w-4.5 h-4.5 text-emerald-600" />
+          <ClipboardDocumentCheckIcon className="w-4.5 h-4.5 text-amber-600" />
         ) : (
           <ClipboardDocumentIcon className="w-4.5 h-4.5" />
         )}
@@ -49,7 +49,7 @@ export default function MessageActions({ content, role, isLast, onRegenerate, on
       {role === 'assistant' && isLast && onRegenerate && (
         <button
           onClick={onRegenerate}
-          className="p-1.5 rounded-md hover:bg-surface-container-low transition-colors text-on-surface-variant/60 hover:text-on-surface"
+          className="p-1.5 rounded-md hover:bg-surface-container-low transition-colors text-on-surface-variant/60 hover:text-amber-700 dark:hover:text-amber-400"
           title="Regenerasi jawaban"
           aria-label="Regenerasi jawaban"
         >
@@ -61,7 +61,7 @@ export default function MessageActions({ content, role, isLast, onRegenerate, on
       {role === 'assistant' && onReply && (
         <button
           onClick={() => onReply({ content, id: null })}
-          className="p-1.5 rounded-md hover:bg-surface-container-low transition-colors text-on-surface-variant/60 hover:text-on-surface"
+          className="p-1.5 rounded-md hover:bg-surface-container-low transition-colors text-on-surface-variant/60 hover:text-amber-700 dark:hover:text-amber-400"
           title="Balas"
           aria-label="Balas pesan"
         >
@@ -72,7 +72,7 @@ export default function MessageActions({ content, role, isLast, onRegenerate, on
       {role === 'user' && onEdit && (
         <button
           onClick={onEdit}
-          className="p-1.5 rounded-md hover:bg-surface-container-low transition-colors text-on-surface-variant/60 hover:text-on-surface"
+          className="p-1.5 rounded-md hover:bg-surface-container-low transition-colors text-on-surface-variant/60 hover:text-amber-700 dark:hover:text-amber-400"
           title="Edit pesan"
           aria-label="Edit pesan"
         >
