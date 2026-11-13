@@ -268,15 +268,15 @@ export default function ShaderBackground() {
      * Hanya warnanya yang berubah.
      */
     const darkPalette = {
-      background: [0.035, 0.032, 0.035],
-      glowA: [0.20, 0.012, 0.025],
-      glowB: [0.56, 0.34, 0.12],
+      background: [0.051, 0.043, 0.055],
+      glowA: [0.35, 0.0, 0.08],
+      glowB: [0.38, 0.24, 0.07],
     }
 
     const lightPalette = {
-      background: [0.985, 0.975, 0.965],
-      glowA: [0.76, 0.35, 0.30],
-      glowB: [0.92, 0.68, 0.28],
+      background: [1.0, 1.0, 1.0],
+      glowA: [0.98, 0.85, 0.85],
+      glowB: [0.99, 0.94, 0.78],
     }
 
     function syncTheme() {
@@ -421,12 +421,11 @@ export default function ShaderBackground() {
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none"
-      style={{
-        zIndex: -1,
-      }}
-    />
+    <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0 bg-hero-mesh">
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full block"
+      />
+    </div>
   )
 }

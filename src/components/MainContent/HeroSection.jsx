@@ -1,5 +1,6 @@
 import React from 'react';
 import permataIcon from '../../assets/permata-icon.png';
+import permataIconDark from '../../assets/permata-icon-dark.png';
 import { 
   Pin, 
   ChevronDown, 
@@ -43,8 +44,9 @@ export default function HeroSection({ onPrefillSelect }) {
   return (
     <div className="max-w-2xl mx-auto w-full flex flex-col items-center my-auto py-2">
       {/* Floating Permata Icon Card */}
-      <div className="w-30 h-30 sm:w-14 sm:h-14 dark:bg-slate-800 shadow-float border border-slate-200/80 dark:border-slate-700 flex items-center justify-center mb-3 sm:mb-4 animate-float p-2.5">
-        <img src={permataIcon} alt="Permata AI" className="w-full h-full object-contain" />
+      <div className="w-16 h-16 sm:w-16 sm:h-16 rounded-2xl dark:bg-[#19151d] flex items-center justify-center mb-3 sm:mb-4 animate-float p-3">
+        <img src={permataIcon} alt="Permata AI" className="w-full h-full object-contain dark:hidden" />
+        <img src={permataIconDark} alt="Permata AI" className="w-full h-full object-contain hidden dark:block" />
       </div>
 
       {/* Gradient Heading */}
@@ -64,7 +66,7 @@ export default function HeroSection({ onPrefillSelect }) {
       <div className="w-full">
         <div className="flex items-center justify-between mb-2.5 px-0.5">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-            <Pin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 rotate-45" />
+            <Pin className="w-3.5 h-3.5 text-amber-600 dark:text-[#c58a27] rotate-45" />
             <span>Pinned Chats</span>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
           </div>
@@ -94,7 +96,7 @@ export default function HeroSection({ onPrefillSelect }) {
               <div 
                 key={item.id}
                 onClick={() => onPrefillSelect && onPrefillSelect(item.prompt)}
-                className="min-w-[200px] sm:min-w-0 flex-1 group cursor-pointer p-3 sm:p-3.5 rounded-2xl bg-[#F8FAFC]/90 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700 hover:border-amber-500/40 hover:shadow-md transition-all flex flex-col justify-between gap-2"
+                className={`min-w-[200px] sm:min-w-0 flex-1 group cursor-pointer p-3 sm:p-3.5 rounded-2xl border border-slate-200/60 dark:border-[#2a222c] hover:shadow-md transition-all flex flex-col justify-between gap-2 ${colorClasses}`}
               >
                 <div className={`w-7 h-7 rounded-lg ${badgeBg}/10 flex items-center justify-center`}>
                   <div className={`w-4 h-5 rounded-xs ${badgeBg} text-white flex items-center justify-center shadow-xs`}>
@@ -102,7 +104,7 @@ export default function HeroSection({ onPrefillSelect }) {
                   </div>
                 </div>
                 <div>
-                  <h3 className={`text-xs font-semibold text-slate-800 dark:text-slate-200 truncate ${colorClasses}`}>
+                  <h3 className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate group-hover:text-inherit">
                     {item.title}
                   </h3>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">

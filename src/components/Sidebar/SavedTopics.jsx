@@ -61,22 +61,18 @@ export default function SavedTopics({ searchQuery = '' }) {
           <div
             key={topic.id}
             onClick={() => navigate(`/chat/${topic.conversation_id}`)}
-            className="group cursor-pointer p-2 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition-all flex items-start justify-between gap-2"
+            className="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-[#1f1922] text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-[#d49b2c] font-medium text-xs flex items-center gap-3 transition-colors text-left group cursor-pointer"
           >
-            <div className="overflow-hidden min-w-0 flex-1">
-              <h4 className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
-                {topic.title || 'Untitled'}
-              </h4>
-              <span className="text-[10px] text-slate-400 mt-0.5 block truncate">
-                {formatTime(topic.updated_at)}
-              </span>
-            </div>
+            <Star className="w-4 h-4 text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27] shrink-0 fill-amber-500/20" />
+            <span className="truncate flex-1">
+              {topic.title || 'Untitled'}
+            </span>
             <button
               onClick={(e) => handleRemove(e, topic.id)}
-              className="text-amber-400 hover:scale-110 transition-transform shrink-0 mt-0.5"
+              className="text-slate-400 hover:text-amber-600 dark:hover:text-[#c58a27] hover:scale-110 transition-transform shrink-0"
               title="Hapus dari topik tersimpan"
             >
-              <Star className="w-3.5 h-3.5 fill-amber-400" />
+              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
             </button>
           </div>
         ))}

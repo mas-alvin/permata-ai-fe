@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import MessageBubble from './MessageBubble';
 import MarkdownRenderer from './MarkdownRenderer';
+import TypingIndicator from '../Typing/TypingIndicator';
 
 export default function MessageList({ messages, onEdit, onRegenerate, onDelete, onReply, isStreaming, partialContent }) {
   const endRef = useRef(null);
@@ -59,14 +60,10 @@ export default function MessageList({ messages, onEdit, onRegenerate, onDelete, 
           </div>
         )}
 
-        {/* Loading dots while waiting for first chunk */}
+        {/* Loading indicator while waiting for first chunk */}
         {isStreaming && !partialContent && (
           <div className="flex justify-start py-1">
-            <div className="flex gap-1.5 items-center px-2">
-              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-            </div>
+            <TypingIndicator />
           </div>
         )}
 

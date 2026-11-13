@@ -11,7 +11,7 @@ import { BookOpenIcon, CheckIcon } from '@heroicons/react/24/outline';
  * Toggle RAG on/off + checklist dokumen (hanya yang berstatus ready).
  * Pilihan dipersisten ke backend via PUT /conversations/{id}/rag-sources.
  */
-export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumentIds, onPersist }) {
+export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumentIds, onPersist, customTrigger }) {
   const dispatch = useAppDispatch();
   const documents = useAppSelector((state) => state.rag.documents);
   const [open, setOpen] = useState(false);
@@ -114,48 +114,59 @@ export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumen
 
   return (
     <div className="relative">
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-          localEnabled && activeCount > 0
-            ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30'
-            : 'text-on-surface-variant border-on-surface/10 hover:bg-surface-container-high'
-        }`}
-        title="Sumber knowledge base"
-      >
-        <BookOpenIcon className="w-4 h-4 text-amber-600/80 dark:text-amber-400/80" />
-        <span className="hidden sm:inline">Knowledge</span>
-        {activeCount > 0 && (
-          <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-[#800020] to-amber-600 text-white text-[10px] font-bold">
-            {activeCount}
-          </span>
-        )}
-      </button>
+      {customTrigger ? (
+        customTrigger({
+          onClick: () => setOpen((prev) => !prev),
+          isOpen: open,
+          activeCount,
+          isEnabled: localEnabled,
+          buttonRef,
+        })
+      ) : (
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={() => setOpen((prev) => !prev)}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+            localEnabled && activeCount > 0
+              ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30'
+              : 'text-on-surface-variant border-on-surface/10 hover:bg-surface-container-high'
+          }`}
+          title="Sumber knowledge base"
+        >
+          <BookOpenIcon className="w-4 h-4 text-amber-600/80 dark:text-amber-400/80" />
+          <span className="hidden sm:inline">Knowledge</span>
+          {activeCount > 0 && (
+            <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-[#800020] to-amber-600 text-white text-[10px] font-bold">
+              {activeCount}
+            </span>
+          )}
+        </button>
+      )}
 
       {open &&
         popoverPos &&
         createPortal(
           <div
             ref={popoverRef}
+            data-rag-portal="true"
             style={{ top: `${popoverPos.top}px`, left: `${popoverPos.left}px`, width: `${popoverPos.width}px` }}
-            className="fixed z-[9999] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-on-surface/10 overflow-hidden"
+            className="fixed z-[9999] bg-white dark:bg-[#19151d] rounded-2xl border border-slate-200 dark:border-[#2a222c] shadow-2xl overflow-hidden"
           >
             {/* Header toggle */}
-            <div className="p-3 border-b border-on-surface/8">
+            <div className="p-3 border-b border-slate-100 dark:border-[#2a222c]">
               <button
                 type="button"
                 onClick={() => setLocalEnabled((prev) => !prev)}
                 className="flex items-center justify-between w-full"
               >
                 <div className="text-left">
-                  <p className="text-sm font-semibold text-on-surface">RAG aktif</p>
-                  <p className="text-[10px] text-on-surface-variant/70">Jawab dari dokumen internal</p>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">RAG aktif</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Jawab dari dokumen internal</p>
                 </div>
                 <span
                   className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                    localEnabled ? 'bg-amber-600' : 'bg-on-surface/15'
+                    localEnabled ? 'bg-amber-600' : 'bg-slate-200 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -171,8 +182,8 @@ export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumen
             <div className="max-h-64 overflow-y-auto custom-scrollbar">
               {readyDocs.length === 0 ? (
                 <div className="p-6 text-center">
-                  <BookOpenIcon className="w-7 h-7 mx-auto text-on-surface-variant/30 mb-2" />
-                  <p className="text-xs text-on-surface-variant/70">
+                  <BookOpenIcon className="w-7 h-7 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Belum ada dokumen siap. Unggah dokumen di Settings → Knowledge Base.
                   </p>
                 </div>
@@ -185,18 +196,18 @@ export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumen
                         <button
                           type="button"
                           onClick={() => toggleDocument(String(doc.id))}
-                          className="flex items-center gap-2.5 w-full px-3 py-2 text-left hover:bg-surface-container-low transition-colors"
+                          className="flex items-center gap-2.5 w-full px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-[#201a24] transition-colors"
                         >
                           <span
                             className={`flex items-center justify-center w-4 h-4 rounded border shrink-0 transition-colors ${
-                              isChecked ? 'bg-amber-600 border-amber-600 text-white' : 'border-on-surface/25'
+                              isChecked ? 'bg-amber-600 border-amber-600 text-white' : 'border-slate-300 dark:border-slate-600'
                             }`}
                           >
                             {isChecked && <CheckIcon className="w-3 h-3 text-white" />}
                           </span>
-                          <span className="text-xs text-on-surface truncate flex-1">{doc.title}</span>
+                          <span className="text-xs text-slate-800 dark:text-slate-200 truncate flex-1">{doc.title}</span>
                           {doc.chunk_count > 0 && (
-                            <span className="text-[10px] text-on-surface-variant/50 shrink-0">{doc.chunk_count}</span>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0">{doc.chunk_count}</span>
                           )}
                         </button>
                       </li>
@@ -206,11 +217,11 @@ export default function RagSourcePicker({ conversationId, ragEnabled, ragDocumen
               )}
             </div>
 
-            <div className="p-2.5 border-t border-on-surface/8">
+            <div className="p-2.5 border-t border-slate-100 dark:border-[#2a222c]">
               <button
                 type="button"
                 onClick={persistAndClose}
-                className="w-full py-1.5 rounded-lg bg-gradient-pro text-white text-xs font-semibold hover:opacity-90 transition-opacity"
+                className="w-full py-1.5 rounded-lg bg-gradient-to-r from-[#800020] via-amber-600 to-amber-500 text-white text-xs font-semibold hover:opacity-90 transition-opacity"
               >
                 Simpan
               </button>

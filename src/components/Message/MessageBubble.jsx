@@ -3,6 +3,7 @@ import MessageActions from './MessageActions';
 import AttachmentPreview from './AttachmentPreview';
 import MarkdownRenderer from './MarkdownRenderer';
 import SelectionReply from './SelectionReply';
+import TypingIndicator from '../Typing/TypingIndicator';
 
 export default function MessageBubble({
   message,
@@ -38,15 +39,11 @@ export default function MessageBubble({
     setEditing(false);
   };
 
-  // Empty assistant message = loading dots
+  // Empty assistant message = typing / thinking indicator
   if (!isUser && !content) {
     return (
       <div className="flex justify-start py-1">
-        <div className="flex gap-1.5 items-center px-2">
-          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-        </div>
+        <TypingIndicator />
       </div>
     );
   }
@@ -55,19 +52,19 @@ export default function MessageBubble({
   if (isUser && editing) {
     return (
       <div className="flex flex-col items-end py-1">
-        <div className="w-full max-w-xl bg-[#40000b]/[0.05] dark:bg-[#40000b]/20 border border-amber-500/30 rounded-2xl rounded-br-sm p-3 space-y-2">
+        <div className="w-full max-w-xl bg-[#40000b]/[0.05] dark:bg-[#40000b]/25 border border-amber-500/30 rounded-2xl rounded-br-sm p-3 space-y-2">
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             autoFocus
             rows={Math.min(8, Math.max(1, draft.split('\n').length))}
-            className="w-full bg-white dark:bg-slate-900 text-sm text-slate-800 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-slate-700 p-2 resize-none focus:outline-none focus:ring-1 focus:ring-amber-500/40"
+            className="w-full bg-white dark:bg-[#19151d] text-sm text-slate-800 dark:text-slate-100 rounded-xl border border-slate-200 dark:border-[#2a222c] p-2 resize-none focus:outline-none focus:ring-1 focus:ring-amber-500/40"
           />
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={cancelEdit}
-              className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-[#19151d] transition-colors"
             >
               Batal
             </button>
@@ -95,7 +92,7 @@ export default function MessageBubble({
             ))}
           </div>
         )}
-        <div className="bg-gradient-to-r from-[#40000b] to-[#600016] text-white border border-[#800020]/40 rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xl shadow-xs">
+        <div className="bg-gradient-to-r from-[#40000b] to-[#600016] dark:from-[#4d0012] dark:via-[#630018] dark:to-[#78001e] text-white border border-[#800020]/40 dark:border-amber-400/35 rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xl shadow-xs dark:shadow-[0_4px_20px_-2px_rgba(128,0,32,0.45)]">
           <span className="text-sm leading-relaxed whitespace-pre-wrap selection:bg-amber-500 selection:text-white">{content}</span>
         </div>
         <MessageActions

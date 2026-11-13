@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import permataIcon from '../assets/permata-icon.png';
+import permataIconDark from '../assets/permata-icon-dark.png';
 import logoLight from '../assets/permatalight.png';
 import logoDark from '../assets/permatadark.png';
 
@@ -58,7 +59,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-center items-center p-4 sm:p-6 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 relative overflow-hidden transition-colors">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center p-4 sm:p-6 bg-[#faf8f6] dark:bg-[#0d0b0e] text-slate-800 dark:text-slate-100 relative overflow-hidden transition-colors">
       {/* Decorative ambient background glows */}
       <div className="absolute -top-32 -left-32 w-80 sm:w-96 h-80 sm:h-96 bg-amber-500/10 dark:bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-80 sm:w-96 h-80 sm:h-96 bg-rose-500/10 dark:bg-rose-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -77,15 +78,20 @@ export default function LoginPage() {
       </div>
 
       {/* Centered Main Card */}
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xl shadow-[#800020]/5 p-6 sm:p-8 relative z-10 backdrop-blur-md">
+      <div className="w-full max-w-md bg-white dark:bg-[#141116] rounded-2xl border border-slate-200/90 dark:border-[#2a222c] shadow-2xl shadow-[#800020]/10 p-6 sm:p-8 relative z-10 backdrop-blur-md transition-colors">
         {/* Logo & Heading */}
         <div className="flex flex-col items-center mb-6 text-center">
           <Link to="/" className="inline-flex items-center justify-center mb-3.5 group">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-800 border border-amber-200/70 dark:border-slate-700 flex items-center justify-center p-2.5 shadow-2xs group-hover:scale-105 transition-transform">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-[#19151d] dark:to-[#221a25] border border-amber-200/70 dark:border-white/10 flex items-center justify-center p-2.5 shadow-2xs group-hover:scale-105 transition-transform">
               <img
                 src={permataIcon}
                 alt="Permata AI Logo"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain dark:hidden"
+              />
+              <img
+                src={permataIconDark}
+                alt="Permata AI Logo"
+                className="w-full h-full object-contain hidden dark:block"
               />
             </div>
           </Link>
@@ -127,7 +133,7 @@ export default function LoginPage() {
                 placeholder="nama@email.com"
                 required
                 autoComplete="email"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 dark:focus:border-amber-400 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#19151d] border border-slate-200 dark:border-[#2a222c] rounded-xl text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 dark:focus:border-amber-400 transition-all"
               />
             </div>
           </div>
@@ -156,7 +162,7 @@ export default function LoginPage() {
                 placeholder="Masukkan kata sandi"
                 required
                 autoComplete="current-password"
-                className="w-full pl-10 pr-11 py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 dark:focus:border-amber-400 transition-all"
+                className="w-full pl-10 pr-11 py-2.5 bg-slate-50 dark:bg-[#19151d] border border-slate-200 dark:border-[#2a222c] rounded-xl text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 dark:focus:border-amber-400 transition-all"
               />
               <button
                 type="button"
@@ -206,8 +212,8 @@ export default function LoginPage() {
 
         {/* Divider */}
         <div className="relative flex items-center justify-center my-6">
-          <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
-          <span className="absolute bg-white dark:bg-slate-900 px-3 text-[11px] uppercase tracking-wider text-slate-400 font-medium">
+          <div className="border-t border-slate-200 dark:border-[#2a222c] w-full" />
+          <span className="absolute bg-white dark:bg-[#141116] px-3 text-[11px] uppercase tracking-wider text-slate-400 font-medium">
             atau
           </span>
         </div>
@@ -217,7 +223,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => alert('Fitur Google login dalam integrasi OAuth')}
-            className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 dark:bg-[#19151d] hover:bg-slate-100 dark:hover:bg-[#201a24] border border-slate-200 dark:border-[#2a222c] rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -243,7 +249,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => alert('Fitur Apple login dalam integrasi OAuth')}
-            className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-50 dark:bg-[#19151d] hover:bg-slate-100 dark:hover:bg-[#201a24] border border-slate-200 dark:border-[#2a222c] rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
           >
             <span className="text-sm font-bold"></span>
             <span>Apple</span>
@@ -251,7 +257,7 @@ export default function LoginPage() {
         </div>
 
         {/* Register CTA */}
-        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800/80 text-center text-xs text-slate-500 dark:text-slate-400">
+        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-[#2a222c] text-center text-xs text-slate-500 dark:text-slate-400">
           Belum punya akun?{' '}
           <Link
             to="/register"

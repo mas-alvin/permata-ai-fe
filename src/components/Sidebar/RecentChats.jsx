@@ -109,13 +109,19 @@ export default function RecentChats({ searchQuery = '' }) {
             <div
               key={chat.id}
               onClick={() => !isEditing && navigate(`/chat/${chat.id}`)}
-              className={`group cursor-pointer px-1.5 rounded-sm flex items-center justify-between gap-2 ${
-                isActive
-                  ? 'bg-[#bcbcbc]/10 dark:bg-[#40000b]/30 text-amber-800 dark:text-amber-300'
-                  : 'hover:bg-slate-100/70 dark:hover:bg-slate-800/70'
+              className={`w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-[#1f1922] text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-[#d49b2c] font-medium text-xs flex items-center gap-3 transition-colors text-left group cursor-pointer ${
+                isActive ? 'bg-amber-500/10 dark:bg-amber-500/10 text-amber-800 dark:text-[#d49b2c] font-semibold' : ''
               }`}
             >
-              <div className="overflow-hidden pr-1 flex-1 min-w-0">
+              <MessageCircle
+                className={`w-4 h-4 shrink-0 transition-colors ${
+                  isActive
+                    ? 'text-amber-700 dark:text-[#d49b2c]'
+                    : 'text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27]'
+                }`}
+              />
+
+              <div className="overflow-hidden flex-1 min-w-0">
                 {isEditing ? (
                   <input
                     type="text"
@@ -125,30 +131,23 @@ export default function RecentChats({ searchQuery = '' }) {
                     onBlur={() => handleSaveTitle(chat.id)}
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 border border-amber-500 rounded-sm px-2 py-1 focus:outline-none transition-all"
+                    className="w-full text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-[#19151d] border border-amber-500 rounded-lg px-2 py-0.5 focus:outline-none transition-all"
                   />
                 ) : (
-                  <>
-                    <h4 className={`text-xs font-medium truncate transition-colors ${
-                      isActive ? 'text-amber-800 dark:text-amber-300 font-semibold' : 'text-slate-800 dark:text-slate-200 group-hover:text-amber-700 dark:group-hover:text-amber-400'
-                    }`}>
-                      {chat.title || 'Percakapan baru'}
-                    </h4>
-                    {/* <span className="text-[10px] text-slate-400 block truncate">
-                      {formatTime(chat.updated_at)}
-                    </span> */}
-                  </>
+                  <span className="truncate block">
+                    {chat.title || 'Percakapan baru'}
+                  </span>
                 )}
               </div>
+
               {!isEditing && (
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center shrink-0">
                   <ConversationMenu
                     chat={chat}
                     onStartRename={handleStartRename}
                     onPin={handlePin}
                     onDelete={handleDelete}
                   />
-                  <MessageCircle className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
                 </div>
               )}
             </div>

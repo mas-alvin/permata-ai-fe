@@ -22,6 +22,7 @@ import {
 import { setUser, setCredits, decrementCredits, clearCredentials } from '../store/slices/authSlice';
 import { conversationService } from '../services/conversationService';
 import permataIcon from '../assets/permata-icon.png';
+import permataIconDark from '../assets/permata-icon-dark.png';
 import { messageService } from '../services/messageService';
 import { authService } from '../services/authService';
 import { sendMessageStream, regenerateMessageStream } from '../services/chatStreamService';
@@ -31,6 +32,7 @@ import { PanelLeft, SlidersHorizontal, Upload, Sparkles } from 'lucide-react';
 import MessageList from '../components/Message/MessageList';
 import ChatInputActive from '../components/Chat/ChatInputActive';
 import HeroSection from '../components/MainContent/HeroSection';
+import ShaderBackground from '../components/MainContent/ShaderBackground';
 import ModelSwitcher from '../components/Chat/ModelSwitcher';
 import ConfirmModal from '../components/ui/ConfirmModal';
 import { ragService } from '../services/ragService';
@@ -449,56 +451,62 @@ export default function ChatPage() {
 
   return (
     <div className="flex-1 flex gap-2.5 overflow-hidden relative min-w-0 h-full">
-      <main className="flex-1 bg-hero-mesh sm:rounded-2xl border-0 sm:border border-white dark:border-slate-800 shadow-soft flex flex-col justify-between overflow-hidden relative min-w-0 h-full">
+      <main className="flex-1 sm:rounded-2xl border-0 sm:border border-white/80 dark:border-[#2a222c] shadow-soft flex flex-col justify-between overflow-hidden relative min-w-0 h-full transition-colors bg-white/70 dark:bg-[#120f14]/80">
+        {/* Background shader: hanya muncul saat chat baru (kosong), hilang saat chat aktif */}
+        {isNewChat && !hasMessages && <ShaderBackground />}
         
         {/* Top Bar inside Card */}
-        <div className="h-12 px-3 sm:px-5 flex items-center justify-between shrink-0 z-10 border-b sm:border-b-0 border-slate-100/60 dark:border-slate-800/60">
+        <div className="relative z-10 h-12 px-3 sm:px-5 flex items-center justify-between shrink-0 border-b sm:border-b-0 border-slate-100/60 dark:border-[#2a222c]/60">
           {/* Left Controls: Sidebar Toggle Button + Model Selector */}
           <div className="flex items-center gap-2">
             <button
               onClick={onToggleSidebar}
-              className="w-8 h-8 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 shadow-2xs flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2a222c] shadow-2xs flex items-center justify-center transition-all active:scale-95 cursor-pointer"
               title="Buka / Tutup Sidebar"
             >
               <PanelLeft className="w-4 h-4" />
             </button>
 
-            <ModelSwitcher />
+            {/* Switch model: mobile only at top bar */}
+            <div className="sm:hidden">
+              <ModelSwitcher />
+            </div>
           </div>
 
           {/* Right Controls inside Card */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => alert('Panel Konfigurasi Model')}
-              className="hidden sm:flex py-1.5 px-3 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-slate-700 hover:border-amber-500/40 transition-all cursor-pointer"
+              className="hidden sm:flex py-1.5 px-3 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 font-medium text-xs items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-[#2a222c] hover:border-amber-500/40 transition-all cursor-pointer"
             >
               <span>Configuration</span>
-              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-600/70 dark:text-amber-400/70" />
+              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-600/70 dark:text-amber-500/80" />
             </button>
 
             <button
               onClick={handleShare}
-              className="py-1.5 px-3 rounded-full bg-white/90 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-slate-700 hover:border-amber-500/40 transition-all cursor-pointer"
+              className="py-1.5 px-3 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-[#2a222c] hover:border-amber-500/40 transition-all cursor-pointer"
             >
               <span>Share</span>
-              <Upload className="w-3.5 h-3.5 text-amber-600/70 dark:text-amber-400/70" />
+              <Upload className="w-3.5 h-3.5 text-amber-600/70 dark:text-amber-500/80" />
             </button>
 
             {/* Gradient Star Avatar Badge */}
             <button
               onClick={() => alert('Profil Permata AI')}
-              className="w-8 h-8 rounded-full p-0.5 bg-amber-50 border border-amber-300/40 shadow-xs flex items-center justify-center hover:scale-105 transition-transform ml-1 cursor-pointer"
+              className="w-8 h-8 rounded-full p-0.5 bg-amber-50 dark:bg-white/5 border border-amber-300/40 dark:border-white/10 shadow-xs flex items-center justify-center hover:scale-105 transition-transform ml-1 cursor-pointer"
               title="Permata AI Workspace"
             >
-              <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center p-1">
-                <img src={permataIcon} alt="Permata AI" className="w-full h-full object-contain" />
+              <div className="w-full h-full rounded-full bg-white dark:bg-[#141116] flex items-center justify-center p-1">
+                <img src={permataIcon} alt="Permata AI" className="w-full h-full object-contain dark:hidden" />
+                <img src={permataIconDark} alt="Permata AI" className="w-full h-full object-contain hidden dark:block" />
               </div>
             </button>
           </div>
         </div>
 
         {/* Scrollable Middle Content */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-2 flex flex-col justify-start sm:justify-center min-h-0">
+        <div className="relative z-10 flex-1 overflow-y-auto px-4 sm:px-8 py-2 flex flex-col justify-start sm:justify-center min-h-0">
           {isNewChat && !hasMessages ? (
             <HeroSection onPrefillSelect={(prompt) => setEditContent(prompt)} />
           ) : (
@@ -521,7 +529,7 @@ export default function ChatPage() {
                   {ragSources.map((src, idx) => (
                     <span
                       key={`${src.document_id}-${idx}`}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-300/50 dark:border-amber-800/50 text-[10px] font-medium text-amber-700 dark:text-amber-300"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-300/50 dark:border-amber-800/50 text-[10px] font-medium text-amber-700 dark:text-[#d49b2c]"
                       title={`Similarity: ${src.similarity}`}
                     >
                       <span className="material-symbols-outlined text-[11px]">menu_book</span>
@@ -537,17 +545,19 @@ export default function ChatPage() {
         </div>
 
         {/* Bottom Chat Input */}
-        <ChatInputActive
-          onSend={handleNewMessage}
-          disabled={isStreaming}
-          prefill={editContent}
-          onPrefillClear={() => setEditContent('')}
-          replyContent={replyContent}
-          onReplyClear={() => setReplyContent(null)}
-          ragConfig={ragConfig}
-          onRagConfigChange={handleRagConfigChange}
-          showQuickActions={isNewChat && !hasMessages}
-        />
+        <div className="relative z-10 shrink-0">
+          <ChatInputActive
+            onSend={handleNewMessage}
+            disabled={isStreaming}
+            prefill={editContent}
+            onPrefillClear={() => setEditContent('')}
+            replyContent={replyContent}
+            onReplyClear={() => setReplyContent(null)}
+            ragConfig={ragConfig}
+            onRagConfigChange={handleRagConfigChange}
+            showQuickActions={isNewChat && !hasMessages}
+          />
+        </div>
 
         <ConfirmModal
           open={!!deleteTarget}

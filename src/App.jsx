@@ -42,7 +42,7 @@ function ChatLayout() {
   const closeSidebar = () => setIsSidebarOpen(false);
 
   return (
-    <div className="text-slate-800 antialiased h-screen w-screen overflow-hidden flex font-sans relative bg-gradient-to-br from-[#E9F1FA] via-[#F2F6FC] to-[#E6EEF8] p-0 sm:p-2 gap-0 sm:gap-2">
+    <div className="text-slate-800 dark:text-slate-100 antialiased h-screen w-screen overflow-hidden flex font-sans relative bg-gradient-to-br from-[#F5F2EF] via-[#FAF8F5] to-[#F0EBE5] dark:from-[#090709] dark:via-[#0d0b0e] dark:to-[#120f14] p-0 sm:p-2 gap-0 sm:gap-2 transition-colors">
       <Sidebar isOpen={isSidebarOpen} onToggle={toggleSidebar} onClose={closeSidebar} />
       <div className="flex-1 min-w-0 h-full flex flex-col relative overflow-hidden">
         <Outlet context={{ onToggleSidebar: toggleSidebar, isSidebarOpen }} />

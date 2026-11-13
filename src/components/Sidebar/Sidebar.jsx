@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import permataIcon from '../../assets/permata-icon.png';
+import permataIconDark from '../../assets/permata-icon-dark.png';
 import { 
   Sparkles, 
   Search, 
@@ -11,7 +12,8 @@ import {
   Code2, 
   FileCheck2, 
   Clock, 
-  MoreHorizontal 
+  MoreHorizontal,
+  X 
 } from 'lucide-react';
 import SavedTopics from './SavedTopics';
 import RecentChats from './RecentChats';
@@ -56,7 +58,7 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
             : 'w-0 -translate-x-full lg:translate-x-0 lg:w-0 overflow-hidden p-0'
         }`}
       >
-        <div className="w-[275px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col justify-between p-3.5 shrink-0 overflow-hidden h-full">
+        <div className="w-[275px] bg-white/95 dark:bg-[#141116]/95 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-[#2a222c] shadow-soft flex flex-col justify-between p-3.5 shrink-0 overflow-hidden h-full">
           {/* Inner container */}
           <div className="w-full flex flex-col justify-between h-full overflow-hidden">
             
@@ -67,13 +69,20 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
               <div className="flex items-center justify-between px-1 pt-0.5 shrink-0">
                 <div 
                   onClick={() => { navigate('/chat/new'); if (window.innerWidth < 1024) onClose(); }} 
-                  className="flex items-center gap-2.5 cursor-pointer group"
+                  className="flex items-center gap-2 cursor-pointer group"
                 >
-                  <img 
-                    src={permataIcon} 
-                    alt="Permata AI" 
-                    className="w-7 h-7 object-contain transition-transform group-hover:scale-105" 
-                  />
+                  <div className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-white/5 border border-amber-200/60 dark:border-white/10 flex items-center justify-center p-1 shadow-2xs group-hover:scale-105 transition-transform">
+                    <img 
+                      src={permataIcon} 
+                      alt="Permata AI" 
+                      className="w-full h-full object-contain dark:hidden" 
+                    />
+                    <img 
+                      src={permataIconDark} 
+                      alt="Permata AI" 
+                      className="w-full h-full object-contain hidden dark:block" 
+                    />
+                  </div>
                   <span className="font-bold text-base text-slate-900 dark:text-white tracking-tight">Permata AI</span>
                 </div>
 
@@ -82,14 +91,14 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                     onClick={() => {
                       document.getElementById('sidebarSearchInput')?.focus();
                     }} 
-                    className="p-1.5 rounded-full text-slate-500 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" 
+                    className="p-1.5 rounded-full text-slate-500 hover:text-amber-700 dark:hover:text-[#c58a27] hover:bg-slate-100 dark:hover:bg-[#1f1922] transition-colors" 
                     title="Cari Chat (⌘F)"
                   >
                     <Search className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={onToggle} 
-                    className="w-8 h-8 rounded-full bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-200/80 hover:text-amber-700 dark:hover:text-amber-400 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all active:scale-95" 
+                    className="w-8 h-8 rounded-full bg-slate-100/90 dark:bg-[#1f1922] hover:bg-slate-200/80 dark:hover:bg-[#29222e] hover:text-amber-700 dark:hover:text-[#c58a27] text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all active:scale-95" 
                     title="Tutup Sidebar"
                   >
                     <PanelLeftClose className="w-4 h-4" />
@@ -97,29 +106,38 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                 </div>
               </div>
 
-              {/* Pill Tombol Utama: Percakapan Baru */}
-              <div className="pt-0.5 shrink-0">
+              {/* Menu Percakapan Baru & Cari Obrolan (Disamakan seperti Eksplorasi Ide / Studio Kreatif) */}
+              <div className="flex flex-col gap-0.5 shrink-0">
                 <button 
                   onClick={() => { navigate('/chat/new'); if (window.innerWidth < 1024) onClose(); }} 
-                  className="w-full py-2.5 px-3.5 rounded-full bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-200/50 dark:border-slate-700/50 hover:border-amber-500/40 font-medium text-xs flex items-center gap-3 transition-all active:scale-[0.98]"
+                  className="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-[#1f1922] text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-[#d49b2c] font-medium text-xs flex items-center gap-3 transition-colors text-left group"
                 >
-                  <PenTool className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+                  <PenTool className="w-4 h-4 text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27] shrink-0" />
                   <span>Percakapan baru</span>
                 </button>
-              </div>
 
-              {/* Search Chats Input */}
-              <div className="relative mt-0.5 shrink-0">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input 
-                  id="sidebarSearchInput"
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari obrolan..." 
-                  className="w-full pl-8 pr-12 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-amber-500/60 transition-all"
-                />
-                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-slate-400 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200/70 dark:border-slate-700">⌘ F</span>
+                <div className="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-[#1f1922] text-slate-700 dark:text-slate-300 font-medium text-xs flex items-center gap-3 transition-colors group">
+                  <Search className="w-4 h-4 text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27] shrink-0" />
+                  <input 
+                    id="sidebarSearchInput"
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Cari obrolan..." 
+                    className="w-full bg-transparent text-xs text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none"
+                  />
+                  {searchQuery ? (
+                    <button 
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  ) : (
+                    <span className="text-[10px] font-medium text-slate-400/80 shrink-0">⌘ F</span>
+                  )}
+                </div>
               </div>
 
               {/* Menu Navigasi Vertikal Gemini */}
@@ -130,24 +148,24 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                     <button 
                       key={item.label}
                       onClick={() => handleQuickNav(item.prompt)} 
-                      className="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-amber-300 font-medium text-xs flex items-center gap-3 transition-colors text-left group"
+                      className="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-[#1f1922] text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-[#d49b2c] font-medium text-xs flex items-center gap-3 transition-colors text-left group"
                     >
-                      <Icon className="w-4 h-4 text-slate-500 group-hover:text-amber-700 dark:group-hover:text-amber-400" />
+                      <Icon className="w-4 h-4 text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27]" />
                       <span>{item.label}</span>
                     </button>
                   );
                 })}
                 <button 
                   onClick={() => alert('Menu lainnya segera hadir')} 
-                  className="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-amber-300 font-medium text-xs flex items-center gap-3 transition-colors text-left group"
+                  className="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-[#1f1922] text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-[#d49b2c] font-medium text-xs flex items-center gap-3 transition-colors text-left group"
                 >
-                  <MoreHorizontal className="w-4 h-4 text-slate-500 group-hover:text-amber-700 dark:group-hover:text-amber-400" />
+                  <MoreHorizontal className="w-4 h-4 text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27]" />
                   <span>Selengkapnya</span>
                 </button>
               </div>
 
               {/* Divider */}
-              <div className="h-px bg-slate-200/70 dark:bg-slate-800 my-0.5 shrink-0" />
+              <div className="h-px bg-slate-200/70 dark:bg-[#2a222c] my-0.5 shrink-0" />
 
               {/* Scrollable Chat Lists */}
               <div className="flex-1 space-y-3">
@@ -161,7 +179,7 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
             </div>
 
             {/* Bottom Section (User Profile Card) */}
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 shrink-0">
+            <div className="pt-2 border-t border-slate-100 dark:border-[#2a222c] shrink-0">
               <WorkspaceFooter />
             </div>
 
