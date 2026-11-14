@@ -9,6 +9,7 @@ export default function SavedTopics({ searchQuery = '' }) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const topics = useAppSelector((state) => state.conversation.topics);
+  const activeId = useAppSelector((state) => state.conversation.activeConversationId);
 
   useEffect(() => {
     topicService
@@ -49,33 +50,46 @@ export default function SavedTopics({ searchQuery = '' }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1.5 px-1">
+      <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 dark:text-slate-500 mb-1.5 px-2">
         <div className="flex items-center gap-1.5">
-          <Star className="w-3.5 h-3.5" />
+          <Star className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
           <span>Topik Tersimpan</span>
         </div>
-        <span className="text-[10px]">{filteredTopics.length}</span>
+        <span className="text-[10px] text-slate-400 dark:text-slate-500">{filteredTopics.length}</span>
       </div>
       <div className="flex flex-col gap-1">
-        {filteredTopics.map((topic) => (
-          <div
-            key={topic.id}
-            onClick={() => navigate(`/chat/${topic.conversation_id}`)}
-            className="w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-[#1f1922] text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-[#d49b2c] font-medium text-xs flex items-center gap-3 transition-colors text-left group cursor-pointer"
-          >
-            <Star className="w-4 h-4 text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27] shrink-0 fill-amber-500/20" />
-            <span className="truncate flex-1">
-              {topic.title || 'Untitled'}
-            </span>
-            <button
-              onClick={(e) => handleRemove(e, topic.id)}
-              className="text-slate-400 hover:text-amber-600 dark:hover:text-[#c58a27] hover:scale-110 transition-transform shrink-0"
-              title="Hapus dari topik tersimpan"
+        {filteredTopics.map((topic) => {
+          const isActive = activeId === String(topic.conversation_id);
+          return (
+            <div
+              key={topic.id}
+              onClick={() => navigate(`/chat/${topic.conversation_id}`)}
+              className={`w-full py-2 px-2.5 rounded-sm font-medium text-xs flex items-center gap-2.5 transition-colors text-left group cursor-pointer ${
+                isActive
+                  ? 'bg-slate-500/10 dark:bg-slate-500/15 text-slate-900 dark:text-slate-100 font-semibold'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-500/10 dark:hover:bg-slate-500/10 hover:text-slate-900 dark:hover:text-white'
+              }`}
             >
-              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-            </button>
-          </div>
-        ))}
+              <Star
+                className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                  isActive
+                    ? 'text-amber-700 dark:text-[#d49b2c] fill-amber-500/40'
+                    : 'text-slate-400 dark:text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27] fill-amber-500/20'
+                }`}
+              />
+              <span className="truncate flex-1">
+                {topic.title || 'Untitled'}
+              </span>
+              <button
+                onClick={(e) => handleRemove(e, topic.id)}
+                className="text-slate-400 hover:text-amber-600 dark:hover:text-[#c58a27] hover:scale-110 transition-transform shrink-0"
+                title="Hapus dari topik tersimpan"
+              >
+                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

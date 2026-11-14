@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import permataIcon from '../../assets/permata-icon.png';
-import permataIconDark from '../../assets/permata-icon-dark.png';
+import PermataLogoLoader from './PermataLogoLoader';
 import { Sparkles } from 'lucide-react';
 
 const THINKING_STEPS = [
@@ -24,12 +23,11 @@ export default function TypingIndicator({ label }) {
 
   return (
     <div className="flex items-center gap-2.5 py-1.5 px-0.5 select-none animate-in fade-in duration-300">
-      {/* AI Avatar Orb with Breathing Aura */}
+      {/* AI Avatar Orb with Breathing Aura and Animated Permata Logo Loader */}
       <div className="relative flex items-center justify-center shrink-0">
-        <span className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#800020] via-amber-500 to-amber-300 opacity-50 blur-xs animate-pulse-glow" />
-        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-[#19151d] border border-amber-500/30 dark:border-amber-400/30 flex items-center justify-center shadow-xs relative z-10 p-1">
-          <img src={permataIcon} alt="Permata AI" className="w-full h-full object-contain dark:hidden animate-float" />
-          <img src={permataIconDark} alt="Permata AI" className="w-full h-full object-contain hidden dark:block animate-float" />
+        <span className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-[#800020] via-amber-500 to-amber-300 opacity-40 blur-xs animate-pulse-glow" />
+        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white dark:bg-[#19151d] border border-amber-500/35 dark:border-amber-400/30 flex items-center justify-center shadow-xs relative z-10 p-1.5">
+          <PermataLogoLoader className="w-full h-full" />
         </div>
       </div>
 

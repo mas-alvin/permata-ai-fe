@@ -457,11 +457,11 @@ export default function ChatPage() {
         
         {/* Top Bar inside Card */}
         <div className="relative z-10 h-12 px-3 sm:px-5 flex items-center justify-between shrink-0 border-b sm:border-b-0 border-slate-100/60 dark:border-[#2a222c]/60">
-          {/* Left Controls: Sidebar Toggle Button + Model Selector */}
+          {/* Left Controls: Sidebar Toggle Button (Mobile) + Model Selector (Mobile) */}
           <div className="flex items-center gap-2">
             <button
               onClick={onToggleSidebar}
-              className="w-8 h-8 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2a222c] shadow-2xs flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+              className="sm:hidden w-8 h-8 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-[#2a222c] shadow-2xs flex items-center justify-center transition-all active:scale-95 cursor-pointer"
               title="Buka / Tutup Sidebar"
             >
               <PanelLeft className="w-4 h-4" />

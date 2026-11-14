@@ -85,12 +85,12 @@ export default function PinnedChats({ searchQuery = '' }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1.5 px-1">
+      <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 dark:text-slate-500 mb-1.5 px-2">
         <div className="flex items-center gap-1.5">
           <Pin className="w-3.5 h-3.5 rotate-45 text-amber-500" />
           <span>Disematkan</span>
         </div>
-        <span className="text-[10px]">{pinnedConversations.length}</span>
+        <span className="text-[10px] text-slate-400 dark:text-slate-500">{pinnedConversations.length}</span>
       </div>
       <div className="flex flex-col gap-1">
         {pinnedConversations.map((chat) => {
@@ -101,15 +101,17 @@ export default function PinnedChats({ searchQuery = '' }) {
             <div
               key={chat.id}
               onClick={() => !isEditing && navigate(`/chat/${chat.id}`)}
-              className={`w-full py-2 px-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-[#1f1922] text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-[#d49b2c] font-medium text-xs flex items-center gap-3 transition-colors text-left group cursor-pointer ${
-                isActive ? 'bg-amber-500/10 dark:bg-amber-500/10 text-amber-800 dark:text-[#d49b2c] font-semibold' : ''
+              className={`w-full py-0.5 px-2.5 rounded-sm font-medium text-xs flex items-center gap-2.5 transition-colors text-left group cursor-pointer ${
+                isActive
+                  ? 'bg-slate-500/10 dark:bg-slate-500/15 text-slate-900 dark:text-slate-100 font-semibold'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-500/10 dark:hover:bg-slate-500/10 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Pin
-                className={`w-4 h-4 shrink-0 rotate-45 transition-colors ${
+                className={`w-3.5 h-3.5 shrink-0 rotate-45 transition-colors ${
                   isActive
                     ? 'text-amber-700 dark:text-[#d49b2c] fill-amber-700/30'
-                    : 'text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27]'
+                    : 'text-slate-400 dark:text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27]'
                 }`}
               />
 
@@ -123,7 +125,7 @@ export default function PinnedChats({ searchQuery = '' }) {
                     onBlur={() => handleSaveTitle(chat.id)}
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-[#19151d] border border-amber-500 rounded-lg px-2 py-0.5 focus:outline-none transition-all"
+                    className="w-full text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-[#19151d] border border-amber-500 rounded-sm px-2 py-0.5 focus:outline-none transition-all"
                   />
                 ) : (
                   <span className="truncate block">
