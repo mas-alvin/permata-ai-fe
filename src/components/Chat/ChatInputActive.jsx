@@ -1,6 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppSelector } from '../../store/hooks';
-import { Paperclip, Lightbulb, AudioLines, Sparkles, X, ArrowUpRight, Timer, Plus, BookOpen } from 'lucide-react';
+import { 
+  Paperclip, 
+  Lightbulb, 
+  AudioLines, 
+  Sparkles, 
+  X, 
+  ArrowUpRight, 
+  Timer, 
+  Plus, 
+  BookOpen,
+  ArrowUp,
+  Square,
+  Pause
+} from 'lucide-react';
 import { attachmentService } from '../../services/attachmentService';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import RagSourcePicker from '../Rag/RagSourcePicker';
@@ -22,6 +35,8 @@ function formatSize(bytes) {
 export default function ChatInputActive({ 
   onSend, 
   disabled = false, 
+  isStreaming = false,
+  onStop,
   prefill = '', 
   onPrefillClear, 
   replyContent = null, 
@@ -462,15 +477,29 @@ export default function ChatInputActive({
                   {/* <span className="hidden xs:inline">Voice</span> */}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={sendDisabled || !input.trim()}
-                  className="w-8 h-8 py-1 px-3 sm:px-3.5 rounded-full bg-send-btn hover:opacity-95 text-white font-semibold text-[11px] flex items-center gap-1 shadow-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3 fill-amber-200 text-amber-200" />
-                  {/* <span>Send</span> */}
-                </button>
+                {/* Tombol Kirim / Berhenti dengan Solid Background */}
+                {isStreaming ? (
+                  <button
+                    type="button"
+                    onClick={onStop}
+                    className="w-8 h-8 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer ring-2 ring-slate-400/20"
+                    title="Hentikan pembuatan respon (Stop)"
+                    aria-label="Berhenti"
+                  >
+                    <Square className="w-3 h-3 fill-current" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={sendDisabled || !input.trim()}
+                    className="w-8 h-8 rounded-full bg-amber-600 hover:bg-amber-700 dark:bg-[#c58a27] dark:hover:bg-[#b0781c] text-white font-semibold flex items-center justify-center shadow-sm transition-all active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer"
+                    title="Kirim pesan"
+                    aria-label="Kirim"
+                  >
+                    <ArrowUp className="w-4 h-4 text-white stroke-[2.5]" />
+                  </button>
+                )}
               </div>
             </div>
           </div>

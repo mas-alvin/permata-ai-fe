@@ -39,6 +39,7 @@ export async function sendGuestMessageStream(
 
     await consumeSseStream(response, onChunk, onDone, onError);
   } catch (error) {
+    if (error.name === 'AbortError') return;
     onError(error);
   }
 }

@@ -193,57 +193,6 @@ export default function MessageBubble({
         </div>
       </SelectionReply>
 
-      {/* Quick Download Card jika jawaban berupa dokumen terstruktur */}
-      {isDocumentLike && (
-        <div className="mt-3.5 mb-1 px-1 w-full max-w-xl">
-          <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
-                <FileDown className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
-                  Dokumen Fisik Siap Diunduh
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  Dibungkus otomatis oleh Laravel menjadi file resmi
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-              <button
-                type="button"
-                onClick={() => handleQuickDownload('pdf')}
-                disabled={!!downloadingFormat}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-700 dark:text-red-300 text-xs font-semibold border border-red-500/20 transition-all cursor-pointer disabled:opacity-50"
-              >
-                {downloadingFormat === 'pdf' ? (
-                  <span className="material-symbols-outlined text-[13px] animate-spin">progress_activity</span>
-                ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                )}
-                <span>PDF (.pdf)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickDownload('word')}
-                disabled={!!downloadingFormat}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-semibold border border-blue-500/20 transition-all cursor-pointer disabled:opacity-50"
-              >
-                {downloadingFormat === 'word' ? (
-                  <span className="material-symbols-outlined text-[13px] animate-spin">progress_activity</span>
-                ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                )}
-                <span>Word (.docx)</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <MessageActions
         content={content}
         role="assistant"

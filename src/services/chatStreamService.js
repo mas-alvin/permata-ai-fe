@@ -98,7 +98,8 @@ export async function sendMessageStream(
   onDone,
   onError,
   attachments = [],
-  ragParams = null
+  ragParams = null,
+  signal = null
 ) {
   try {
     const body = { content, model_id: modelId, attachments };
@@ -114,6 +115,7 @@ export async function sendMessageStream(
       {
         method: 'POST',
         body: JSON.stringify(body),
+        signal,
       }
     );
 
@@ -124,6 +126,9 @@ export async function sendMessageStream(
 
     await consumeSseStream(response, onChunk, onDone, onError);
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return;
+    }
     onError(error);
   }
 }
@@ -132,11 +137,13 @@ export async function regenerateMessageStream(
   messageId,
   onChunk,
   onDone,
-  onError
+  onError,
+  signal = null
 ) {
   try {
     const response = await fetchWithAuth(`${API_BASE}/messages/${messageId}/regenerate`, {
       method: 'POST',
+      signal,
     });
 
     if (!response.ok) {
@@ -146,7 +153,24 @@ export async function regenerateMessageStream(
 
     await consumeSseStream(response, onChunk, onDone, onError);
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return;
+    }
     onError(error);
+  }
+}
+
+/**
+ * Beritahu backend untuk memutus proses generasi AI pada percakapan ini.
+ */
+export async function stopConversationStream(conversationId) {
+  if (!conversationId || conversationId === 'new') return;
+  try {
+    await fetchWithAuth(`${API_BASE}/conversations/${conversationId}/stop`, {
+      method: 'POST',
+    });
+  } catch (err) {
+    console.warn('Gagal memanggil stop di backend:', err);
   }
 }
 

@@ -10,6 +10,7 @@ import {
   removeMessage,
   removeMessagesAfter,
   insertMessageAfter,
+  clearPlaceholderMessages,
   selectMessagesByConversationId,
   setActiveConversation,
 } from '../store/slices/conversationSlice';
@@ -25,7 +26,7 @@ import permataIcon from '../assets/permata-icon.png';
 import permataIconDark from '../assets/permata-icon-dark.png';
 import { messageService } from '../services/messageService';
 import { authService } from '../services/authService';
-import { sendMessageStream, regenerateMessageStream } from '../services/chatStreamService';
+import { sendMessageStream, regenerateMessageStream, stopConversationStream } from '../services/chatStreamService';
 import { sendGuestMessageStream } from '../services/guestChatService';
 import { useOutletContext } from 'react-router-dom';
 import { PanelLeft, SlidersHorizontal, Upload, Sparkles, FileDown } from 'lucide-react';
@@ -140,9 +141,65 @@ export default function ChatPage() {
       .catch(() => {});
   }, [dispatch, isAuthenticated]);
 
+  const abortControllerRef = useRef(null);
+  const pollIntervalRef = useRef(null);
+
+  // Hentikan proses streaming chat jika tombol berhenti ditekan user
+  const handleStopStream = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+
+    if (id && id !== 'new') {
+      stopConversationStream(id);
+    }
+
+    const partial = partialContentRef.current;
+    if (partial && partial.trim()) {
+      dispatch(
+        commitStreamedMessage({
+          conversationId: id || 'new',
+          message: {
+            id: Date.now() + 1,
+            role: 'assistant',
+            content: partial,
+            created_at: new Date().toISOString(),
+          },
+        })
+      );
+    }
+
+    if (id && id !== 'new') {
+      dispatch(clearPlaceholderMessages(id));
+    }
+    hasOptimisticRef.current = false;
+    dispatch(endStream());
+  };
+
   // Stream a fresh AI answer for an assistant message, replacing the old one.
   // Dipakai bersama oleh "regenerate" dan "edit & kirim ulang".
   const regenerateAssistant = (assistantMessage) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+
+    hasOptimisticRef.current = true;
+    if (id && id !== 'new') {
+      dispatch(clearPlaceholderMessages(id));
+    }
     dispatch(startStream());
     regenerateMessageStream(
       assistantMessage.id,
@@ -150,6 +207,7 @@ export default function ChatPage() {
       ({ fullContent: streamedText, creditsRemaining, creditsDeducted }) => {
         const fullContent = streamedText || partialContentRef.current;
         dispatch(endStream());
+        hasOptimisticRef.current = false;
         dispatch(
           commitStreamedMessage({
             conversationId: id,
@@ -171,9 +229,11 @@ export default function ChatPage() {
         syncMessagesFromServer(id);
       },
       (err) => {
+        hasOptimisticRef.current = false;
         dispatch(endStream());
         setError(err?.message || 'Terjadi kesalahan saat regenerasi.');
-      }
+      },
+      controller.signal
     );
   };
 
@@ -200,6 +260,14 @@ export default function ChatPage() {
 
     // 3. JANGAN hapus jawaban lama — biarkan tetap terlihat (percabangan percakapan)
     //    Stream jawaban baru dan sisipkan SETELAH pesan user yang baru diedit
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    hasOptimisticRef.current = true;
+    if (id && id !== 'new') {
+      dispatch(clearPlaceholderMessages(id));
+    }
     dispatch(startStream());
     regenerateMessageStream(
       assistantMessage.id,
@@ -207,6 +275,7 @@ export default function ChatPage() {
       ({ fullContent: streamedText, creditsRemaining, creditsDeducted }) => {
         const fullContent = streamedText || partialContentRef.current;
         dispatch(endStream());
+        hasOptimisticRef.current = false;
         
         // Buat pesan assistant baru dengan ID sementara
         const newAssistantMessage = {
@@ -233,6 +302,7 @@ export default function ChatPage() {
         syncMessagesFromServer(id);
       },
       (err) => {
+        hasOptimisticRef.current = false;
         dispatch(endStream());
         setError(err?.message || 'Terjadi kesalahan saat regenerasi.');
       }
@@ -273,6 +343,12 @@ export default function ChatPage() {
     if (message.role !== 'assistant') return;
     setError(null);
 
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    dispatch(clearPlaceholderMessages(id));
+
     // Optimistically remove the assistant message (and anything after it)
     dispatch(removeMessagesAfter({ conversationId: id, messageId: message.id, inclusive: true }));
     regenerateAssistant(message);
@@ -285,14 +361,63 @@ export default function ChatPage() {
     }
     setLoading(true);
     setError(null);
+
     conversationService
       .get(id)
       .then((res) => {
         const apiMessages = res.data.messages || [];
-        // Don't overwrite if we have optimistic messages
         if (!hasOptimisticRef.current && apiMessages.length > 0) {
           dispatch(setMessages({ conversationId: id, messages: apiMessages }));
         }
+
+        // Jika pengerjaan AI masih berjalan di latar belakang saat halaman di-refresh:
+        // HANYA pasang placeholder jika pesan user baru saja dikirim (< 2 menit yang lalu)
+        // dan frontend TIDAK sedang aktif streaming
+        const lastMsg = apiMessages[apiMessages.length - 1];
+        const isRecentUserMsg =
+          lastMsg &&
+          lastMsg.role === 'user' &&
+          lastMsg.created_at &&
+          Date.now() - new Date(lastMsg.created_at).getTime() < 120000;
+
+        if (!hasOptimisticRef.current && !isStreaming && isRecentUserMsg) {
+          // Tampilkan typing indicator placeholder
+          dispatch(
+            setMessages({
+              conversationId: id,
+              messages: [
+                ...apiMessages,
+                { id: 'bg-in-progress', role: 'assistant', content: '', created_at: new Date().toISOString() },
+              ],
+            })
+          );
+
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+
+          let attempts = 0;
+          pollIntervalRef.current = setInterval(() => {
+            attempts++;
+            conversationService
+              .get(id)
+              .then((pollRes) => {
+                const updatedMessages = pollRes.data.messages || [];
+                const updatedLast = updatedMessages[updatedMessages.length - 1];
+                if (updatedLast && updatedLast.role === 'assistant') {
+                  if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+                  pollIntervalRef.current = null;
+                  dispatch(setMessages({ conversationId: id, messages: updatedMessages }));
+                } else if (attempts >= 45) {
+                  if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+                  pollIntervalRef.current = null;
+                }
+              })
+              .catch(() => {
+                if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+              });
+          }, 2000);
+        }
+
         // Muat preferensi RAG percakapan (Fase 7).
         setRagConfig({
           ragEnabled: !!res.data.rag_enabled,
@@ -306,11 +431,26 @@ export default function ChatPage() {
         setError('Gagal memuat percakapan.');
         setLoading(false);
       });
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
   }, [id, dispatch]);
 
   const handleNewMessage = async (content, attachments = []) => {
     setError(null);
     let conversationId = id;
+
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    if (conversationId && conversationId !== 'new') {
+      dispatch(clearPlaceholderMessages(conversationId));
+    }
 
     // ── Mode tamu: belum login ──────────────────────────────────────────
     // Tamu memakai endpoint khusus /guest/chat yang dibatasi kuota harian
@@ -340,6 +480,12 @@ export default function ChatPage() {
       dispatch(appendMessage({ conversationId: guestConvId, message: userMsg }));
       dispatch(startStream());
 
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       sendGuestMessageStream(
         content,
         (chunk) => dispatch(appendStreamChunk(chunk)),
@@ -365,7 +511,8 @@ export default function ChatPage() {
         (err) => {
           dispatch(endStream());
           setError(err?.message || 'Terjadi kesalahan saat streaming.');
-        }
+        },
+        controller.signal
       );
       return;
     }
@@ -397,6 +544,12 @@ export default function ChatPage() {
       hasOptimisticRef.current = true;
       dispatch(appendMessage({ conversationId, message: userMsg }));
       dispatch(startStream());
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
       sendMessageStream(
         conversationId,
@@ -432,7 +585,8 @@ export default function ChatPage() {
           setError(err?.message || 'Terjadi kesalahan saat streaming.');
         },
         attachments,
-        { ragEnabled: ragConfig.ragEnabled, ragDocumentIds: ragConfig.ragDocumentIds }
+        { ragEnabled: ragConfig.ragEnabled, ragDocumentIds: ragConfig.ragDocumentIds },
+        controller.signal
       );
     } catch (err) {
       setError('Gagal memproses pesan.');
@@ -669,6 +823,8 @@ export default function ChatPage() {
           <ChatInputActive
             onSend={handleNewMessage}
             disabled={isStreaming}
+            isStreaming={isStreaming}
+            onStop={handleStopStream}
             prefill={editContent}
             onPrefillClear={() => setEditContent('')}
             replyContent={replyContent}

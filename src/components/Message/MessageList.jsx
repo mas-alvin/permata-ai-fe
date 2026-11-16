@@ -32,6 +32,21 @@ export default function MessageList({ messages, onEdit, onRegenerate, onDelete, 
     }
   }, [messages.length, partialContent, isStreaming, userScrolledUp]);
 
+  // Saring pesan agar TIDAK PERNAH menampilkan animasi loading ganda:
+  // 1. Jika streaming sedang aktif (isStreaming), sembunyikan placeholder/pesan kosong di riwayat
+  //    karena streaming indicator di bagian bawah sudah mewakili proses berpikir AI.
+  // 2. Jika tidak streaming, sembunyikan pesan asisten kosong yang bukan pesan terakhir.
+  const displayMessages = messages.filter((msg, idx) => {
+    const isEmptyAssistant = msg.role === 'assistant' && (!msg.content || msg.content.trim() === '');
+    if (isStreaming && (isEmptyAssistant || msg.id === 'bg-in-progress')) {
+      return false;
+    }
+    if (isEmptyAssistant && idx !== messages.length - 1) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <div
       ref={containerRef}
@@ -39,11 +54,11 @@ export default function MessageList({ messages, onEdit, onRegenerate, onDelete, 
       onScroll={handleScroll}
     >
       <div className="max-w-4xl mx-auto space-y-2 w-full min-w-0">
-        {messages.map((msg, idx) => (
+        {displayMessages.map((msg, idx) => (
           <MessageBubble
             key={msg.id ?? idx}
             message={msg}
-            isLast={idx === messages.length - 1}
+            isLast={idx === displayMessages.length - 1}
             onEdit={onEdit}
             onRegenerate={onRegenerate}
             onDelete={onDelete}

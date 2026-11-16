@@ -90,6 +90,14 @@ const conversationSlice = createSlice({
       const id = action.payload;
       state.topics = state.topics.filter((t) => t.id !== id);
     },
+    clearPlaceholderMessages(state, action) {
+      const conversationId = action.payload;
+      const list = state.messages[conversationId];
+      if (!list) return;
+      state.messages[conversationId] = list.filter(
+        (m) => m.id !== 'bg-in-progress' && !(m.role === 'assistant' && (!m.content || m.content.trim() === ''))
+      );
+    },
     // Reset penuh state percakapan — dipakai saat login (chat tamu dihapus)
     // dan saat logout (kembali ke mode tamu dengan state bersih).
     clearConversations(state) {
@@ -121,6 +129,7 @@ export const {
   setTopics,
   addTopic,
   removeTopic,
+  clearPlaceholderMessages,
   clearConversations,
 } = conversationSlice.actions;
 
