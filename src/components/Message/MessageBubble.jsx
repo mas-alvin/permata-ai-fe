@@ -4,6 +4,8 @@ import AttachmentPreview from './AttachmentPreview';
 import MarkdownRenderer from './MarkdownRenderer';
 import SelectionReply from './SelectionReply';
 import TypingIndicator from '../Typing/TypingIndicator';
+import { FileDown, Download } from 'lucide-react';
+import { documentService } from '../../services/documentService';
 
 function parseUserContent(content) {
   if (typeof content === 'string' && content.startsWith('> ')) {
@@ -22,6 +24,20 @@ function parseUserContent(content) {
   return { quote: null, text: content };
 }
 
+function extractTitleFromContent(content) {
+  if (!content) return 'Dokumen Permata AI';
+  const match = content.match(/^#+\s*(.+)$/m);
+  if (match && match[1]) {
+    return match[1].trim().replace(/[*_`]/g, '');
+  }
+  const firstLine = content.split('\n').find((l) => l.trim().length > 0);
+  if (firstLine) {
+    const cleaned = firstLine.replace(/[*_#`]/g, '').trim();
+    if (cleaned.length > 0) return cleaned.slice(0, 60);
+  }
+  return 'Dokumen Permata AI';
+}
+
 export default function MessageBubble({
   message,
   isLast,
@@ -34,7 +50,21 @@ export default function MessageBubble({
   const content = message.content || '';
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(content);
+  const [downloadingFormat, setDownloadingFormat] = useState(null); // 'pdf' | 'word' | null
   const attachments = message.attachments || [];
+
+  const documentTitle = extractTitleFromContent(content);
+  // Deteksi apakah pesan ini terstruktur seperti dokumen formal (memiliki judul/sub-judul dan isi terstruktur)
+  const isDocumentLike =
+    !isUser &&
+    content.length > 180 &&
+    (/^#+\s/m.test(content) ||
+     content.includes('Ringkasan Eksekutif') ||
+     content.includes('Dokumen') ||
+     content.includes('Laporan') ||
+     content.includes('Panduan') ||
+     content.includes('CRUD') ||
+     /(unduh pdf|unduh word|dokumen fisik|\.pdf|\.docx)/i.test(content));
 
   const startEdit = () => {
     setDraft(content);
@@ -54,6 +84,26 @@ export default function MessageBubble({
     }
     onEdit?.(message, trimmed);
     setEditing(false);
+  };
+
+  const handleQuickDownload = async (format) => {
+    try {
+      setDownloadingFormat(format);
+      await documentService.exportDocument({
+        format,
+        title: documentTitle,
+        content,
+        meta: {
+          document_type: 'Dokumen Formal AI',
+          author: 'Permata AI Assistant',
+        },
+      });
+    } catch (err) {
+      console.error('Download error:', err);
+      alert('Gagal mengunduh dokumen. Silakan coba kembali.');
+    } finally {
+      setDownloadingFormat(null);
+    }
   };
 
   // Empty assistant message = typing / thinking indicator
@@ -128,12 +178,13 @@ export default function MessageBubble({
           isLast={isLast}
           onEdit={onEdit ? startEdit : undefined}
           onDelete={onDelete ? () => onDelete(message) : undefined}
+          title={documentTitle}
         />
       </div>
     );
   }
 
-  // AI message: no bubble, plain text + actions on hover
+  // AI message: no bubble, plain text + actions on hover + optional document quick download banner
   return (
     <div className="flex flex-col items-start py-1 group w-full min-w-0">
       <SelectionReply onReply={onReply}>
@@ -141,12 +192,66 @@ export default function MessageBubble({
           <MarkdownRenderer content={content} />
         </div>
       </SelectionReply>
+
+      {/* Quick Download Card jika jawaban berupa dokumen terstruktur */}
+      {isDocumentLike && (
+        <div className="mt-3.5 mb-1 px-1 w-full max-w-xl">
+          <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <FileDown className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                  Dokumen Fisik Siap Diunduh
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                  Dibungkus otomatis oleh Laravel menjadi file resmi
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={() => handleQuickDownload('pdf')}
+                disabled={!!downloadingFormat}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-700 dark:text-red-300 text-xs font-semibold border border-red-500/20 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {downloadingFormat === 'pdf' ? (
+                  <span className="material-symbols-outlined text-[13px] animate-spin">progress_activity</span>
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                )}
+                <span>PDF (.pdf)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickDownload('word')}
+                disabled={!!downloadingFormat}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-semibold border border-blue-500/20 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {downloadingFormat === 'word' ? (
+                  <span className="material-symbols-outlined text-[13px] animate-spin">progress_activity</span>
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                )}
+                <span>Word (.docx)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <MessageActions
         content={content}
         role="assistant"
         isLast={isLast}
         onRegenerate={onRegenerate ? () => onRegenerate(message) : undefined}
         onDelete={onDelete ? () => onDelete(message) : undefined}
+        onReply={onReply}
+        title={documentTitle}
       />
     </div>
   );

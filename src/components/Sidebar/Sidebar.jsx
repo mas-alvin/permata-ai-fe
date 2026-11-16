@@ -14,7 +14,8 @@ import {
   FileCheck2, 
   Clock, 
   MoreHorizontal,
-  MessageSquare
+  MessageSquare,
+  FileDown
 } from 'lucide-react';
 import SavedTopics from './SavedTopics';
 import RecentChats from './RecentChats';
@@ -24,12 +25,14 @@ import RequireAuth from './RequireAuth';
 import GuestNotice from './GuestNotice';
 import SearchModal from '../Search/SearchModal';
 import MoreFeaturesModal from './MoreFeaturesModal';
+import DocumentGeneratorModal from '../Document/DocumentGeneratorModal';
 
 export default function Sidebar({ isOpen, onToggle, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isMoreFeaturesOpen, setIsMoreFeaturesOpen] = useState(false);
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const isNewChat = location.pathname === '/chat/new' || location.pathname === '/chat' || location.pathname === '/';
 
   const quickNavItems = [
@@ -71,6 +74,19 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
     if (window.innerWidth < 640) onClose();
   };
 
+  const handleGenerateDocument = ({ prompt, title, mode, targetFormat }) => {
+    navigate('/chat/new', {
+      state: {
+        prefill: prompt,
+        mode: `${mode} (${targetFormat.toUpperCase()})`,
+        documentTitle: title,
+        targetFormat,
+        timestamp: Date.now(),
+      },
+    });
+    if (window.innerWidth < 640) onClose();
+  };
+
   // Shortcut global: Cmd+K / Ctrl+K atau Cmd+F / Ctrl+F untuk membuka modal pencarian
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
@@ -107,6 +123,13 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
       <MoreFeaturesModal
         isOpen={isMoreFeaturesOpen}
         onClose={() => setIsMoreFeaturesOpen(false)}
+      />
+
+      {/* Modal Generator Dokumen Resmi (PDF & Word) */}
+      <DocumentGeneratorModal
+        isOpen={isDocModalOpen}
+        onClose={() => setIsDocModalOpen(false)}
+        onGenerate={handleGenerateDocument}
       />
 
       {/* Sidebar Container */}
@@ -211,6 +234,21 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                     </button>
                   );
                 })}
+                {/* Generator Dokumen (PDF / Word) */}
+                <button 
+                  type="button"
+                  onClick={() => setIsDocModalOpen(true)} 
+                  className="w-full py-2 px-2.5 rounded-sm hover:bg-slate-500/10 dark:hover:bg-slate-500/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium text-xs flex items-center justify-between transition-colors text-left group cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <FileDown className="w-4 h-4 text-amber-600 dark:text-[#d49b2c] group-hover:scale-110 shrink-0 transition-transform" />
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">Buat Dokumen</span>
+                  </div>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold uppercase tracking-wider">
+                    PDF &bull; Word
+                  </span>
+                </button>
+
                 <button 
                   type="button"
                   onClick={() => setIsMoreFeaturesOpen(true)} 
@@ -342,6 +380,21 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                   </div>
                 );
               })}
+
+              {/* Generator Dokumen Button in Collapsed Rail */}
+              <div className="relative group/tip flex justify-center w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsDocModalOpen(true)}
+                  className="w-10 h-10 rounded-sm hover:bg-slate-500/10 dark:hover:bg-slate-500/10 text-slate-400 dark:text-slate-500 hover:text-amber-700 dark:hover:text-[#d49b2c] flex items-center justify-center transition-all cursor-pointer group"
+                  aria-label="Generator Dokumen (PDF & Word)"
+                >
+                  <FileDown className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                </button>
+                <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900/90 dark:bg-[#1c1720] text-white text-[11px] font-medium rounded-sm shadow-xl pointer-events-none whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity z-50">
+                  Generator Dokumen (PDF / Word)
+                </div>
+              </div>
 
               {/* More Features Modal Button in Collapsed Rail */}
               <div className="relative group/tip flex justify-center w-full">

@@ -28,7 +28,7 @@ import { authService } from '../services/authService';
 import { sendMessageStream, regenerateMessageStream } from '../services/chatStreamService';
 import { sendGuestMessageStream } from '../services/guestChatService';
 import { useOutletContext } from 'react-router-dom';
-import { PanelLeft, SlidersHorizontal, Upload, Sparkles } from 'lucide-react';
+import { PanelLeft, SlidersHorizontal, Upload, Sparkles, FileDown } from 'lucide-react';
 import MessageList from '../components/Message/MessageList';
 import ChatInputActive from '../components/Chat/ChatInputActive';
 import HeroSection from '../components/MainContent/HeroSection';
@@ -36,6 +36,7 @@ import ShaderBackground from '../components/MainContent/ShaderBackground';
 import ModelSwitcher from '../components/Chat/ModelSwitcher';
 import ConfirmModal from '../components/ui/ConfirmModal';
 import { ragService } from '../services/ragService';
+import { documentService } from '../services/documentService';
 
 export default function ChatPage() {
   const { id } = useParams();
@@ -58,6 +59,9 @@ export default function ChatPage() {
   const [editContent, setEditContent] = useState('');
   const [activeMode, setActiveMode] = useState(null);
   const [replyContent, setReplyContent] = useState(null);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const exportMenuRef = useRef(null);
 
   // Sinkronisasi prefill dan mode dari menu Sidebar (quickNav / template modal)
   useEffect(() => {
@@ -451,6 +455,56 @@ export default function ChatPage() {
     setReplyContent(null);
   }, [id]);
 
+  // Tutup dropdown ekspor saat klik di luar area
+  useEffect(() => {
+    if (!exportDropdownOpen) return;
+    const handleClickOutside = (e) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target)) {
+        setExportDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [exportDropdownOpen]);
+
+  const handleExportConversation = async (format) => {
+    if (!conversation || conversation.length === 0) {
+      alert('Belum ada pesan di percakapan ini untuk diekspor.');
+      return;
+    }
+    try {
+      setIsExporting(true);
+      if (id && id !== 'new') {
+        await documentService.exportConversation(id, format);
+      } else {
+        const activeConv = conversationsList.find((c) => String(c.id) === String(id));
+        const title = activeConv?.title || 'Transkrip Obrolan Permata AI';
+        const transcript = conversation
+          .map((m) => {
+            const sender = m.role === 'assistant' ? '🤖 **Permata AI**' : '👤 **Pengguna**';
+            return `### ${sender}\n\n${m.content}\n\n---`;
+          })
+          .join('\n\n');
+
+        await documentService.exportDocument({
+          format,
+          title,
+          content: transcript,
+          meta: {
+            document_type: 'Transkrip Percakapan',
+            author: user?.name ?? 'Pengguna Permata AI',
+          },
+        });
+      }
+      setExportDropdownOpen(false);
+    } catch (err) {
+      console.error('Conversation export error:', err);
+      alert('Gagal mengekspor percakapan.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const handleShare = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
@@ -499,6 +553,60 @@ export default function ChatPage() {
               <span>Configuration</span>
               <SlidersHorizontal className="w-3.5 h-3.5 text-slate-600/70 dark:text-slate-100/80" />
             </button>
+
+            {/* Tombol Ekspor Seluruh Percakapan (PDF & Word) */}
+            {hasMessages && (
+              <div className="relative" ref={exportMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setExportDropdownOpen((prev) => !prev)}
+                  disabled={isExporting}
+                  className="py-1.5 px-3 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-[#2a222c] hover:border-slate-500/40 transition-all cursor-pointer"
+                  title="Ekspor percakapan ke file fisik (PDF / Word)"
+                >
+                  {isExporting ? (
+                    <span className="material-symbols-outlined text-[14px] animate-spin text-amber-600">progress_activity</span>
+                  ) : (
+                    <FileDown className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
+                  )}
+                  <span>Ekspor</span>
+                </button>
+
+                {exportDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-[#1a151d] rounded-xl border border-slate-200 dark:border-[#2a222c] shadow-xl py-1 z-30 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-3 py-1.5 border-b border-slate-100 dark:border-[#241d27] text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                      Ekspor Percakapan
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleExportConversation('pdf')}
+                      className="w-full px-3 py-2 text-left flex items-center justify-between text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#241d27] transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
+                        <span className="font-medium">Dokumen PDF</span>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-mono font-bold">
+                        .pdf
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleExportConversation('word')}
+                      className="w-full px-3 py-2 text-left flex items-center justify-between text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#241d27] transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
+                        <span className="font-medium">Microsoft Word</span>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-mono font-bold">
+                        .docx
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <button
               onClick={handleShare}
