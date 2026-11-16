@@ -262,7 +262,7 @@ export default function WorkspaceFooter({ collapsed = false }) {
           </div>
 
           {menuOpen && (
-            <div className="absolute bottom-full right-0 mb-2 w-56 bg-white dark:bg-[#19151d] rounded-xl border border-slate-200 dark:border-[#2a222c] shadow-2xl z-50 overflow-hidden">
+            <div className="absolute bottom-full right-0 mb-2 w-56 bg-white dark:bg-[#19151d] rounded-md border border-slate-200 dark:border-[#2a222c] shadow-2xl z-50 overflow-hidden">
               <p className="px-4 py-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wide border-b border-slate-100 dark:border-[#2a222c]">
                 Pengaturan
               </p>

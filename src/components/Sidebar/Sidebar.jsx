@@ -23,23 +23,51 @@ import WorkspaceFooter from './WorkspaceFooter';
 import RequireAuth from './RequireAuth';
 import GuestNotice from './GuestNotice';
 import SearchModal from '../Search/SearchModal';
+import MoreFeaturesModal from './MoreFeaturesModal';
 
 export default function Sidebar({ isOpen, onToggle, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isMoreFeaturesOpen, setIsMoreFeaturesOpen] = useState(false);
   const isNewChat = location.pathname === '/chat/new' || location.pathname === '/chat' || location.pathname === '/';
 
   const quickNavItems = [
-    { label: 'Eksplorasi Ide', icon: LayoutGrid, prompt: 'Bantu rancang ide eksplorasi inovatif untuk proyek digital' },
-    { label: 'Studio Kreatif', icon: Palette, prompt: 'Buat konsep ilustrasi visual kreatif dan modern' },
-    { label: 'Asisten Koding', icon: Code2, prompt: 'Bantu review kode dan berikan solusi optimasi' },
-    { label: 'Rangkuman Dokumen', icon: FileCheck2, prompt: 'Rangkum dokumen panjang ini menjadi 5 poin aksi utama' },
-    { label: 'Aktivitas Terjadwal', icon: Clock, prompt: 'Buat jadwal sprint harian dan manajemen waktu produktif' },
+    { 
+      label: 'Eksplorasi Ide', 
+      icon: LayoutGrid, 
+      prompt: 'Bantu saya melakukan brainstorming dan mengeksplorasi ide inovatif untuk proyek digital baru. Berikan konsep unik, analisis potensi pasar, dan langkah awal implementasi.' 
+    },
+    { 
+      label: 'Studio Kreatif', 
+      icon: Palette, 
+      prompt: 'Bantu rancang konsep narasi kreatif, pesan visual, dan copywriting menarik untuk kampanye produk. Berikan tone of voice yang segar, engaging, dan inspiratif.' 
+    },
+    { 
+      label: 'Asisten Koding', 
+      icon: Code2, 
+      prompt: 'Bantu saya meninjau, menulis kode bersih (clean code), dan memberikan solusi optimasi serta penanganan bug untuk kebutuhan pemrograman berikut:\n\n' 
+    },
+    { 
+      label: 'Rangkuman Dokumen', 
+      icon: FileCheck2, 
+      prompt: 'Tolong baca dan rangkum materi atau dokumen berikut ke dalam 5 poin aksi utama dan kesimpulan ringkas:\n\n[Tempel isi materi atau dokumen di sini]' 
+    },
+    { 
+      label: 'Aktivitas Terjadwal', 
+      icon: Clock, 
+      prompt: 'Bantu susun jadwal kerja terstruktur, prioritas sprint harian, dan time-blocking produktif untuk mencapai target sasaran berikut:' 
+    },
   ];
 
-  const handleQuickNav = (prompt) => {
-    navigate('/chat/new', { state: { prefill: prompt } });
+  const handleQuickNav = (item) => {
+    navigate('/chat/new', { 
+      state: { 
+        prefill: item.prompt, 
+        mode: item.label,
+        timestamp: Date.now() 
+      } 
+    });
     if (window.innerWidth < 640) onClose();
   };
 
@@ -75,6 +103,12 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
         onClose={() => setIsSearchModalOpen(false)} 
       />
 
+      {/* Modal Pusat Fitur & Pustaka Template Selengkapnya */}
+      <MoreFeaturesModal
+        isOpen={isMoreFeaturesOpen}
+        onClose={() => setIsMoreFeaturesOpen(false)}
+      />
+
       {/* Sidebar Container */}
       <aside
         className={`fixed sm:static inset-y-0 left-0 z-40 sm:z-20 flex h-full transition-[width,transform] duration-300 ease-[cubic-bezier(0.2,0,0,1)] p-2 sm:p-0 shrink-0 select-none ${
@@ -105,7 +139,7 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                   onClick={() => { navigate('/chat/new'); if (window.innerWidth < 640) onClose(); }} 
                   className="flex items-center gap-2 cursor-pointer group"
                 >
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center p-1 shadow-2xs group-hover:scale-105 transition-transform">
+                  <div className="w-9 h-9 flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
                     <img 
                       src={permataIcon} 
                       alt="Permata AI" 
@@ -169,7 +203,7 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                     <button 
                       key={item.label}
                       type="button"
-                      onClick={() => handleQuickNav(item.prompt)} 
+                      onClick={() => handleQuickNav(item)} 
                       className="w-full py-2 px-2.5 rounded-sm hover:bg-slate-500/10 dark:hover:bg-slate-500/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium text-xs flex items-center gap-2.5 transition-colors text-left group cursor-pointer"
                     >
                       <Icon className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27] shrink-0 transition-colors" />
@@ -179,11 +213,16 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                 })}
                 <button 
                   type="button"
-                  onClick={() => alert('Menu lainnya segera hadir')} 
-                  className="w-full py-2 px-2.5 rounded-sm hover:bg-slate-500/10 dark:hover:bg-slate-500/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium text-xs flex items-center gap-2.5 transition-colors text-left group cursor-pointer"
+                  onClick={() => setIsMoreFeaturesOpen(true)} 
+                  className="w-full py-2 px-2.5 rounded-sm hover:bg-slate-500/10 dark:hover:bg-slate-500/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-medium text-xs flex items-center justify-between transition-colors text-left group cursor-pointer"
                 >
-                  <MoreHorizontal className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27] shrink-0 transition-colors" />
-                  <span>Selengkapnya</span>
+                  <div className="flex items-center gap-2.5">
+                    <MoreHorizontal className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-amber-700 dark:group-hover:text-[#c58a27] shrink-0 transition-colors" />
+                    <span>Selengkapnya</span>
+                  </div>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 font-semibold uppercase tracking-wider">
+                    Pustaka
+                  </span>
                 </button>
               </div>
 
@@ -291,7 +330,7 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                   <div key={item.label} className="relative group/tip flex justify-center w-full">
                     <button
                       type="button"
-                      onClick={() => handleQuickNav(item.prompt)}
+                      onClick={() => handleQuickNav(item)}
                       className="w-10 h-10 rounded-sm hover:bg-slate-500/10 dark:hover:bg-slate-500/10 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-all cursor-pointer group"
                       aria-label={item.label}
                     >
@@ -303,6 +342,21 @@ export default function Sidebar({ isOpen, onToggle, onClose }) {
                   </div>
                 );
               })}
+
+              {/* More Features Modal Button in Collapsed Rail */}
+              <div className="relative group/tip flex justify-center w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsMoreFeaturesOpen(true)}
+                  className="w-10 h-10 rounded-sm hover:bg-slate-500/10 dark:hover:bg-slate-500/10 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-all cursor-pointer group"
+                  aria-label="Pustaka Template Selengkapnya"
+                >
+                  <MoreHorizontal className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                </button>
+                <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900/90 dark:bg-[#1c1720] text-white text-[11px] font-medium rounded-sm shadow-xl pointer-events-none whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity z-50">
+                  Pustaka Template &amp; Fitur Lainnya
+                </div>
+              </div>
 
               {/* Recent Chats Button to Expand and View History */}
               <div className="relative group/tip flex justify-center w-full mt-1">

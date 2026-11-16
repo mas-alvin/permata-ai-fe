@@ -26,6 +26,8 @@ export default function ChatInputActive({
   onPrefillClear, 
   replyContent = null, 
   onReplyClear, 
+  activeMode = null,
+  onActiveModeClear,
   ragConfig, 
   onRagConfigChange,
   showQuickActions = false
@@ -137,6 +139,7 @@ export default function ChatInputActive({
     }
     if (onPrefillClear) onPrefillClear();
     if (onReplyClear) onReplyClear();
+    if (onActiveModeClear) onActiveModeClear();
   };
 
   useEffect(() => {
@@ -170,6 +173,30 @@ export default function ChatInputActive({
       {/* Suggestion pills if empty state */}
       {showQuickActions && (
         <QuickActions onSelectPrompt={(prompt) => setInput(prompt)} />
+      )}
+
+      {/* Active mode / Specialized role preview */}
+      {activeMode && (
+        <div className="px-1">
+          <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 shadow-2xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span className="text-xs font-medium truncate">
+                Mode aktif: <span className="font-semibold">{activeMode}</span>
+              </span>
+            </div>
+            {onActiveModeClear && (
+              <button
+                type="button"
+                onClick={onActiveModeClear}
+                className="p-1 rounded-md text-amber-700/70 dark:text-amber-300/70 hover:text-red-600 dark:hover:text-red-400 transition-colors shrink-0 cursor-pointer"
+                aria-label="Batalkan mode spesialis"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Quoted reply preview */}

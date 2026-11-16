@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   setConversations,
@@ -53,9 +53,26 @@ export default function ChatPage() {
   const outletContext = useOutletContext();
   const onToggleSidebar = outletContext?.onToggleSidebar;
   const isSidebarOpen = outletContext?.isSidebarOpen ?? true;
+  const location = useLocation();
 
   const [editContent, setEditContent] = useState('');
+  const [activeMode, setActiveMode] = useState(null);
   const [replyContent, setReplyContent] = useState(null);
+
+  // Sinkronisasi prefill dan mode dari menu Sidebar (quickNav / template modal)
+  useEffect(() => {
+    if (location.state?.prefill) {
+      setEditContent(location.state.prefill);
+      setActiveMode(location.state.mode || null);
+    }
+  }, [location.state, location.key]);
+
+  // Saat berpindah ke percakapan lama yang sudah ada, reset activeMode
+  useEffect(() => {
+    if (id && id !== 'new') {
+      setActiveMode(null);
+    }
+  }, [id]);
 
   // RAG (Fase 7) — sumber knowledge base untuk percakapan aktif.
   const [ragConfig, setRagConfig] = useState({ ragEnabled: false, ragDocumentIds: [] });
@@ -477,31 +494,20 @@ export default function ChatPage() {
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => alert('Panel Konfigurasi Model')}
-              className="hidden sm:flex py-1.5 px-3 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 font-medium text-xs items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-[#2a222c] hover:border-amber-500/40 transition-all cursor-pointer"
+              className="hidden sm:flex py-1.5 px-3 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 font-medium text-xs items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-[#2a222c] hover:border-slate-500/40 transition-all cursor-pointer"
             >
               <span>Configuration</span>
-              <SlidersHorizontal className="w-3.5 h-3.5 text-amber-600/70 dark:text-amber-500/80" />
+              <SlidersHorizontal className="w-3.5 h-3.5 text-slate-600/70 dark:text-slate-100/80" />
             </button>
 
             <button
               onClick={handleShare}
-              className="py-1.5 px-3 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-[#2a222c] hover:border-amber-500/40 transition-all cursor-pointer"
+              className="py-1.5 px-3 rounded-full bg-white/90 dark:bg-[#19151d] hover:bg-white dark:hover:bg-[#221c27] text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1.5 shadow-2xs border border-slate-200/80 dark:border-[#2a222c] hover:border-slate-500/40 transition-all cursor-pointer"
             >
               <span>Share</span>
-              <Upload className="w-3.5 h-3.5 text-amber-600/70 dark:text-amber-500/80" />
+              <Upload className="w-3.5 h-3.5 text-slate-600/70 dark:text-slate-100/80" />
             </button>
 
-            {/* Gradient Star Avatar Badge */}
-            <button
-              onClick={() => alert('Profil Permata AI')}
-              className="w-8 h-8 rounded-full p-0.5 bg-amber-50 dark:bg-white/5 border border-amber-300/40 dark:border-white/10 shadow-xs flex items-center justify-center hover:scale-105 transition-transform ml-1 cursor-pointer"
-              title="Permata AI Workspace"
-            >
-              <div className="w-full h-full rounded-full bg-white dark:bg-[#141116] flex items-center justify-center p-1">
-                <img src={permataIcon} alt="Permata AI" className="w-full h-full object-contain dark:hidden" />
-                <img src={permataIconDark} alt="Permata AI" className="w-full h-full object-contain hidden dark:block" />
-              </div>
-            </button>
           </div>
         </div>
 
@@ -559,6 +565,8 @@ export default function ChatPage() {
             onPrefillClear={() => setEditContent('')}
             replyContent={replyContent}
             onReplyClear={() => setReplyContent(null)}
+            activeMode={activeMode}
+            onActiveModeClear={() => setActiveMode(null)}
             ragConfig={ragConfig}
             onRagConfigChange={handleRagConfigChange}
             showQuickActions={isNewChat && !hasMessages}

@@ -44,7 +44,7 @@ export default function HeroSection({ onPrefillSelect }) {
   return (
     <div className="max-w-2xl mx-auto w-full flex flex-col items-center my-auto py-2">
       {/* Floating Permata Icon Card */}
-      <div className="w-16 h-16 sm:w-16 sm:h-16 rounded-2xl dark:bg-[#19151d] flex items-center justify-center mb-3 sm:mb-4 animate-float p-3">
+      <div className="w-16 h-16 sm:w-16 sm:h-16 flex items-center justify-center mb-3 sm:mb-4 animate-float p-3">
         <img src={permataIcon} alt="Permata AI" className="w-full h-full object-contain dark:hidden" />
         <img src={permataIconDark} alt="Permata AI" className="w-full h-full object-contain hidden dark:block" />
       </div>
