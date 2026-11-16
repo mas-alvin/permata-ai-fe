@@ -47,6 +47,7 @@ async function consumeSseStream(response, onChunk, onDone, onError) {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  let accumulatedContent = '';
   let quota = null;
 
   const flushParts = (parts) => {
@@ -65,6 +66,7 @@ async function consumeSseStream(response, onChunk, onDone, onError) {
       }
 
       if (json.content) {
+        accumulatedContent += json.content;
         onChunk(json.content);
       }
       if (json.error) {
@@ -93,7 +95,7 @@ async function consumeSseStream(response, onChunk, onDone, onError) {
     flushParts([buffer]);
   }
 
-  onDone({ quota });
+  onDone({ fullContent: accumulatedContent, quota });
 }
 
 async function safeExtractError(response) {

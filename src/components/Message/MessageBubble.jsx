@@ -5,6 +5,23 @@ import MarkdownRenderer from './MarkdownRenderer';
 import SelectionReply from './SelectionReply';
 import TypingIndicator from '../Typing/TypingIndicator';
 
+function parseUserContent(content) {
+  if (typeof content === 'string' && content.startsWith('> ')) {
+    const splitIndex = content.indexOf('\n\n');
+    if (splitIndex !== -1) {
+      const quoteBlock = content.slice(0, splitIndex);
+      const textBlock = content.slice(splitIndex + 2);
+      const lines = quoteBlock.split('\n');
+      const allQuoted = lines.every((line) => line.startsWith('>') || line.trim() === '');
+      if (allQuoted) {
+        const quote = lines.map((l) => l.replace(/^>\s?/, '')).join('\n');
+        return { quote, text: textBlock };
+      }
+    }
+  }
+  return { quote: null, text: content };
+}
+
 export default function MessageBubble({
   message,
   isLast,
@@ -83,8 +100,10 @@ export default function MessageBubble({
 
   // User message: bubble + action icons below
   if (isUser) {
+    const { quote, text } = parseUserContent(content);
+
     return (
-      <div className="flex flex-col items-end py-1 group">
+      <div className="flex flex-col items-end py-1 group max-w-full">
         {attachments.length > 0 && (
           <div className="flex flex-wrap justify-end gap-2 mb-1">
             {attachments.map((att, idx) => (
@@ -93,7 +112,15 @@ export default function MessageBubble({
           </div>
         )}
         <div className="bg-gradient-to-r from-[#40000b] to-[#600016] dark:from-[#4d0012] dark:via-[#630018] dark:to-[#78001e] text-white border border-[#800020]/40 dark:border-amber-400/35 rounded-2xl rounded-br-sm px-4 py-2.5 max-w-xl shadow-xs dark:shadow-[0_4px_20px_-2px_rgba(128,0,32,0.45)]">
-          <span className="text-sm leading-relaxed whitespace-pre-wrap selection:bg-amber-500 selection:text-white">{content}</span>
+          {quote && (
+            <div className="mb-2.5 pl-2.5 py-1.5 pr-2 rounded-r-lg bg-black/30 border-l-2 border-amber-400 text-xs text-amber-100/90 font-mono whitespace-pre-wrap max-h-36 overflow-y-auto custom-scrollbar">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-amber-300 block mb-0.5">
+                Membalas:
+              </span>
+              <span className="opacity-90">{quote}</span>
+            </div>
+          )}
+          <span className="text-sm leading-relaxed whitespace-pre-wrap selection:bg-amber-500 selection:text-white">{text}</span>
         </div>
         <MessageActions
           content={content}
@@ -108,9 +135,9 @@ export default function MessageBubble({
 
   // AI message: no bubble, plain text + actions on hover
   return (
-    <div className="flex flex-col items-start py-1 group w-full">
+    <div className="flex flex-col items-start py-1 group w-full min-w-0">
       <SelectionReply onReply={onReply}>
-        <div className="max-w-4xl px-1 w-full">
+        <div className="w-full max-w-4xl px-1 min-w-0">
           <MarkdownRenderer content={content} />
         </div>
       </SelectionReply>

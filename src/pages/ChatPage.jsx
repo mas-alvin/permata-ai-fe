@@ -126,8 +126,8 @@ export default function ChatPage() {
     regenerateMessageStream(
       assistantMessage.id,
       (chunk) => dispatch(appendStreamChunk(chunk)),
-      ({ creditsRemaining, creditsDeducted }) => {
-        const fullContent = partialContentRef.current;
+      ({ fullContent: streamedText, creditsRemaining, creditsDeducted }) => {
+        const fullContent = streamedText || partialContentRef.current;
         dispatch(endStream());
         dispatch(
           commitStreamedMessage({
@@ -183,8 +183,8 @@ export default function ChatPage() {
     regenerateMessageStream(
       assistantMessage.id,
       (chunk) => dispatch(appendStreamChunk(chunk)),
-      ({ creditsRemaining, creditsDeducted }) => {
-        const fullContent = partialContentRef.current;
+      ({ fullContent: streamedText, creditsRemaining, creditsDeducted }) => {
+        const fullContent = streamedText || partialContentRef.current;
         dispatch(endStream());
         
         // Buat pesan assistant baru dengan ID sementara
@@ -322,8 +322,8 @@ export default function ChatPage() {
       sendGuestMessageStream(
         content,
         (chunk) => dispatch(appendStreamChunk(chunk)),
-        ({ quota }) => {
-          const fullContent = partialContentRef.current;
+        ({ fullContent: streamedText, quota }) => {
+          const fullContent = streamedText || partialContentRef.current;
           dispatch(endStream());
           dispatch(
             commitStreamedMessage({
@@ -382,8 +382,8 @@ export default function ChatPage() {
         content,
         selectedModelId,
         (chunk) => dispatch(appendStreamChunk(chunk)),
-        ({ creditsRemaining, creditsDeducted, ragSources: sources }) => {
-          const fullContent = partialContentRef.current;
+        ({ fullContent: streamedText, creditsRemaining, creditsDeducted, ragSources: sources }) => {
+          const fullContent = streamedText || partialContentRef.current;
           dispatch(endStream());
           setRagSources(sources || []);
           dispatch(
@@ -505,12 +505,18 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Scrollable Middle Content */}
-        <div className="relative z-10 flex-1 overflow-y-auto px-4 sm:px-8 py-2 flex flex-col justify-start sm:justify-center min-h-0">
+        {/* Middle Content */}
+        <div
+          className={`relative z-10 flex-1 flex flex-col min-h-0 ${
+            isNewChat && !hasMessages
+              ? 'overflow-y-auto justify-start sm:justify-center px-4 sm:px-6 py-2'
+              : 'overflow-hidden justify-start'
+          }`}
+        >
           {isNewChat && !hasMessages ? (
             <HeroSection onPrefillSelect={(prompt) => setEditContent(prompt)} />
           ) : (
-            <div className="max-w-3xl mx-auto w-full flex-1 flex flex-col py-2">
+            <div className="w-full flex-1 flex flex-col min-h-0">
               <MessageList
                 messages={conversation}
                 onEdit={handleEditMessage}

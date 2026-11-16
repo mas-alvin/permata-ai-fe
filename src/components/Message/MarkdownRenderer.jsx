@@ -39,7 +39,7 @@ export default function MarkdownRenderer({ content = '' }) {
   };
 
   return (
-    <div className="prose prose-sm max-w-none text-on-surface dark:prose-invert">
+    <div className="prose prose-sm max-w-none text-on-surface dark:prose-invert w-full min-w-0">
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>

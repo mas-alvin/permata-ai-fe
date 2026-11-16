@@ -6,32 +6,47 @@ export default function SelectionReply({ onReply, children }) {
 
   const handleSelectionChange = () => {
     const sel = window.getSelection();
-    if (!sel.rangeCount) {
+    if (!sel || !sel.rangeCount) {
+      setSelection(null);
+      return;
+    }
+
+    const selectedText = sel.toString().trim();
+    if (!selectedText) {
       setSelection(null);
       return;
     }
 
     const range = sel.getRangeAt(0);
-    const selectedText = sel.toString().trim();
-
-    // Check if selection is inside our container
-    if (!containerRef.current?.contains(range.commonAncestorContainer)) {
+    const container = containerRef.current;
+    if (!container) {
       setSelection(null);
       return;
     }
 
-    if (selectedText.length > 0) {
-      const rect = range.getBoundingClientRect();
-      const containerRect = containerRef.current.getBoundingClientRect();
-      
-      setSelection({
-        text: selectedText,
-        top: rect.top - containerRect.top - 8,
-        left: rect.left - containerRect.left + rect.width / 2,
-      });
-    } else {
+    // Check if selection is inside our container
+    const isInside =
+      container.contains(range.commonAncestorContainer) ||
+      (sel.anchorNode && container.contains(sel.anchorNode));
+
+    if (!isInside) {
       setSelection(null);
+      return;
     }
+
+    const rect = range.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    if (rect.width === 0 && rect.height === 0) {
+      setSelection(null);
+      return;
+    }
+
+    setSelection({
+      text: selectedText,
+      top: Math.max(0, rect.top - containerRect.top - 8),
+      left: Math.max(50, Math.min(containerRect.width - 50, rect.left - containerRect.left + rect.width / 2)),
+    });
   };
 
   useEffect(() => {
@@ -40,16 +55,17 @@ export default function SelectionReply({ onReply, children }) {
   }, []);
 
   const handleReplyClick = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     if (selection?.text) {
       onReply?.(selection.text);
       setSelection(null);
-      window.getSelection().removeAllRanges();
+      window.getSelection()?.removeAllRanges();
     }
   };
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative w-full min-w-0">
       {children}
       
       {selection && (
@@ -62,6 +78,7 @@ export default function SelectionReply({ onReply, children }) {
           }}
         >
           <button
+            onMouseDown={(e) => e.preventDefault()}
             onClick={handleReplyClick}
             className="pointer-events-auto px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-[#40000b] to-[#600016] border border-amber-500/40 rounded-full shadow-lg hover:opacity-95 transition-opacity flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
             title="Balas teks terpilih"

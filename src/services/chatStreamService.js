@@ -30,6 +30,7 @@ async function consumeSseStream(response, onChunk, onDone, onError) {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  let accumulatedContent = '';
   let creditsRemaining = null;
   let creditsDeducted = null;
   let ragSources = null;
@@ -50,6 +51,7 @@ async function consumeSseStream(response, onChunk, onDone, onError) {
       }
 
       if (json.content) {
+        accumulatedContent += json.content;
         onChunk(json.content);
       }
       if (json.error) {
@@ -85,7 +87,7 @@ async function consumeSseStream(response, onChunk, onDone, onError) {
     flushParts([buffer]);
   }
 
-  onDone({ creditsRemaining, creditsDeducted, ragSources });
+  onDone({ fullContent: accumulatedContent, creditsRemaining, creditsDeducted, ragSources });
 }
 
 export async function sendMessageStream(

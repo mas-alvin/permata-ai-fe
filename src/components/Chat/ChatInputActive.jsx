@@ -31,7 +31,7 @@ export default function ChatInputActive({
   showQuickActions = false
 }) {
   const [input, setInput] = useState(prefill);
-  const [textareaHeight, setTextareaHeight] = useState(38);
+  const [textareaHeight, setTextareaHeight] = useState(44);
   const [deepThinkActive, setDeepThinkActive] = useState(false);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -117,12 +117,23 @@ export default function ChatInputActive({
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
     if (!input.trim() || sendDisabled) return;
-    onSend(input, attachments);
+
+    let finalContent = input.trim();
+    if (replyContent) {
+      const quoted = replyContent
+        .trim()
+        .split('\n')
+        .map((line) => `> ${line}`)
+        .join('\n');
+      finalContent = `${quoted}\n\n${finalContent}`;
+    }
+
+    onSend(finalContent, attachments);
     setInput('');
     setAttachments([]);
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      setTextareaHeight(38);
+      setTextareaHeight(44);
     }
     if (onPrefillClear) onPrefillClear();
     if (onReplyClear) onReplyClear();
@@ -137,7 +148,7 @@ export default function ChatInputActive({
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      const height = Math.min(textarea.scrollHeight, 120);
+      const height = Math.min(Math.max(textarea.scrollHeight, 44), 140);
       setTextareaHeight(height);
       textarea.style.height = `${height}px`;
     }
@@ -155,7 +166,7 @@ export default function ChatInputActive({
   };
 
   return (
-    <div className="px-3 sm:px-6 pb-2.5 sm:pb-3 pt-1 max-w-2xl mx-auto w-full flex flex-col gap-2 shrink-0">
+    <div className="px-4 sm:px-6 pb-2.5 sm:pb-3 pt-1 max-w-4xl mx-auto w-full flex flex-col gap-2 shrink-0">
       {/* Suggestion pills if empty state */}
       {showQuickActions && (
         <QuickActions onSelectPrompt={(prompt) => setInput(prompt)} />
@@ -240,7 +251,7 @@ export default function ChatInputActive({
               onKeyDown={handleKeyDown}
               disabled={sendDisabled}
               placeholder="Ask me anything..."
-              className="w-full resize-none border-0 bg-transparent text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none leading-relaxed"
+              className="w-full resize-none border-0 bg-transparent text-sm sm:text-base text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none leading-relaxed"
               style={{ minHeight: `${textareaHeight}px` }}
             />
 
